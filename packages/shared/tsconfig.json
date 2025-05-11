@@ -1,0 +1,4 @@
+{
+  "extends": "@vefy/tsconfig/node.json",
+  "include": ["src/**/*.ts"]
+}

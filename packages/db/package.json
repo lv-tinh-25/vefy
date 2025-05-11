@@ -1,0 +1,25 @@
+{
+  "name": "@vefy/db",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:studio": "drizzle-kit studio"
+  },
+  "dependencies": {
+    "@vefy/shared": "workspace:*",
+    "drizzle-orm": "^0.45.2",
+    "postgres": "^3.4.9"
+  },
+  "devDependencies": {
+    "@types/node": "^25.6.0",
+    "@vefy/tsconfig": "workspace:*",
+    "drizzle-kit": "^0.31.10",
+    "tsup": "^8.4.0",
+    "typescript": "^5.7.0"
+  }
+}

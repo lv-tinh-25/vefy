@@ -1,0 +1,42 @@
+import { Hono } from "hono";
+import { zValidator } from "@hono/zod-validator";
+import { insertVehicleSchema, updateVehicleInfoSchema } from "@vefy/shared";
+import * as vehicleService from "../services/vehicle.service";
+import { oilChangeRoutes } from "./oil-changes";
+import { partRoutes } from "./parts";
+import { expenseRoutes } from "./expenses";
+import type { AuthEnv } from "../middleware/auth";
+
+export const vehicleRoutes = new Hono<AuthEnv>()
+  .get("/", async (c) => {
+    const userId = c.get("userId");
+    const vehicles = await vehicleService.listAll(userId);
+    return c.json(vehicles);
+  })
+  .get("/:id", async (c) => {
+    const id = c.req.param("id");
+    const vehicle = await vehicleService.getById(id);
+    if (!vehicle) return c.json({ error: "Không tìm thấy xe" }, 404);
+    return c.json(vehicle);
+  })
+  .post("/", zValidator("json", insertVehicleSchema), async (c) => {
+    const userId = c.get("userId");
+    const data = c.req.valid("json");
+    const vehicle = await vehicleService.create(userId, data);
+    return c.json(vehicle, 201);
+  })
+  .patch("/:id", zValidator("json", updateVehicleInfoSchema), async (c) => {
+    const id = c.req.param("id");
+    const data = c.req.valid("json");
+    const vehicle = await vehicleService.update(id, data);
+    if (!vehicle) return c.json({ error: "Không tìm thấy xe" }, 404);
+    return c.json(vehicle);
+  })
+  .delete("/:id", async (c) => {
+    const id = c.req.param("id");
+    await vehicleService.remove(id);
+    return c.json({ success: true });
+  })
+  .route("/:vehicleId/oil-changes", oilChangeRoutes)
+  .route("/:vehicleId/parts", partRoutes)
+  .route("/:vehicleId/expenses", expenseRoutes);

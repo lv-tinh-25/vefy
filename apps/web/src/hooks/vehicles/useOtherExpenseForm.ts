@@ -1,0 +1,52 @@
+"use client";
+
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  createOtherExpenseSchema,
+  type CreateOtherExpense,
+} from "@vefy/shared";
+import { api } from "@/lib/api";
+
+export function useOtherExpenseForm(
+  vehicleId: string,
+  onSuccess: () => void,
+  onClose: () => void,
+) {
+  const [loading, setLoading] = useState(false);
+
+  const form = useForm<CreateOtherExpense>({
+    resolver: zodResolver(createOtherExpenseSchema),
+    defaultValues: {
+      date: new Date().toISOString().slice(0, 10),
+      name: "",
+      amount: undefined,
+      note: "",
+    },
+  });
+
+  const onSubmit = form.handleSubmit(async (data) => {
+    setLoading(true);
+    try {
+      const res = await api.api.vehicles[":vehicleId"].expenses.$post({
+        param: { vehicleId },
+        json: {
+          date: data.date,
+          amount: data.amount,
+          name: data.name,
+          note: data.note || undefined,
+        },
+      });
+      if (res.ok) {
+        form.reset();
+        onSuccess();
+        onClose();
+      }
+    } finally {
+      setLoading(false);
+    }
+  });
+
+  return { form, loading, onSubmit };
+}

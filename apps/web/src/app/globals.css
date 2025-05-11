@@ -1,0 +1,224 @@
+@import "tailwindcss";
+
+/* ─── Design Tokens (registers utility classes) ────────────────── */
+@theme {
+  /* Surface colors — light values as default, overridden by .dark */
+  --color-background: #f7f8fb;
+  --color-surface: #ffffff;
+  --color-elevated: #ffffff;
+  --color-card: #ffffff;
+
+  /* Text colors */
+  --color-foreground: #0f172a;
+  --color-muted-foreground: #64748b;
+  --color-faint: #94a3b8;
+
+  /* Border */
+  --color-border: #e2e8f0;
+  --color-border-hover: #cbd5e1;
+
+  /* Primary accent — teal (deeper for light bg contrast) */
+  --color-primary: #00b894;
+  --color-primary-hover: #00a381;
+  --color-primary-foreground: #ffffff;
+  --color-primary-muted: #00b89412;
+
+  /* Destructive */
+  --color-destructive: #dc2626;
+  --color-destructive-hover: #b91c1c;
+  --color-destructive-foreground: #ffffff;
+  --color-destructive-muted: #dc262610;
+
+  /* Status: Danger */
+  --color-danger: #dc2626;
+  --color-danger-muted: #dc262610;
+
+  /* Status: Warning */
+  --color-warning: #d97706;
+  --color-warning-muted: #d9770610;
+
+  /* Status: Success */
+  --color-success: #059669;
+  --color-success-muted: #05966910;
+
+  /* Status: Neutral */
+  --color-neutral: #64748b;
+  --color-neutral-muted: #64748b10;
+
+  /* Focus ring */
+  --color-ring: #00b894;
+
+  /* Shadows */
+  --shadow-glow: 0 0 20px #00b89412;
+  --shadow-card: 0 1px 3px #0000000a, 0 1px 2px #0000000f;
+  --shadow-elevated: 0 4px 16px #00000010;
+
+  /* Animations */
+  --animate-fade-in: fade-in 0.4s ease-out both;
+  --animate-slide-up: slide-up 0.4s ease-out both;
+  --animate-scale-in: scale-in 0.25s ease-out both;
+}
+
+/* ─── Dark Theme Override ──────────────────────────────────────── */
+.dark {
+  --color-background: #080b12;
+  --color-surface: #0f1420;
+  --color-elevated: #151c2c;
+  --color-card: #0f1420;
+
+  --color-foreground: #eef2ff;
+  --color-muted-foreground: #8892a8;
+  --color-faint: #4b5563;
+
+  --color-border: #1e293b;
+  --color-border-hover: #334155;
+
+  --color-primary: #00d4aa;
+  --color-primary-hover: #00eebb;
+  --color-primary-foreground: #080b12;
+  --color-primary-muted: #00d4aa1a;
+
+  --color-destructive: #ef4444;
+  --color-destructive-hover: #dc2626;
+  --color-destructive-foreground: #fef2f2;
+  --color-destructive-muted: #ef44441a;
+
+  --color-danger: #f87171;
+  --color-danger-muted: #f871711a;
+
+  --color-warning: #fbbf24;
+  --color-warning-muted: #fbbf241a;
+
+  --color-success: #34d399;
+  --color-success-muted: #34d3991a;
+
+  --color-neutral: #64748b;
+  --color-neutral-muted: #64748b1a;
+
+  --color-ring: #00d4aa;
+
+  --shadow-glow: 0 0 20px #00d4aa26;
+  --shadow-card: 0 2px 16px #00000033;
+  --shadow-elevated: 0 8px 32px #00000066;
+}
+
+/* ─── Keyframes ─────────────────────────────────────────────────── */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* ─── Base ──────────────────────────────────────────────────────── */
+html {
+  color-scheme: light;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+body {
+  font-family: var(--font-outfit), sans-serif;
+  background: var(--color-background);
+  color: var(--color-foreground);
+}
+
+/* ─── Native select/option styling ─────────────────────────────── */
+select option,
+select optgroup {
+  background: var(--color-surface);
+  color: var(--color-foreground);
+  padding: 8px 12px;
+}
+
+select optgroup {
+  font-weight: 600;
+  color: var(--color-muted-foreground);
+}
+
+/* ─── Sonner toast close button → right side ───────────────────── */
+[data-sonner-toast] [data-close-button] {
+  left: auto !important;
+  right: 0 !important;
+}
+
+/* ─── Date/time input styling ──────────────────────────────────── */
+input[type="date"] {
+  position: relative;
+}
+
+input[type="date"]::-webkit-date-and-time-value {
+  text-align: left;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  filter: invert(0.5);
+  cursor: pointer;
+  padding: 4px;
+}
+
+.dark input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.7);
+}
+
+/* Heading typography — Sora geometric display */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-sora), sans-serif;
+  letter-spacing: -0.02em;
+}
+
+/* ─── Custom Utilities ──────────────────────────────────────────── */
+@utility font-heading {
+  font-family: var(--font-sora), sans-serif;
+  letter-spacing: -0.02em;
+}
+
+/* ─── Scrollbar ─────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border-hover);
+}
+
+/* ─── Selection ─────────────────────────────────────────────────── */
+::selection {
+  background: var(--color-primary-muted);
+  color: var(--color-primary);
+}
+
+/* ─── Atmospheric background glow ───────────────────────────────── */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  height: 500px;
+  background: radial-gradient(ellipse 80% 50% at 50% -10%, #00d4aa08, transparent);
+  pointer-events: none;
+  z-index: 0;
+}

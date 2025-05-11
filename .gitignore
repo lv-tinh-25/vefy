@@ -1,0 +1,10 @@
+node_modules
+.env
+.env.local
+.turbo
+dist
+.next
+drizzle/meta
+*.tsbuildinfo
+.DS_Store
+.claude

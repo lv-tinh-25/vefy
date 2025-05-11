@@ -1,0 +1,5 @@
+{
+  "name": "@vefy/tsconfig",
+  "private": true,
+  "files": ["base.json", "node.json", "nextjs.json"]
+}
