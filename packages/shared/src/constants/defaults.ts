@@ -19,3 +19,8 @@ export const ALERT_THRESHOLDS = {
 } as const;
 
 export const DEFAULT_WARRANTY_MONTHS = 12;
+
+export const OCR_LIMITS = {
+  dailyPerUser: 10,
+  cooldownSeconds: 10,
+} as const;

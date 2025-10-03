@@ -1,4 +1,4 @@
-import { GoogleGenAI } from "@google/genai";
+import { ApiError, GoogleGenAI } from "@google/genai";
 
 let genai: GoogleGenAI | null = null;
 
@@ -11,10 +11,42 @@ function getClient() {
   return genai;
 }
 
-export interface OcrResult {
-  km: number | null;
-  success: boolean;
-  message: string;
+// Each model has its own free-tier quota, so falling back keeps OCR working when the first runs out
+const MODELS = ["gemini-2.5-flash", "gemini-2.5-flash-lite"] as const;
+
+export type OcrOutcome =
+  | { status: "ok"; km: number }
+  | { status: "unreadable" }
+  | { status: "unavailable" }
+  | { status: "error" };
+
+export function isQuotaError(err: unknown): boolean {
+  return err instanceof ApiError && err.status === 429;
+}
+
+export async function generateWithFallback<T>(
+  models: readonly string[],
+  call: (model: string) => Promise<T>,
+): Promise<T | null> {
+  for (const model of models) {
+    try {
+      return await call(model);
+    } catch (err) {
+      if (!isQuotaError(err)) throw err;
+      console.warn(`[OCR] ${model} quota exhausted, trying next model`);
+    }
+  }
+  return null;
+}
+
+export function parseKm(text: string): number | null {
+  if (!text || text === "ERROR") return null;
+  // Take first number in case the model adds extra text
+  const match = text.match(/\d[\d,.\s]*/);
+  if (!match) return null;
+  const km = parseInt(match[0].replace(/[.,\s]/g, ""), 10);
+  if (isNaN(km) || km <= 0 || km > 10_000_000) return null;
+  return km;
 }
 
 const PROMPT = `You are analyzing a photo of a vehicle dashboard (car or motorcycle).
@@ -42,61 +74,26 @@ Examples of valid responses:
 126
 ERROR`;
 
-export async function readOdometer(imageBase64: string): Promise<OcrResult> {
+export async function readOdometer(imageBase64: string): Promise<OcrOutcome> {
   try {
     const client = getClient();
+    const response = await generateWithFallback(MODELS, (model) =>
+      client.models.generateContent({
+        model,
+        contents: [
+          {
+            role: "user",
+            parts: [{ inlineData: { mimeType: "image/jpeg", data: imageBase64 } }, { text: PROMPT }],
+          },
+        ],
+      }),
+    );
+    if (!response) return { status: "unavailable" };
 
-    const response = await client.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: [
-        {
-          role: "user",
-          parts: [
-            {
-              inlineData: {
-                mimeType: "image/jpeg",
-                data: imageBase64,
-              },
-            },
-            { text: PROMPT },
-          ],
-        },
-      ],
-    });
-
-    const text = response.text?.trim() ?? "";
-
-    if (text === "ERROR" || !text) {
-      return {
-        km: null,
-        success: false,
-        message: "Cannot read odometer from image",
-      };
-    }
-
-    // Take first integer from response (in case AI adds extra text)
-    const match = text.match(/\d[\d,.\s]*/);
-    if (!match) {
-      return {
-        km: null,
-        success: false,
-        message: "Cannot read odometer from image",
-      };
-    }
-
-    const km = parseInt(match[0].replace(/[.,\s]/g, ""), 10);
-
-    if (isNaN(km) || km <= 0 || km > 10_000_000) {
-      return {
-        km: null,
-        success: false,
-        message: "Cannot read odometer from image",
-      };
-    }
-
-    return { km, success: true, message: `Read: ${km.toLocaleString()} km` };
+    const km = parseKm(response.text?.trim() ?? "");
+    return km === null ? { status: "unreadable" } : { status: "ok", km };
   } catch (err) {
     console.error("[OCR Error]", err);
-    return { km: null, success: false, message: "OCR processing error" };
+    return { status: "error" };
   }
 }

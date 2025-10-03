@@ -227,10 +227,15 @@ export const en: Messages = {
   },
 
   ocr: {
-    capture: "Scan Odo",
-    success: "Read: {km} km",
-    fail: "Could not read. Please enter manually.",
+    capture: "Scan odometer",
+    retryIn: "Scan again in {seconds}s",
+    limitReachedButton: "No scans left today",
+    success: "Read: {km} km ({remaining} scans left today)",
+    fail: "Couldn't read the odometer. Take a clearer photo or enter it manually ({remaining} scans left today)",
     error: "OCR error. Please enter manually.",
+    cooldown: "Please wait {seconds} seconds before scanning again",
+    dailyLimit: "You've used all {limit} scans for today. Please enter manually.",
+    unavailable: "The scanning service is busy. Please enter manually.",
   },
 
   auth: {

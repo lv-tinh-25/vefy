@@ -226,9 +226,14 @@ export const vi = {
 
   ocr: {
     capture: "Chụp Odo",
-    success: "Đọc được: {km} km",
-    fail: "Không đọc được. Vui lòng nhập thủ công.",
+    retryIn: "Chụp lại sau {seconds}s",
+    limitReachedButton: "Hết lượt hôm nay",
+    success: "Đọc được: {km} km (còn {remaining} lượt hôm nay)",
+    fail: "Không đọc được số Odo, vui lòng chụp rõ hơn hoặc nhập tay (còn {remaining} lượt hôm nay)",
     error: "Lỗi OCR. Vui lòng nhập thủ công.",
+    cooldown: "Vui lòng đợi {seconds} giây rồi chụp lại",
+    dailyLimit: "Bạn đã dùng hết {limit} lượt đọc ảnh hôm nay. Vui lòng nhập thủ công.",
+    unavailable: "Dịch vụ đọc ảnh đang quá tải. Vui lòng nhập thủ công.",
   },
 
   auth: {

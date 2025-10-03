@@ -4,3 +4,4 @@ export * from "./oil-changes";
 export * from "./parts";
 export * from "./expenses";
 export * from "./notifications";
+export * from "./ocr-usage";
