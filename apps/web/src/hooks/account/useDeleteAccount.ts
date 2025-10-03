@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { deleteUser } from "@/lib/auth-client";
+import { getAuthErrorKey } from "@/lib/auth-errors";
 
 export function useDeleteAccount(expectedEmail: string, onClose: () => void) {
   const router = useRouter();
@@ -22,7 +23,7 @@ export function useDeleteAccount(expectedEmail: string, onClose: () => void) {
     try {
       const result = await deleteUser();
       if (result.error) {
-        setError(result.error.message ?? "auth.errorConnection");
+        setError(getAuthErrorKey(result.error, "auth.errorConnection"));
         return;
       }
       onClose();

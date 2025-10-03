@@ -1,29 +1,41 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
+import { useResendVerification } from "@/hooks/auth/useResendVerification";
 import { useT } from "@/lib/i18n";
+import { Button } from "@/components/core/atoms/Button";
 import { Mail } from "lucide-react";
+import { AuthNotice } from "./AuthNotice";
+import { BackToLoginLink } from "./BackToLoginLink";
 
 export function VerifyEmail() {
   const searchParams = useSearchParams();
   const email = searchParams.get("email") ?? "";
+  const isFromLogin = searchParams.get("from") === "login";
   const { t } = useT();
+  const { resend, cooldown, isSending, canResend } = useResendVerification(email);
 
   return (
-    <div className="w-full max-w-sm mx-auto text-center animate-fade-in">
-      <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary-muted mx-auto mb-6">
-        <Mail className="h-8 w-8 text-primary" />
-      </div>
+    <AuthNotice
+      icon={Mail}
+      title={isFromLogin ? t("auth.unverifiedTitle") : t("auth.verifyEmailTitle")}
+      description={
+        isFromLogin ? t("auth.unverifiedDesc", { email }) : t("auth.verifyEmailDesc", { email })
+      }
+    >
+      {!isFromLogin && <p className="text-sm text-faint mb-4">{t("auth.verifyEmailHint")}</p>}
 
-      <h1 className="text-2xl font-bold font-heading text-foreground mb-3">
-        {t("auth.verifyEmailTitle")}
-      </h1>
+      {email && (
+        <Button type="button" variant="outline" className="w-full" onClick={resend} disabled={!canResend}>
+          {isSending
+            ? t("common.loading")
+            : cooldown > 0
+              ? t("auth.resendEmailIn", { seconds: cooldown })
+              : t("auth.resendEmail")}
+        </Button>
+      )}
 
-      <p className="text-muted-foreground mb-6">
-        {t("auth.verifyEmailDesc", { email })}
-      </p>
-
-      <p className="text-sm text-faint">{t("auth.verifyEmailHint")}</p>
-    </div>
+      <BackToLoginLink className="mt-6" />
+    </AuthNotice>
   );
 }

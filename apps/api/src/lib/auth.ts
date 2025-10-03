@@ -1,11 +1,16 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "@vefy/db";
-import { sendVerificationEmail } from "./email";
+import { sendVerificationEmail, sendResetPasswordEmail } from "./email";
 
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
 
 const BASE_URL = process.env.BETTER_AUTH_URL || "http://localhost:3001";
+
+const EMAIL_LINK_EXPIRES_IN = 30 * 60;
+
+// Mail goes out through a free Gmail account — cap resends per IP to protect its quota
+const EMAIL_RATE_LIMIT = { window: 60 * 60, max: 3 };
 
 export const auth = betterAuth({
   baseURL: BASE_URL,
@@ -14,6 +19,7 @@ export const auth = betterAuth({
   trustedOrigins: [FRONTEND_URL],
 
   user: {
+    deleteUser: { enabled: true },
     additionalFields: {
       profileCompleted: {
         type: "boolean",
@@ -26,15 +32,17 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,
+    resetPasswordTokenExpiresIn: EMAIL_LINK_EXPIRES_IN,
+    revokeSessionsOnPasswordReset: true,
     sendResetPassword: async ({ user, url }) => {
-      // TODO: implement password reset email
-      console.log(`Password reset for ${user.email}: ${url}`);
+      await sendResetPasswordEmail(user.email, url);
     },
   },
 
   emailVerification: {
     sendOnSignUp: true,
     autoSignInAfterVerification: true,
+    expiresIn: EMAIL_LINK_EXPIRES_IN,
     sendVerificationEmail: async ({ user, url }) => {
       // Replace default callbackURL with frontend complete-profile page
       const verifyUrl = url.replace(
@@ -42,6 +50,16 @@ export const auth = betterAuth({
         `callbackURL=${encodeURIComponent(`${FRONTEND_URL}/auth/complete-profile`)}`,
       );
       await sendVerificationEmail(user.email, verifyUrl);
+    },
+  },
+
+  rateLimit: {
+    enabled: true,
+    // Memory storage isn't shared across serverless instances
+    storage: "database",
+    customRules: {
+      "/send-verification-email": EMAIL_RATE_LIMIT,
+      "/request-password-reset": EMAIL_RATE_LIMIT,
     },
   },
 

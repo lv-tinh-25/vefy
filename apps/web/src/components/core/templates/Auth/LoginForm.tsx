@@ -52,7 +52,15 @@ export function LoginForm() {
           name="password"
           render={({ field, fieldState }) => (
             <div className="space-y-1.5">
-              <Label>{t("auth.password")}</Label>
+              <div className="flex items-center justify-between">
+                <Label>{t("auth.password")}</Label>
+                <Link
+                  href="/auth/forgot-password"
+                  className="text-xs text-primary hover:underline font-medium"
+                >
+                  {t("auth.forgotPassword")}
+                </Link>
+              </div>
               <PasswordInput
                 {...field}
                 placeholder="••••••••"

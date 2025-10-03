@@ -14,3 +14,6 @@ export const signOut = client.signOut;
 export const changePassword = client.changePassword;
 export const deleteUser = client.deleteUser;
 export const revokeOtherSessions = client.revokeOtherSessions;
+export const requestPasswordReset = client.requestPasswordReset;
+export const resetPassword = client.resetPassword;
+export const sendVerificationEmail = client.sendVerificationEmail;

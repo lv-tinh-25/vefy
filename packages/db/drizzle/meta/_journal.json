@@ -43,6 +43,13 @@
       "when": 1776915634213,
       "tag": "0005_even_moonstone",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1791016081997,
+      "tag": "0006_concerned_lord_hawal",
+      "breakpoints": true
     }
   ]
 }

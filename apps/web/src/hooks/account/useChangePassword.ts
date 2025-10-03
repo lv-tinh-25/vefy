@@ -8,13 +8,14 @@ import {
   type ChangePasswordInput,
 } from "@vefy/shared";
 import { changePassword } from "@/lib/auth-client";
+import { getAuthErrorKey } from "@/lib/auth-errors";
 
 export function useChangePassword(onClose: () => void) {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { control, handleSubmit, reset } = useForm<ChangePasswordInput>({
+  const { control, handleSubmit, reset, setError: setFieldError } = useForm<ChangePasswordInput>({
     resolver: zodResolver(changePasswordSchema),
     defaultValues: {
       currentPassword: "",
@@ -34,7 +35,12 @@ export function useChangePassword(onClose: () => void) {
         revokeOtherSessions: true,
       });
       if (result.error) {
-        setError(result.error.message ?? "auth.errorConnection");
+        const key = getAuthErrorKey(result.error, "auth.errorConnection");
+        if (key === "account.errorWrongPassword") {
+          setFieldError("currentPassword", { message: key });
+        } else {
+          setError(key);
+        }
         return;
       }
       setSuccess(true);

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { revokeOtherSessions } from "@/lib/auth-client";
+import { getAuthErrorKey } from "@/lib/auth-errors";
 
 export function useLogoutAll() {
   const [loading, setLoading] = useState(false);
@@ -14,7 +15,7 @@ export function useLogoutAll() {
     try {
       const result = await revokeOtherSessions();
       if (result.error) {
-        setError(result.error.message ?? "auth.errorConnection");
+        setError(getAuthErrorKey(result.error, "auth.errorConnection"));
         return;
       }
       setSuccess(true);

@@ -7,12 +7,20 @@ import { Button } from "@/components/core/atoms/Button";
 import { Input } from "@/components/core/atoms/Input";
 import { Label } from "@/components/core/atoms/Label";
 import { AvatarUpload } from "@/components/core/molecules/AvatarUpload";
-import { User } from "lucide-react";
+import { Loader2, User } from "lucide-react";
 
 export function CompleteProfile() {
-  const { control, onSubmit, error, isSubmitting } = useCompleteProfile();
+  const { control, onSubmit, error, isSubmitting, isChecking } = useCompleteProfile();
   const { t, tRaw } = useT();
   const watchedName = useWatch({ control, name: "name" });
+
+  if (isChecking) {
+    return (
+      <div className="flex justify-center py-16">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
 
   return (
     <div className="w-full max-w-sm mx-auto animate-fade-in">

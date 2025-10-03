@@ -1,12 +1,13 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-const AUTH_PAGES = ["/auth/login", "/auth/register", "/auth/verify-email"];
+const AUTH_PAGES = ["/auth/login", "/auth/register", "/auth/verify-email", "/auth/forgot-password"];
 const PUBLIC_PAGES = [...AUTH_PAGES];
-const SESSION_COOKIE = "better-auth.session_token";
+// better-auth prefixes the cookie with __Secure- on HTTPS
+const SESSION_COOKIES = ["better-auth.session_token", "__Secure-better-auth.session_token"];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const hasSession = request.cookies.has(SESSION_COOKIE);
+  const hasSession = SESSION_COOKIES.some((name) => request.cookies.has(name));
 
   // Auth pages: redirect to /garage if already logged in
   if (AUTH_PAGES.some((p) => pathname.startsWith(p)) && hasSession) {

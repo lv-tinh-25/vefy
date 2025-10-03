@@ -1,16 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { completeProfileSchema, type CompleteProfileInput } from "@vefy/shared";
 import { api } from "@/lib/api";
+import { useAuth } from "@/hooks/auth/useAuth";
 
 export function useCompleteProfile() {
   const router = useRouter();
+  const { isProfileCompleted, isProfileLoading } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Verification links stay valid after use, so re-clicking one lands here again
+  useEffect(() => {
+    if (isProfileCompleted) router.replace("/garage");
+  }, [isProfileCompleted, router]);
 
   const { control, handleSubmit } = useForm<CompleteProfileInput>({
     resolver: zodResolver(completeProfileSchema),
@@ -51,5 +58,11 @@ export function useCompleteProfile() {
     }
   });
 
-  return { control, onSubmit, error, isSubmitting };
+  return {
+    control,
+    onSubmit,
+    error,
+    isSubmitting,
+    isChecking: isProfileLoading || isProfileCompleted,
+  };
 }

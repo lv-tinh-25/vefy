@@ -69,6 +69,35 @@ export const changePasswordSchema = z
   .refine((d) => d.newPassword === d.confirmNewPassword, {
     path: ["confirmNewPassword"],
     message: "validation.passwordMismatch",
+  })
+  .refine((d) => d.newPassword !== d.currentPassword, {
+    path: ["newPassword"],
+    message: "validation.passwordSameAsCurrent",
   });
 
 export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
+
+// ─── Forgot / Reset Password ──────────────────────────────────────
+export const forgotPasswordSchema = z.object({
+  email: z
+    .string()
+    .min(1, "validation.emailRequired")
+    .email("validation.emailInvalid"),
+});
+
+export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
+
+export const resetPasswordSchema = z
+  .object({
+    newPassword: z
+      .string()
+      .min(8, "validation.passwordMin")
+      .max(72, "validation.passwordMax"),
+    confirmNewPassword: z.string().min(1, "validation.confirmRequired"),
+  })
+  .refine((d) => d.newPassword === d.confirmNewPassword, {
+    path: ["confirmNewPassword"],
+    message: "validation.passwordMismatch",
+  });
+
+export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;

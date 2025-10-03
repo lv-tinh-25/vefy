@@ -17,7 +17,7 @@ interface UserProfile {
 export function useAuth() {
   const { data: session, isPending } = useSession();
 
-  const { data: profile, mutate } = useSWR<UserProfile>(
+  const { data: profile, error: profileError, mutate } = useSWR<UserProfile>(
     session?.user ? "profile" : null,
     async () => {
       const res = await api.api.profile.me.$get();
@@ -31,6 +31,7 @@ export function useAuth() {
     profile,
     session: session?.session ?? null,
     isLoading: isPending,
+    isProfileLoading: isPending || (!!session?.user && !profile && !profileError),
     isAuthenticated: !!session?.user,
     isProfileCompleted: profile?.profileCompleted ?? false,
     hasPassword: profile?.authMethods?.includes("credential") ?? false,

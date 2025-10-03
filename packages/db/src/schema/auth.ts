@@ -1,4 +1,4 @@
-import { pgTable, text, boolean, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, boolean, timestamp, integer, bigint } from "drizzle-orm/pg-core";
 
 // ─── Better Auth: user ────────────────────────────────────────────
 export const user = pgTable("user", {
@@ -53,4 +53,12 @@ export const verification = pgTable("verification", {
   expiresAt: timestamp("expires_at").notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// ─── Better Auth: rate limit (rateLimit.storage = "database") ─────
+export const rateLimit = pgTable("rate_limit", {
+  id: text("id").primaryKey(),
+  key: text("key").notNull().unique(),
+  count: integer("count").notNull(),
+  lastRequest: bigint("last_request", { mode: "number" }).notNull(),
 });

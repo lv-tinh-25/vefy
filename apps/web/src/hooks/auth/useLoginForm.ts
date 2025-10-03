@@ -27,6 +27,10 @@ export function useLoginForm() {
         password: data.password,
       });
       if (result.error) {
+        if (result.error.code === "EMAIL_NOT_VERIFIED") {
+          router.push(`/auth/verify-email?email=${encodeURIComponent(data.email)}&from=login`);
+          return;
+        }
         toast.error(t("auth.errorLogin"));
         return;
       }
