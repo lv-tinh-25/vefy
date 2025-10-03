@@ -4,6 +4,7 @@ import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
 import { X } from "lucide-react";
 import { useEffect, type ReactNode } from "react";
+import { useT } from "@/lib/i18n";
 
 interface DialogProps {
   open: boolean;
@@ -13,9 +14,25 @@ interface DialogProps {
   /** Sticky footer actions (buttons) */
   actions?: ReactNode;
   className?: string;
+  /** While a request is in flight, block X / backdrop / Escape so it can't be closed mid-save */
+  busy?: boolean;
 }
 
-export function Dialog({ open, onClose, title, children, actions, className }: DialogProps) {
+export function Dialog({ open, onClose, title, children, actions, className, busy = false }: DialogProps) {
+  const { t } = useT();
+  const requestClose = () => {
+    if (!busy) onClose();
+  };
+
+  useEffect(() => {
+    if (!open) return;
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === "Escape" && !busy) onClose();
+    }
+    document.addEventListener("keydown", handleKey);
+    return () => document.removeEventListener("keydown", handleKey);
+  }, [open, busy, onClose]);
+
   useEffect(() => {
     if (open) {
       document.body.style.overflow = "hidden";
@@ -32,7 +49,7 @@ export function Dialog({ open, onClose, title, children, actions, className }: D
   return createPortal(
     <div className="fixed inset-0 z-9999 animate-fade-in">
       {/* Backdrop — desktop only */}
-      <div className="hidden sm:block fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div className="hidden sm:block fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={requestClose} />
 
       {/* Panel */}
       <div
@@ -49,8 +66,11 @@ export function Dialog({ open, onClose, title, children, actions, className }: D
         <div className="shrink-0 flex items-center justify-between px-5 py-4 border-b border-border sm:px-6">
           <h2 className="text-lg font-semibold text-foreground">{title}</h2>
           <button
-            onClick={onClose}
-            className="rounded-lg p-1.5 text-faint hover:text-foreground hover:bg-surface transition-colors"
+            type="button"
+            onClick={requestClose}
+            disabled={busy}
+            aria-label={t("common.close")}
+            className="rounded-lg p-1.5 text-faint hover:text-foreground hover:bg-surface transition-colors disabled:opacity-40 disabled:pointer-events-none"
           >
             <X className="h-4 w-4" />
           </button>

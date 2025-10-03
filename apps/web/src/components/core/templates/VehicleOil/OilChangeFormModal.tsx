@@ -30,10 +30,11 @@ export function OilChangeFormModal({ open, onClose, onSuccess, vehicleId }: OilC
     <Dialog
       open={open}
       onClose={onClose}
+      busy={loading}
       title={t("oilForm.title")}
       actions={
         <>
-          <Button type="button" variant="outline" onClick={onClose}>{t("common.cancel")}</Button>
+          <Button type="button" variant="outline" onClick={onClose} disabled={loading}>{t("common.cancel")}</Button>
           <Button type="submit" form="oil-change-form" disabled={loading}>
             {loading ? t("common.saving") : t("common.save")}
           </Button>

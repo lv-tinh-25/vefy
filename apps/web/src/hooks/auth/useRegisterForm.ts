@@ -6,11 +6,15 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { registerSchema, type RegisterInput } from "@vefy/shared";
 import { signUp, signIn } from "@/lib/auth-client";
+import { toast } from "sonner";
+import { useT } from "@/lib/i18n";
 
 export function useRegisterForm() {
   const router = useRouter();
+  const { t } = useT();
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   const { control, handleSubmit } = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
@@ -28,22 +32,43 @@ export function useRegisterForm() {
       });
       if (result.error) {
         setError(result.error.message ?? "auth.errorRegister");
+        setIsSubmitting(false);
         return;
       }
+      // Keep the form locked while navigating away
       router.push(`/auth/verify-email?email=${encodeURIComponent(data.email)}`);
+      return;
     } catch {
       setError("auth.errorConnection");
-    } finally {
-      setIsSubmitting(false);
     }
+    setIsSubmitting(false);
   });
 
   const signUpWithGoogle = async () => {
-    await signIn.social({
-      provider: "google",
-      callbackURL: `${window.location.origin}/garage`,
-    });
+    setIsGoogleLoading(true);
+    try {
+      const result = await signIn.social({
+        provider: "google",
+        callbackURL: `${window.location.origin}/garage`,
+      });
+      // On success the browser is already leaving for Google; only an error lands here
+      if (result.error) {
+        toast.error(t("auth.errorConnection"));
+        setIsGoogleLoading(false);
+      }
+    } catch {
+      toast.error(t("auth.errorConnection"));
+      setIsGoogleLoading(false);
+    }
   };
 
-  return { control, onSubmit, signUpWithGoogle, error, isSubmitting };
+  return {
+    control,
+    onSubmit,
+    signUpWithGoogle,
+    error,
+    isSubmitting,
+    isGoogleLoading,
+    isBusy: isSubmitting || isGoogleLoading,
+  };
 }

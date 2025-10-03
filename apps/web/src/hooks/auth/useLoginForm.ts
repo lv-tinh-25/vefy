@@ -13,6 +13,7 @@ export function useLoginForm() {
   const router = useRouter();
   const { t } = useT();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   const { control, handleSubmit } = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
@@ -32,22 +33,35 @@ export function useLoginForm() {
           return;
         }
         toast.error(t("auth.errorLogin"));
+        setIsSubmitting(false);
         return;
       }
+      // Keep the form locked while navigating away
       router.push("/garage");
+      return;
     } catch {
       toast.error(t("auth.errorConnection"));
-    } finally {
-      setIsSubmitting(false);
     }
+    setIsSubmitting(false);
   });
 
   const signInWithGoogle = async () => {
-    await signIn.social({
-      provider: "google",
-      callbackURL: `${window.location.origin}/garage`,
-    });
+    setIsGoogleLoading(true);
+    try {
+      const result = await signIn.social({
+        provider: "google",
+        callbackURL: `${window.location.origin}/garage`,
+      });
+      // On success the browser is already leaving for Google; only an error lands here
+      if (result.error) {
+        toast.error(t("auth.errorConnection"));
+        setIsGoogleLoading(false);
+      }
+    } catch {
+      toast.error(t("auth.errorConnection"));
+      setIsGoogleLoading(false);
+    }
   };
 
-  return { control, onSubmit, signInWithGoogle, isSubmitting };
+  return { control, onSubmit, signInWithGoogle, isSubmitting, isGoogleLoading, isBusy: isSubmitting || isGoogleLoading };
 }

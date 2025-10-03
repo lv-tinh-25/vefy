@@ -29,10 +29,11 @@ export function VehicleFormModal({ open, onClose, onSuccess }: VehicleFormModalP
     <Dialog
       open={open}
       onClose={onClose}
+      busy={loading}
       title={t("vehicleForm.title")}
       actions={
         <>
-          <Button type="button" variant="outline" onClick={onClose}>{t("common.cancel")}</Button>
+          <Button type="button" variant="outline" onClick={onClose} disabled={loading}>{t("common.cancel")}</Button>
           <Button type="submit" form="vehicle-form" disabled={loading}>
             {loading ? t("common.adding") : t("vehicleForm.addVehicle")}
           </Button>

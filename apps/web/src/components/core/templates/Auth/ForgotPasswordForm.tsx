@@ -66,7 +66,7 @@ export function ForgotPasswordForm() {
         </Button>
       </form>
 
-      <BackToLoginLink className="mt-6" />
+      <BackToLoginLink className="mt-6" disabled={isSubmitting} />
     </div>
   );
 }

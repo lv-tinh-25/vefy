@@ -34,10 +34,11 @@ export function OtherExpenseFormModal({
     <Dialog
       open={open}
       onClose={onClose}
+      busy={loading}
       title={t("expenseForm.title")}
       actions={
         <>
-          <Button type="button" variant="outline" onClick={onClose}>
+          <Button type="button" variant="outline" onClick={onClose} disabled={loading}>
             {t("common.cancel")}
           </Button>
           <Button type="submit" form="other-expense-form" disabled={loading}>

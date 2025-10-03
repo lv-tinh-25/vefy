@@ -25,10 +25,11 @@ export function DeleteAccountModal({ open, onClose }: DeleteAccountModalProps) {
     <Dialog
       open={open}
       onClose={onClose}
+      busy={isSubmitting}
       title={t("account.deleteConfirmTitle")}
       actions={
         <>
-          <Button type="button" variant="outline" onClick={onClose}>{t("common.cancel")}</Button>
+          <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>{t("common.cancel")}</Button>
           <Button type="button" variant="destructive" onClick={onConfirm} disabled={!isMatch || isSubmitting}>
             {isSubmitting ? t("common.deleting") : t("account.deleteAccountAction")}
           </Button>

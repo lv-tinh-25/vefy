@@ -2,6 +2,7 @@ import type { Messages } from "../types";
 
 export const en: Messages = {
   common: {
+    close: "Close",
     loading: "Loading...",
     cancel: "Cancel",
     save: "Save",

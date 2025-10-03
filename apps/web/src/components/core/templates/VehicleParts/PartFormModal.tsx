@@ -29,10 +29,11 @@ export function PartFormModal({ open, onClose, onSuccess, vehicleId }: PartFormM
     <Dialog
       open={open}
       onClose={onClose}
+      busy={loading}
       title={t("partForm.title")}
       actions={
         <>
-          <Button type="button" variant="outline" onClick={onClose}>
+          <Button type="button" variant="outline" onClick={onClose} disabled={loading}>
             {t("common.cancel")}
           </Button>
           <Button type="submit" form="part-form" disabled={loading}>

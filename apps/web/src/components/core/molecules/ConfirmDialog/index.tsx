@@ -28,6 +28,7 @@ export function ConfirmDialog({
       open={open}
       onClose={onClose}
       title={title}
+      busy={loading}
       actions={
         <>
           <Button variant="outline" onClick={onClose} disabled={loading}>

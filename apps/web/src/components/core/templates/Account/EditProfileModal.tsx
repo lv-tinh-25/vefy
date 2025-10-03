@@ -24,10 +24,11 @@ export function EditProfileModal({ open, onClose }: EditProfileModalProps) {
     <Dialog
       open={open}
       onClose={onClose}
+      busy={isSubmitting}
       title={t("account.editProfileTitle")}
       actions={
         <>
-          <Button type="button" variant="outline" onClick={onClose}>{t("common.cancel")}</Button>
+          <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>{t("common.cancel")}</Button>
           <Button type="submit" form="edit-profile-form" disabled={isSubmitting}>
             {isSubmitting ? t("common.saving") : t("common.saveChanges")}
           </Button>

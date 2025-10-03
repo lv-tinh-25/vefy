@@ -1,5 +1,6 @@
 export const vi = {
   common: {
+    close: "Đóng",
     loading: "Đang tải...",
     cancel: "Hủy",
     save: "Lưu",

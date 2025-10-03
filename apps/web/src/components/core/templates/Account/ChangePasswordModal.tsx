@@ -34,10 +34,11 @@ export function ChangePasswordModal({ open, onClose }: ChangePasswordModalProps)
     <Dialog
       open={open}
       onClose={onClose}
+      busy={isSubmitting}
       title={t("account.changePasswordTitle")}
       actions={
         <>
-          <Button type="button" variant="outline" onClick={onClose}>
+          <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>
             {t("common.cancel")}
           </Button>
           <Button type="submit" form="change-password-form" disabled={isSubmitting}>
