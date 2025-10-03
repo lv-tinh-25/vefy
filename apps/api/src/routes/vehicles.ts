@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { createMiddleware } from "hono/factory";
 import { zValidator } from "@hono/zod-validator";
 import { insertVehicleSchema, updateVehicleInfoSchema } from "@vefy/shared";
 import * as vehicleService from "../services/vehicle.service";
@@ -7,7 +8,18 @@ import { partRoutes } from "./parts";
 import { expenseRoutes } from "./expenses";
 import type { AuthEnv } from "../middleware/auth";
 
+// Hono exposes the param under the name used by the matched route: "id" on /:id, "vehicleId" on
+// the mounted sub-routers — the wildcard must use :vehicleId or it never matches them
+const requireVehicleOwner = createMiddleware<AuthEnv>(async (c, next) => {
+  const vehicleId = c.req.param("vehicleId") ?? c.req.param("id") ?? "";
+  const owned = await vehicleService.isOwnedBy(vehicleId, c.get("userId"));
+  if (!owned) return c.json({ error: "Vehicle not found" }, 404);
+  await next();
+});
+
 export const vehicleRoutes = new Hono<AuthEnv>()
+  .use("/:id", requireVehicleOwner)
+  .use("/:vehicleId/*", requireVehicleOwner)
   .get("/", async (c) => {
     const userId = c.get("userId");
     const vehicles = await vehicleService.listAll(userId);

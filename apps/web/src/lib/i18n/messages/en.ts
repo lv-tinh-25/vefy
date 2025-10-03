@@ -81,6 +81,14 @@ export const en: Messages = {
     noOilData: "No oil data yet. Add an oil change in the Oil tab.",
   },
 
+  vehicleActions: {
+    moreActions: "More actions",
+    delete: "Delete vehicle",
+    deleteConfirmTitle: "Delete vehicle?",
+    deleteConfirm: "Delete \"{name}\" and all of its oil, parts and expense history? This cannot be undone.",
+    deleteSuccess: "Vehicle deleted",
+  },
+
   documents: {
     vehicleInfo: "Vehicle info",
     name: "Memorable name",

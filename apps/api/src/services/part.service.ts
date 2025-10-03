@@ -1,13 +1,7 @@
 import { db } from "@vefy/db";
 import { parts, expenses } from "@vefy/db";
-import { eq, asc } from "drizzle-orm";
-import type { InsertPart, Part } from "@vefy/shared";
-
-function addMonths(dateStr: string, months: number): string {
-  const d = new Date(dateStr + "T00:00:00");
-  d.setMonth(d.getMonth() + months);
-  return d.toISOString().slice(0, 10);
-}
+import { and, eq, asc } from "drizzle-orm";
+import { addMonthsToDate, type InsertPart, type Part } from "@vefy/shared";
 
 function toPart(row: typeof parts.$inferSelect): Part {
   return {
@@ -35,7 +29,7 @@ export async function listByVehicle(vehicleId: string) {
 }
 
 export async function create(data: InsertPart) {
-  const warrantyExpiry = addMonths(data.installDate, data.warrantyMonths ?? 12);
+  const warrantyExpiry = addMonthsToDate(data.installDate, data.warrantyMonths ?? 12);
 
   return db.transaction(async (tx) => {
     const [row] = await tx
@@ -66,6 +60,6 @@ export async function create(data: InsertPart) {
   });
 }
 
-export async function remove(id: string) {
-  await db.delete(parts).where(eq(parts.id, id));
+export async function remove(id: string, vehicleId: string) {
+  await db.delete(parts).where(and(eq(parts.id, id), eq(parts.vehicleId, vehicleId)));
 }

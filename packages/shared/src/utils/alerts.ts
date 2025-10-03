@@ -1,6 +1,7 @@
 import type { Vehicle } from "../schemas/vehicle";
 import type { Part } from "../schemas/part";
 import { ALERT_THRESHOLDS } from "../constants/defaults";
+import { daysUntil } from "./date";
 
 export type AlertStatus = "danger" | "warning" | "success" | "neutral";
 
@@ -25,12 +26,6 @@ export function buildAlertKey(
   return `${type}:${entityId}:${discriminator ?? "none"}`;
 }
 
-function daysBetween(dateStr: string, now: Date): number {
-  const target = new Date(dateStr + "T00:00:00");
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  return Math.floor((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-}
-
 function dateAlert(
   type: AlertType,
   label: string,
@@ -51,7 +46,7 @@ function dateAlert(
     };
   }
 
-  const days = daysBetween(expiryDate, now);
+  const days = daysUntil(expiryDate, now);
   let status: AlertStatus;
 
   if (days < threshold.dangerDays) {

@@ -1,6 +1,6 @@
 import { db } from "@vefy/db";
 import { expenses, vehicles } from "@vefy/db";
-import { eq, desc } from "drizzle-orm";
+import { and, eq, desc } from "drizzle-orm";
 import {
   groupExpensesByPeriod,
   type Expense,
@@ -63,8 +63,11 @@ export async function createOther(data: {
   return toExpense(row);
 }
 
-export async function remove(id: string) {
-  const [row] = await db.select().from(expenses).where(eq(expenses.id, id));
+export async function remove(id: string, vehicleId: string) {
+  const [row] = await db
+    .select()
+    .from(expenses)
+    .where(and(eq(expenses.id, id), eq(expenses.vehicleId, vehicleId)));
   if (!row) throw new Error("expense.notFound");
   if (row.oilChangeId || row.partId) {
     throw new Error("expense.linkedReadonly");

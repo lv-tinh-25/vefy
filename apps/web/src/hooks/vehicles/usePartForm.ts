@@ -3,7 +3,7 @@
 import { type FormEvent, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { insertPartSchema, type InsertPart } from "@vefy/shared";
+import { insertPartSchema, type InsertPart, todayDateStr } from "@vefy/shared";
 import { api } from "@/lib/api";
 
 export type PartFormType = "part" | "other";
@@ -20,7 +20,7 @@ export function usePartForm(
     resolver: zodResolver(insertPartSchema.omit({ vehicleId: true })),
     defaultValues: {
       name: "",
-      installDate: new Date().toISOString().slice(0, 10),
+      installDate: todayDateStr(),
       warrantyMonths: 12,
       odometer: undefined as number | undefined,
       cost: undefined as number | undefined,
@@ -57,7 +57,7 @@ export function usePartForm(
     }
     setLoading(true);
     try {
-      const today = new Date().toISOString().slice(0, 10);
+      const today = todayDateStr();
       const res = await api.api.vehicles[":vehicleId"].expenses.$post({
         param: { vehicleId },
         json: {

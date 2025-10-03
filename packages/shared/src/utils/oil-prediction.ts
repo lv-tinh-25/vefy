@@ -2,6 +2,7 @@ import type { OilChange } from "../schemas/oil-change";
 import type { Alert, AlertStatus } from "./alerts";
 import { buildAlertKey } from "./alerts";
 import { ALERT_THRESHOLDS } from "../constants/defaults";
+import { daysBetweenDates, todayDateStr } from "./date";
 
 export type OilUrgency = "overdue" | "warning" | "ok";
 
@@ -18,15 +19,6 @@ export interface OilPrediction {
   urgency: OilUrgency;
 }
 
-function daysBetween(a: string, b: string): number {
-  const da = new Date(a + "T00:00:00");
-  const db = new Date(b + "T00:00:00");
-  return Math.floor((db.getTime() - da.getTime()) / (1000 * 60 * 60 * 24));
-}
-
-function toDateStr(d: Date): string {
-  return d.toISOString().slice(0, 10);
-}
 
 export function predictOilChange(
   oilChanges: OilChange[],
@@ -43,9 +35,9 @@ export function predictOilChange(
 
   const newest = sorted[sorted.length - 1];
   const oldest = sorted[0];
-  const todayStr = toDateStr(currentDate);
+  const todayStr = todayDateStr(currentDate);
 
-  const daysSinceLast = Math.max(0, daysBetween(newest.date, todayStr));
+  const daysSinceLast = Math.max(0, daysBetweenDates(newest.date, todayStr));
 
   if (sorted.length < 2) {
     return {
@@ -64,7 +56,7 @@ export function predictOilChange(
 
   // Bước 1: Tính trung bình km/ngày
   const totalKm = newest.odometer - oldest.odometer;
-  const totalDays = daysBetween(oldest.date, newest.date);
+  const totalDays = daysBetweenDates(oldest.date, newest.date);
 
   if (totalDays <= 0 || totalKm <= 0) {
     return {

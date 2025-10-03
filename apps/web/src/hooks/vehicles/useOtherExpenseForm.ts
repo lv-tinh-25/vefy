@@ -3,10 +3,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  createOtherExpenseSchema,
-  type CreateOtherExpense,
-} from "@vefy/shared";
+import { createOtherExpenseSchema, type CreateOtherExpense, todayDateStr } from "@vefy/shared";
 import { api } from "@/lib/api";
 
 export function useOtherExpenseForm(
@@ -19,7 +16,7 @@ export function useOtherExpenseForm(
   const form = useForm<CreateOtherExpense>({
     resolver: zodResolver(createOtherExpenseSchema),
     defaultValues: {
-      date: new Date().toISOString().slice(0, 10),
+      date: todayDateStr(),
       name: "",
       amount: undefined,
       note: "",

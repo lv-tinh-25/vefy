@@ -35,6 +35,6 @@ export const oilChangeRoutes = new Hono()
   )
   .delete("/:id", async (c) => {
     const id = c.req.param("id");
-    await oilChangeService.remove(id);
+    await oilChangeService.remove(id, c.req.param("vehicleId") ?? "");
     return c.json({ success: true });
   });

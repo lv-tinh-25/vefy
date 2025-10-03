@@ -11,6 +11,7 @@ import { useT } from "@/lib/i18n";
 import { formatDate, formatNumber } from "@/lib/utils";
 import { PageSpinner } from "@/components/core/atoms/Spinner";
 import { Plus, Trash2, Wrench } from "lucide-react";
+import { daysUntil } from "@vefy/shared";
 
 export function VehiclePartsContent() {
   const params = useParams();
@@ -24,9 +25,7 @@ export function VehiclePartsContent() {
   if (!vehicle) return <PageSpinner />;
 
   function getWarrantyStatus(expiryDate: string): { variant: "danger" | "warning" | "success"; label: string } {
-    const now = new Date();
-    const expiry = new Date(expiryDate + "T00:00:00");
-    const days = Math.floor((expiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    const days = daysUntil(expiryDate);
     if (days < 0) return { variant: "danger", label: t("parts.warrantyExpired", { days: Math.abs(days) }) };
     if (days <= 30) return { variant: "warning", label: t("parts.warrantyRemaining", { days }) };
     return { variant: "success", label: t("parts.warrantyRemaining", { days }) };

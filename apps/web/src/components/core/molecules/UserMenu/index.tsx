@@ -18,7 +18,7 @@ const LOCALE_LABELS: Record<Locale, string> = {
 };
 
 export function UserMenu() {
-  const { profile } = useAuth();
+  const { profile, user } = useAuth();
   const { t, locale, setLocale } = useT();
   const { theme, toggleTheme } = useTheme();
   const { unreadCount } = useNotifications();
@@ -37,7 +37,10 @@ export function UserMenu() {
     return () => document.removeEventListener("mousedown", handleClick);
   }, [open]);
 
-  const initial = profile?.name?.charAt(0)?.toUpperCase() ?? "U";
+  // Session usually resolves before the profile request; until either does, show a placeholder
+  const displayName = profile?.name ?? user?.name;
+  const avatarUrl = profile?.image ?? user?.image;
+  const initial = displayName?.charAt(0)?.toUpperCase();
   const badgeLabel = unreadCount > 9 ? "9+" : String(unreadCount);
 
   const handleLogout = async () => {
@@ -62,14 +65,19 @@ export function UserMenu() {
           onClick={() => setOpen(!open)}
           className="relative flex items-center gap-2 rounded-full transition-all duration-200 hover:ring-2 hover:ring-primary/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
-          {profile?.image ? (
+          {avatarUrl ? (
             <img
-              src={profile.image}
-              alt={profile.name}
+              src={avatarUrl}
+              alt={displayName ?? ""}
               className="h-8 w-8 rounded-full object-cover border border-border"
             />
           ) : (
-            <div className="h-8 w-8 rounded-full bg-primary/20 text-primary flex items-center justify-center text-sm font-semibold">
+            <div
+              className={cn(
+                "h-8 w-8 rounded-full bg-primary/20 text-primary flex items-center justify-center text-sm font-semibold",
+                !initial && "animate-pulse",
+              )}
+            >
               {initial}
             </div>
           )}

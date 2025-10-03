@@ -1,6 +1,6 @@
 import { db } from "@vefy/db";
 import { vehicles, oilChanges, parts } from "@vefy/db";
-import { eq, desc } from "drizzle-orm";
+import { and, eq, desc } from "drizzle-orm";
 import {
   computeAllAlerts,
   getActiveAlerts,
@@ -225,6 +225,18 @@ export async function update(id: string, data: UpdateVehicleInfo) {
 
   if (!row) return null;
   return toVehicle(row);
+}
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+export async function isOwnedBy(id: string, userId: string): Promise<boolean> {
+  // Non-UUID ids would make Postgres throw on the uuid column
+  if (!UUID_RE.test(id)) return false;
+  const [row] = await db
+    .select({ id: vehicles.id })
+    .from(vehicles)
+    .where(and(eq(vehicles.id, id), eq(vehicles.userId, userId)));
+  return !!row;
 }
 
 export async function remove(id: string) {

@@ -79,6 +79,14 @@ export const vi = {
     noOilData: "Chưa có dữ liệu nhớt. Thêm lần thay nhớt tại tab Nhớt.",
   },
 
+  vehicleActions: {
+    moreActions: "Thao tác khác",
+    delete: "Xóa xe",
+    deleteConfirmTitle: "Xóa xe?",
+    deleteConfirm: "Xóa \"{name}\" cùng toàn bộ lịch sử nhớt, phụ tùng và chi phí? Hành động này không thể hoàn tác.",
+    deleteSuccess: "Đã xóa xe",
+  },
+
   documents: {
     vehicleInfo: "Thông tin xe",
     name: "Tên gợi nhớ",

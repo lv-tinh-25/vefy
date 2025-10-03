@@ -1,6 +1,6 @@
 import { db } from "@vefy/db";
 import { oilChanges, expenses } from "@vefy/db";
-import { eq, desc } from "drizzle-orm";
+import { and, eq, desc } from "drizzle-orm";
 import type { InsertOilChange, OilChange } from "@vefy/shared";
 
 function toOilChange(row: typeof oilChanges.$inferSelect): OilChange {
@@ -68,6 +68,6 @@ export async function create(data: InsertOilChange) {
   });
 }
 
-export async function remove(id: string) {
-  await db.delete(oilChanges).where(eq(oilChanges.id, id));
+export async function remove(id: string, vehicleId: string) {
+  await db.delete(oilChanges).where(and(eq(oilChanges.id, id), eq(oilChanges.vehicleId, vehicleId)));
 }

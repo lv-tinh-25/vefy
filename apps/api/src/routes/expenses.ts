@@ -38,7 +38,7 @@ export const expenseRoutes = new Hono()
   .delete("/:id", async (c) => {
     const id = c.req.param("id");
     try {
-      await expenseService.remove(id);
+      await expenseService.remove(id, c.req.param("vehicleId") ?? "");
       return c.json({ success: true });
     } catch (err) {
       const message = err instanceof Error ? err.message : "expense.error";

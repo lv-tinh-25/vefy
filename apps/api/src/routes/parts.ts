@@ -26,6 +26,6 @@ export const partRoutes = new Hono()
   )
   .delete("/:id", async (c) => {
     const id = c.req.param("id");
-    await partService.remove(id);
+    await partService.remove(id, c.req.param("vehicleId") ?? "");
     return c.json({ success: true });
   });

@@ -3,7 +3,7 @@
 import { Card, CardContent } from "@/components/core/molecules/Card";
 import { useT } from "@/lib/i18n";
 import { formatCurrency } from "@/lib/utils";
-import { sumForPeriod, type Expense } from "@vefy/shared";
+import { sumForPeriod, type Expense, todayDateStr } from "@vefy/shared";
 
 interface SummaryCardsProps {
   expenses: Expense[];
@@ -11,7 +11,7 @@ interface SummaryCardsProps {
 
 export function SummaryCards({ expenses }: SummaryCardsProps) {
   const { t, locale } = useT();
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayDateStr();
   const monthKey = today.slice(0, 7);
   const yearKey = today.slice(0, 4);
   const totalMonth = sumForPeriod(expenses, "month", monthKey);

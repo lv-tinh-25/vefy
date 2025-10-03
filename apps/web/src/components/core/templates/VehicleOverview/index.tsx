@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/core/molecules/Card";
 import { Badge } from "@/components/core/atoms/Badge";
 import { OilPredictionCard } from "./OilPredictionCard";
 import { StatusCard } from "./StatusCard";
+import { VehicleActionsMenu } from "./VehicleActionsMenu";
 import { useT } from "@/lib/i18n";
 import { PageSpinner } from "@/components/core/atoms/Spinner";
 import { Car, Bike, Shield, FileCheck, HeartPulse } from "lucide-react";
@@ -40,13 +41,18 @@ export function VehicleOverviewContent() {
         <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary-muted">
           <VehicleIcon className="h-6 w-6 text-primary" />
         </div>
-        <div className="flex-1">
-          <h2 className="text-xl font-bold text-foreground">{vehicle.name}</h2>
-          <p className="text-sm text-muted-foreground">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <h2 className="text-xl font-bold text-foreground truncate">{vehicle.name}</h2>
+            <Badge className="shrink-0">
+              {vehicle.type === "car" ? t("common.car") : t("common.motorcycle")}
+            </Badge>
+          </div>
+          <p className="text-sm text-muted-foreground truncate">
             {vehicle.brand} {vehicle.model} · {vehicle.year} · {vehicle.licensePlate}
           </p>
         </div>
-        <Badge>{vehicle.type === "car" ? t("common.car") : t("common.motorcycle")}</Badge>
+        <VehicleActionsMenu vehicleId={id} vehicleName={vehicle.name || `${vehicle.brand} ${vehicle.model}`} />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">

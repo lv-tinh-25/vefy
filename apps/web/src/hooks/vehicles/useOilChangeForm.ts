@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { insertOilChangeSchema, type InsertOilChange } from "@vefy/shared";
+import { insertOilChangeSchema, type InsertOilChange, todayDateStr } from "@vefy/shared";
 import { api } from "@/lib/api";
 
 export function useOilChangeForm(vehicleId: string, onSuccess: () => void, onClose: () => void) {
@@ -13,7 +13,7 @@ export function useOilChangeForm(vehicleId: string, onSuccess: () => void, onClo
   const form = useForm<Omit<InsertOilChange, "vehicleId">>({
     resolver: zodResolver(insertOilChangeSchema.omit({ vehicleId: true })),
     defaultValues: {
-      date: new Date().toISOString().slice(0, 10),
+      date: todayDateStr(),
       odometer: undefined,
       cost: undefined,
       oilType: "",
