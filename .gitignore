@@ -7,4 +7,4 @@ dist
 drizzle/meta
 *.tsbuildinfo
 .DS_Store
-.claude
+.claude/settings.local.json
