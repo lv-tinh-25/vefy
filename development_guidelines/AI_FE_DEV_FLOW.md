@@ -100,7 +100,7 @@ export default function GaragePage() {
 **CORRECT:**
 
 ```typescript
-// lib/hooks/use-vehicles.ts
+// hooks/garage/useVehicles.ts
 export function useVehicles() {
   const { data, error, mutate } = useSWR("vehicles", () =>
     api.api.vehicles.$get().then((r) => r.json())

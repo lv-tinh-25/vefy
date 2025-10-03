@@ -1,9 +1,9 @@
 import nodemailer from "nodemailer";
 
-const SMTP_PORT = Number(process.env.SMTP_PORT) || 2525;
+const SMTP_PORT = Number(process.env.SMTP_PORT) || 465;
 
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || "sandbox.smtp.mailtrap.io",
+  host: process.env.SMTP_HOST || "smtp.gmail.com",
   port: SMTP_PORT,
   secure: SMTP_PORT === 465,
   auth: {
@@ -12,7 +12,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-const FROM = process.env.SMTP_FROM || "Vefy <noreply@vefy.app>";
+const FROM = process.env.SMTP_FROM || `Vefy <${process.env.SMTP_USER}>`;
 
 interface ActionEmail {
   to: string;

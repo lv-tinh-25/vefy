@@ -69,12 +69,19 @@ pnpm --filter @vefy/api dev:standalone   # Optional: run the Hono API alone on p
 
 ## Deploy, CI & SEO
 
-- **Vercel**: import the repo with root directory `apps/web` (pnpm workspace is auto-detected). Set the env vars listed below (`DATABASE_URL` must be the Supabase transaction pooler, port 6543; generate fresh `BETTER_AUTH_SECRET` and `CRON_SECRET`). Run `pnpm db:migrate` locally before pushing code that needs a new migration.
+- **Vercel**: Git integration on project `vefy` — pushes to `master` deploy to production, other branches/PRs get preview URLs. Root directory `apps/web` (pnpm workspace is auto-detected); Node version comes from `.nvmrc` (22). Set the env vars listed below (`DATABASE_URL` must be the Supabase transaction pooler, port 6543; generate fresh `BETTER_AUTH_SECRET` and `CRON_SECRET`). Run `pnpm db:migrate` locally before pushing code that needs a new migration.
 - **Cron**: `apps/web/vercel.json` schedules `GET /api/cron/keepalive` daily (guarded by `CRON_SECRET`, which Vercel sends as a Bearer token) so Supabase's free tier doesn't pause.
 - **Google OAuth**: register `https://<domain>/api/auth/callback/google` alongside the localhost URI. Preview deployments have changing URLs, so Google sign-in only works on production (email/password works everywhere).
 - **Search Console**: HTML-tag verification via `GOOGLE_SITE_VERIFICATION`, then submit `/sitemap.xml`.
 - **CI**: `.github/workflows/ci.yml` runs install (frozen lockfile) → typecheck → lint → test → web build on pushes to `master` and PRs.
 - **SEO**: root metadata (title template, Open Graph, `GOOGLE_SITE_VERIFICATION`), `robots.ts`, `sitemap.ts`, `manifest.ts`, `opengraph-image.tsx`, `icon.svg`. Only `/auth/login` and `/auth/register` are indexable; every other route sets `noindex`. Client pages get titles from a small server `layout.tsx` per route. New public files must be added to the middleware matcher exclusions.
+
+## Git Workflow
+
+- Repository: `github.com/lv-tinh-25/vefy`, main branch `master`. Work on a feature branch, merge into `master` when approved.
+- Agents only commit locally. Never push, add remotes, or deploy — the owner pushes.
+- Commit messages follow Conventional Commits (`feat(scope): …`, `fix: …`, `chore: …`), in English.
+- The commit identity is set in the repo-local git config. Do not add `Co-Authored-By` trailers for AI assistants — an authorship preference, not concealment; AI tooling stays in the repo (`CLAUDE.md`, `.claude/`, `development_guidelines/`).
 
 ## Database Tables
 

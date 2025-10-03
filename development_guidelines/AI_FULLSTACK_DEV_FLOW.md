@@ -93,7 +93,7 @@ Route Layer (apps/api/src/routes/)
   ↓ c.json(vehicle) → HTTP Response
 Hono RPC Client (apps/web/src/lib/api.ts)
   ↓ api.api.vehicles.$get() → typed response
-SWR Hook (apps/web/src/lib/hooks/)
+SWR Hook (apps/web/src/hooks/)
   ↓ useSWR() → { data, error, mutate }
 Component (apps/web/src/components/)
   ↓ props → JSX rendering
@@ -157,7 +157,7 @@ useForm<InsertVehicle>({ resolver: zodResolver(insertVehicleSchema) })
 
 ### Phase 5: Frontend Implementation
 
-16. **SWR Hook** - Create data fetching hook in `apps/web/src/lib/hooks/`
+16. **SWR Hook** - Create data fetching hook in `apps/web/src/hooks/<feature>/`
 17. **Components** - Create UI components in `apps/web/src/components/`
 18. **Form Hook** - Create form logic hook with shared schema
 19. **Page** - Compose in App Router page
@@ -280,7 +280,7 @@ export const serviceRecordRoutes = new Hono()
 ### 5. Frontend Hook
 
 ```typescript
-// apps/web/src/lib/hooks/use-service-records.ts
+// apps/web/src/hooks/vehicles/useServiceRecords.ts
 import useSWR from "swr"
 import { api } from "@/lib/api"
 
@@ -304,7 +304,7 @@ export function useServiceRecords(vehicleId: string) {
 ```typescript
 // app/vehicle/[id]/services/page.tsx
 "use client"
-import { useServiceRecords } from "@/lib/hooks/use-service-records"
+import { useServiceRecords } from "@/hooks/vehicles/useServiceRecords"
 
 export default function ServicesPage({ params }: { params: { id: string } }) {
   const { records, isLoading, mutate } = useServiceRecords(params.id)
