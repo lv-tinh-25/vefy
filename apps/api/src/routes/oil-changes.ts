@@ -28,8 +28,10 @@ export const oilChangeRoutes = new Hono()
         });
         return c.json(oilChange, 201);
       } catch (err) {
-        const message = err instanceof Error ? err.message : "Lỗi tạo lần thay nhớt";
-        return c.json({ error: message }, 400);
+        if (err instanceof oilChangeService.OdometerTooLowError) {
+          return c.json({ code: "ODOMETER_TOO_LOW" as const, minOdometer: err.minOdometer }, 400);
+        }
+        throw err;
       }
     },
   )

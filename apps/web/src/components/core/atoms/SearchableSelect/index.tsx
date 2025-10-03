@@ -22,6 +22,8 @@ interface SearchableSelectProps {
   className?: string;
   /** When false, hide the search input (acts as a plain dropdown). Default true. */
   searchable?: boolean;
+  /** Display text for a stored option value (e.g. translated); defaults to the value itself */
+  getOptionLabel?: (value: string) => string;
 }
 
 export function SearchableSelect({
@@ -34,6 +36,7 @@ export function SearchableSelect({
   emptyMessage = "No results",
   className,
   searchable = true,
+  getOptionLabel = (v) => v,
 }: SearchableSelectProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -93,7 +96,7 @@ export function SearchableSelect({
         .map((g) => ({
           ...g,
           options: g.options.filter((o) =>
-            o.toLowerCase().includes(search.toLowerCase()),
+            getOptionLabel(o).toLowerCase().includes(search.toLowerCase()),
           ),
         }))
         .filter((g) => g.options.length > 0)
@@ -161,7 +164,7 @@ export function SearchableSelect({
                 selected ? "bg-primary/10 text-primary font-medium" : "text-foreground hover:bg-surface",
               )}
             >
-              {opt}
+              {getOptionLabel(opt)}
               {selected && <Check className="h-4 w-4" />}
             </button>
           );
@@ -213,7 +216,7 @@ export function SearchableSelect({
         className="flex h-10 w-full items-center justify-between rounded-lg border border-border bg-surface px-3 py-2 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent cursor-pointer"
       >
         <span className={value ? "text-foreground" : "text-faint"}>
-          {value || placeholder}
+          {value ? getOptionLabel(value) : placeholder}
         </span>
         <ChevronDown className={cn("h-4 w-4 text-faint transition-transform", open && "rotate-180")} />
       </button>

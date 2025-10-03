@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Card, CardContent } from "@/components/core/molecules/Card";
 import { Badge } from "@/components/core/atoms/Badge";
 import { useT } from "@/lib/i18n";
+import { getBrandLabel } from "@/lib/brand-label";
 import { Car, Bike, AlertTriangle, Droplets, Wrench } from "lucide-react";
 import { getColorHex } from "@vefy/shared";
 
@@ -47,7 +48,7 @@ export function VehicleCard({ vehicle }: VehicleCardProps) {
                 </Badge>
               </div>
               <p className="text-xs text-muted-foreground mt-0.5">
-                {vehicle.brand} {vehicle.model} · {vehicle.year}
+                {getBrandLabel(vehicle.brand, t)} {vehicle.model} · {vehicle.year}
               </p>
               <p className="text-xs text-faint mt-0.5">{vehicle.licensePlate}</p>
             </div>

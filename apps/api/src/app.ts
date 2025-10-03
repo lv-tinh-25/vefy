@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { auth } from "./lib/auth";
+import { getAppOrigin } from "./lib/origin";
 import { requireAuth } from "./middleware/auth";
 import { vehicleRoutes } from "./routes/vehicles";
 import { ocrRoutes } from "./routes/ocr";
@@ -8,8 +9,9 @@ import { profileRoutes } from "./routes/profile";
 import { uploadRoutes } from "./routes/upload";
 import { notificationRoutes } from "./routes/notifications";
 import { expensesGlobalRoutes } from "./routes/expenses-global";
+import { cronRoutes } from "./routes/cron";
 
-const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
+const FRONTEND_URL = getAppOrigin();
 
 const app = new Hono()
   .use(
@@ -20,6 +22,7 @@ const app = new Hono()
     }),
   )
   .get("/api/health", (c) => c.json({ status: "ok" }))
+  .route("/api/cron", cronRoutes)
   // Better Auth handles all /api/auth/* routes (all HTTP methods)
   .all("/api/auth/*", (c) => {
     return auth.handler(c.req.raw);

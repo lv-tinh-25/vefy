@@ -6,6 +6,7 @@ import { useSwipeable } from "react-swipeable";
 import { AlertTriangle, Trash2, X } from "lucide-react";
 import type { Alert } from "@vefy/shared";
 import { useT } from "@/lib/i18n";
+import { getAlertLabel } from "@/lib/alert-label";
 import { cn } from "@/lib/utils";
 
 interface NotificationItemProps {
@@ -72,7 +73,7 @@ export function NotificationItem({ alert, onDismiss, onNavigate }: NotificationI
               alert.status === "danger" ? "text-danger" : "text-warning",
             )}
           />
-          <span className="truncate text-sm text-foreground">{alert.label}</span>
+          <span className="truncate text-sm text-foreground">{getAlertLabel(alert, t)}</span>
         </div>
         <div className="flex shrink-0 items-center gap-2">
           {alert.daysRemaining !== null && (

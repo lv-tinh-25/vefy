@@ -26,8 +26,14 @@ export async function listByVehicle(vehicleId: string) {
   return rows.map(toOilChange);
 }
 
+export class OdometerTooLowError extends Error {
+  constructor(readonly minOdometer: number) {
+    super(`Odometer must be at least ${minOdometer} km`);
+  }
+}
+
 export async function create(data: InsertOilChange) {
-  // Validate odometer >= lần trước (khi ngày mới hơn)
+  // A newer (or same-day) record can't have a lower odometer than the latest one
   const existing = await db
     .select()
     .from(oilChanges)
@@ -37,7 +43,7 @@ export async function create(data: InsertOilChange) {
   if (existing.length > 0) {
     const latest = existing[0];
     if (data.date >= latest.date && data.odometer < latest.odometer) {
-      throw new Error(`Số Odo phải ≥ ${latest.odometer} km (lần trước)`);
+      throw new OdometerTooLowError(latest.odometer);
     }
   }
 
@@ -60,7 +66,8 @@ export async function create(data: InsertOilChange) {
       date: row.date,
       amount: row.cost,
       category: "part",
-      name: "Thay nhớt",
+      // Display name is translated on the client for oil-change expenses
+      name: "Oil change",
       note: null,
     });
 

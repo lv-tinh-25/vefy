@@ -3,6 +3,7 @@
 import type { Alert } from "@vefy/shared";
 import { AlertBadge } from "@/components/core/molecules/AlertBadge";
 import { useT } from "@/lib/i18n";
+import { getAlertLabel } from "@/lib/alert-label";
 import { cn } from "@/lib/utils";
 import { AlertTriangle, CheckCircle } from "lucide-react";
 
@@ -34,7 +35,7 @@ export function AlertList({ alerts }: AlertListProps) {
             <AlertTriangle
               className={cn("h-4 w-4", alert.status === "danger" ? "text-danger" : "text-warning")}
             />
-            <span className="text-sm text-foreground">{alert.label}</span>
+            <span className="text-sm text-foreground">{getAlertLabel(alert, t)}</span>
           </div>
           <div className="flex items-center gap-2">
             {alert.daysRemaining !== null && (

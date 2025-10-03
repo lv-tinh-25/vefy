@@ -2,6 +2,7 @@ import type { Messages } from "../types";
 
 export const en: Messages = {
   common: {
+    error: "Something went wrong",
     close: "Close",
     loading: "Loading...",
     cancel: "Cancel",
@@ -30,6 +31,13 @@ export const en: Messages = {
     expiredDays: "Overdue {days} days",
     remainingDays: "{days} days left",
     title: "Alerts",
+    labelWarranty: "Vehicle warranty",
+    labelRegistration: "Registration",
+    labelInsurance: "Insurance",
+    labelPartWarranty: "Warranty: {name}",
+    labelOilOverdue: "Oil change overdue!",
+    labelOilRemaining: "Oil: ~{days} days left",
+    labelOilSinceLast: "Oil: {days} days since last change",
   },
 
   notifications: {
@@ -107,6 +115,7 @@ export const en: Messages = {
   },
 
   oil: {
+    errorOdometerTooLow: "Odometer must be at least {km} km (not lower than the previous change)",
     cycleSettings: "Oil change cycle",
     cycleKm: "Cycle (km)",
     useTimeLimit: "Use time-based limit",
@@ -194,7 +203,21 @@ export const en: Messages = {
     selectVehicle: "Select vehicle",
   },
 
+  colors: {
+    white: "White",
+    black: "Black",
+    silver: "Silver",
+    gray: "Gray",
+    red: "Red",
+    blue: "Blue",
+    green: "Green",
+    brown: "Brown",
+    orange: "Orange",
+    yellow: "Yellow",
+  },
+
   expenses: {
+    oilChangeName: "Oil change",
     title: "Expenses",
     totalMonth: "Total this month",
     totalYear: "Total this year",

@@ -1,4 +1,4 @@
-import { supabase } from "../lib/supabase";
+import { getSupabase } from "../lib/supabase";
 
 const BUCKET = "avatars";
 
@@ -21,7 +21,7 @@ export async function uploadAvatar(
   const filePath = `${userId}.jpg`;
 
   // Upload (upsert — overwrite if exists)
-  const { error } = await supabase.storage
+  const { error } = await getSupabase().storage
     .from(BUCKET)
     .upload(filePath, buffer, {
       contentType: "image/jpeg",
@@ -33,7 +33,7 @@ export async function uploadAvatar(
   // Get public URL with cache-busting timestamp
   const {
     data: { publicUrl },
-  } = supabase.storage.from(BUCKET).getPublicUrl(filePath);
+  } = getSupabase().storage.from(BUCKET).getPublicUrl(filePath);
 
   return `${publicUrl}?t=${Date.now()}`;
 }
@@ -42,5 +42,5 @@ export async function uploadAvatar(
  * Delete avatar from Supabase Storage.
  */
 export async function deleteAvatar(userId: string): Promise<void> {
-  await supabase.storage.from(BUCKET).remove([`${userId}.jpg`]);
+  await getSupabase().storage.from(BUCKET).remove([`${userId}.jpg`]);
 }

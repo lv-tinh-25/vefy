@@ -43,7 +43,9 @@ vefy/
 ```bash
 pnpm dev              # Next.js on http://localhost:3000 (UI + API)
 pnpm build            # Build all packages
-pnpm lint             # Lint all packages
+pnpm typecheck        # tsc --noEmit in every package
+pnpm lint             # ESLint (web, zero warnings allowed)
+pnpm test             # Vitest (shared utils, API services)
 pnpm db:generate      # Generate Drizzle migration files
 pnpm db:migrate       # Apply migrations to Supabase
 pnpm db:studio        # Open Drizzle Studio (DB GUI)
@@ -61,7 +63,18 @@ pnpm --filter @vefy/api dev:standalone   # Optional: run the Hono API alone on p
 - **Auth via better-auth**: session cookie (7-day expiry, 24h refresh; `__Secure-` prefixed on HTTPS — middleware checks both names). `requireAuth` sets `userId` on the Hono context.
 - **Ownership checks are enforced in the backend**: `requireVehicleOwner` in `routes/vehicles.ts` guards `/api/vehicles/:id` and every nested route (returns 404 for other users' vehicles); nested deletes also filter by `vehicleId`.
 - **DB client**: `postgres` with `prepare: false` (Supabase transaction pooler compatible) and a pool cached on `globalThis` in dev so Next HMR doesn't leak connections.
+- **App origin** (`apps/api/src/lib/origin.ts`): Vercel preview URL → `FRONTEND_URL` → Vercel production domain → localhost. Used by auth, CORS and SEO, so `FRONTEND_URL` is optional on Vercel.
+- **Third-party clients are created lazily** (Supabase, Gemini) so importing the API never throws during `next build` when env vars are missing.
 - **No `.js` extensions in imports**: tsx and drizzle-kit require extensionless imports.
+
+## Deploy, CI & SEO
+
+- **Vercel**: import the repo with root directory `apps/web` (pnpm workspace is auto-detected). Set the env vars listed below (`DATABASE_URL` must be the Supabase transaction pooler, port 6543; generate fresh `BETTER_AUTH_SECRET` and `CRON_SECRET`). Run `pnpm db:migrate` locally before pushing code that needs a new migration.
+- **Cron**: `apps/web/vercel.json` schedules `GET /api/cron/keepalive` daily (guarded by `CRON_SECRET`, which Vercel sends as a Bearer token) so Supabase's free tier doesn't pause.
+- **Google OAuth**: register `https://<domain>/api/auth/callback/google` alongside the localhost URI. Preview deployments have changing URLs, so Google sign-in only works on production (email/password works everywhere).
+- **Search Console**: HTML-tag verification via `GOOGLE_SITE_VERIFICATION`, then submit `/sitemap.xml`.
+- **CI**: `.github/workflows/ci.yml` runs install (frozen lockfile) → typecheck → lint → test → web build on pushes to `master` and PRs.
+- **SEO**: root metadata (title template, Open Graph, `GOOGLE_SITE_VERIFICATION`), `robots.ts`, `sitemap.ts`, `manifest.ts`, `opengraph-image.tsx`, `icon.svg`. Only `/auth/login` and `/auth/register` are indexable; every other route sets `noindex`. Client pages get titles from a small server `layout.tsx` per route. New public files must be added to the middleware matcher exclusions.
 
 ## Database Tables
 
@@ -85,6 +98,7 @@ pnpm --filter @vefy/api dev:standalone   # Optional: run the Hono API alone on p
 ```
 ALL    /api/auth/*                                    # better-auth (sign-in/up, OAuth, verify email, reset password, ...)
 GET    /api/health
+GET    /api/cron/keepalive                          # Vercel Cron, Bearer CRON_SECRET
 
 # Profile & upload (auth required)
 GET    /api/profile/me
@@ -201,7 +215,7 @@ DATABASE_URL             — Supabase PostgreSQL connection string (use the tran
 
 # Auth (better-auth)
 BETTER_AUTH_SECRET       — session signing key
-FRONTEND_URL             — public origin of the web app (auth base URL + redirects)
+FRONTEND_URL             — public origin of the web app; optional on Vercel (see App origin)
 BETTER_AUTH_URL          — optional; defaults to FRONTEND_URL
 GOOGLE_CLIENT_ID         — Google OAuth client ID
 GOOGLE_CLIENT_SECRET     — Google OAuth client secret (redirect URI: <origin>/api/auth/callback/google)
@@ -219,4 +233,8 @@ SUPABASE_SERVICE_KEY     — Supabase service role key (server-side avatar uploa
 GEMINI_API_KEY           — Google AI Studio API key
 OCR_DAILY_LIMIT          — optional, default 10
 OCR_COOLDOWN_SECONDS     — optional, default 10
+
+# Deploy / SEO
+CRON_SECRET              — Vercel Cron bearer token for /api/cron/keepalive
+GOOGLE_SITE_VERIFICATION — optional, Search Console HTML-tag token
 ```

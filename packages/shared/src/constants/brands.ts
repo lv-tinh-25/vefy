@@ -1,3 +1,6 @@
+// Stored value for "other brand" (kept in Vietnamese for existing rows); display via i18n `brands.other`
+export const OTHER_BRAND = "Khác";
+
 export interface BrandGroup {
   labelKey: string;
   brands: string[];
@@ -24,7 +27,7 @@ export const CAR_BRAND_GROUPS: BrandGroup[] = [
   },
   {
     labelKey: "brands.other",
-    brands: ["Subaru", "Peugeot", "Chevrolet", "Khác"],
+    brands: ["Subaru", "Peugeot", "Chevrolet", OTHER_BRAND],
   },
 ];
 
@@ -46,7 +49,7 @@ export const MOTORCYCLE_BRAND_GROUPS: BrandGroup[] = [
   },
   {
     labelKey: "brands.other",
-    brands: ["TVS Motor", "Khác"],
+    brands: ["TVS Motor", OTHER_BRAND],
   },
 ];
 

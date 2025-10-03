@@ -2,8 +2,9 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "@vefy/db";
 import { sendVerificationEmail, sendResetPasswordEmail } from "./email";
+import { getAppOrigin } from "./origin";
 
-const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
+const FRONTEND_URL = getAppOrigin();
 
 // API is served from the web app (apps/web/src/app/api), so auth lives on the frontend origin
 const BASE_URL = process.env.BETTER_AUTH_URL || FRONTEND_URL;

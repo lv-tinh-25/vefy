@@ -8,7 +8,8 @@
     "build": "tsup src/index.ts --format esm --dts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@vefy/shared": "workspace:*",

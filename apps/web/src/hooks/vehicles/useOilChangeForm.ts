@@ -5,8 +5,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertOilChangeSchema, type InsertOilChange, todayDateStr } from "@vefy/shared";
 import { api } from "@/lib/api";
+import { useT } from "@/lib/i18n";
+import { formatNumber } from "@/lib/utils";
 
 export function useOilChangeForm(vehicleId: string, onSuccess: () => void, onClose: () => void) {
+  const { t, locale } = useT();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -35,10 +38,14 @@ export function useOilChangeForm(vehicleId: string, onSuccess: () => void, onClo
         onClose();
       } else {
         const body = await res.json();
-        setError("error" in body && typeof body.error === "string" ? body.error : "Error");
+        setError(
+          "code" in body && body.code === "ODOMETER_TOO_LOW"
+            ? t("oil.errorOdometerTooLow", { km: formatNumber(body.minOdometer, locale) })
+            : t("common.error"),
+        );
       }
     } catch {
-      setError("Connection error");
+      setError(t("auth.errorConnection"));
     } finally {
       setLoading(false);
     }

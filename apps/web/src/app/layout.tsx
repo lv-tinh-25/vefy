@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getAppOrigin } from "@vefy/api/origin";
 import { Sora, Outfit } from "next/font/google";
 import { I18nProvider } from "@/lib/i18n";
 import { ThemeProvider } from "@/lib/theme";
@@ -17,9 +18,25 @@ const outfit = Outfit({
   display: "swap",
 });
 
+const DESCRIPTION = "Ứng dụng quản lý xe cá nhân, theo dõi bảo hành, giấy tờ, nhớt và phụ tùng";
+
 export const metadata: Metadata = {
-  title: "Vefy - Quản lý xe cá nhân",
-  description: "Ứng dụng quản lý xe cá nhân, theo dõi bảo hành, giấy tờ, nhớt và phụ tùng",
+  metadataBase: new URL(getAppOrigin()),
+  applicationName: "Vefy",
+  title: { default: "Vefy - Quản lý xe cá nhân", template: "%s · Vefy" },
+  description: DESCRIPTION,
+  openGraph: {
+    type: "website",
+    siteName: "Vefy",
+    locale: "vi_VN",
+    title: "Vefy - Quản lý xe cá nhân",
+    description: DESCRIPTION,
+  },
+  twitter: { card: "summary_large_image" },
+  // Google Search Console HTML-tag verification; set the token in Vercel env
+  verification: process.env.GOOGLE_SITE_VERIFICATION
+    ? { google: process.env.GOOGLE_SITE_VERIFICATION }
+    : undefined,
 };
 
 export default function RootLayout({

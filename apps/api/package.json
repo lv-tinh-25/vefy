@@ -4,12 +4,15 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./client": "./src/app.ts"
+    "./client": "./src/app.ts",
+    "./origin": "./src/lib/origin.ts"
   },
   "scripts": {
     "dev:standalone": "dotenv -e ../../.env -- tsx watch src/index.ts",
     "build": "tsup src/index.ts --format esm --dts",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
   },
   "dependencies": {
     "@google/genai": "^1.50.1",
@@ -30,6 +33,7 @@
     "@vefy/tsconfig": "workspace:*",
     "tsup": "^8.4.0",
     "tsx": "^4.19.0",
-    "typescript": "^5.7.0"
+    "typescript": "^5.7.0",
+    "vitest": "^3"
   }
 }

@@ -34,7 +34,9 @@ export function ExpensesList({ expenses, onDelete }: ExpensesListProps) {
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h4 className="font-medium text-sm text-foreground">{expense.name}</h4>
+                    <h4 className="font-medium text-sm text-foreground">
+                      {expense.oilChangeId ? t("expenses.oilChangeName") : expense.name}
+                    </h4>
                     <Badge variant={expense.category === "part" ? "default" : "warning"}>
                       {t(expense.category === "part" ? "category.part" : "category.other")}
                     </Badge>

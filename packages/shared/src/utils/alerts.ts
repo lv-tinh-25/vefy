@@ -10,7 +10,10 @@ export type AlertType = "warranty" | "registration" | "insurance" | "part_warran
 export interface Alert {
   type: AlertType;
   status: AlertStatus;
-  label: string;
+  /** Part name for part_warranty alerts; display text is built by the client via i18n */
+  subject?: string;
+  /** Days since the last oil change, for oil alerts without a prediction yet */
+  daysSinceLast?: number;
   daysRemaining: number | null;
   expiryDate: string | null;
   vehicleId: string;
@@ -28,7 +31,6 @@ export function buildAlertKey(
 
 function dateAlert(
   type: AlertType,
-  label: string,
   expiryDate: string | null,
   now: Date,
   vehicleId: string,
@@ -38,7 +40,6 @@ function dateAlert(
     return {
       type,
       status: "neutral",
-      label,
       daysRemaining: null,
       expiryDate: null,
       vehicleId,
@@ -60,7 +61,6 @@ function dateAlert(
   return {
     type,
     status,
-    label,
     daysRemaining: days,
     expiryDate,
     vehicleId,
@@ -71,15 +71,15 @@ function dateAlert(
 export function computeDocumentAlerts(vehicle: Vehicle, now: Date): Alert[] {
   const alerts: Alert[] = [];
 
-  alerts.push(dateAlert("warranty", "Bảo hành xe", vehicle.warrantyExpiry, now, vehicle.id));
+  alerts.push(dateAlert("warranty", vehicle.warrantyExpiry, now, vehicle.id));
 
   if (vehicle.type === "car") {
     alerts.push(
-      dateAlert("registration", "Đăng kiểm", vehicle.registrationExpiry, now, vehicle.id),
+      dateAlert("registration", vehicle.registrationExpiry, now, vehicle.id),
     );
   }
 
-  alerts.push(dateAlert("insurance", "Bảo hiểm", vehicle.insuranceExpiry, now, vehicle.id));
+  alerts.push(dateAlert("insurance", vehicle.insuranceExpiry, now, vehicle.id));
 
   return alerts;
 }
@@ -88,7 +88,6 @@ export function computePartAlerts(parts: Part[], now: Date, vehicleId: string): 
   return parts.map((part) => {
     const base = dateAlert(
       "part_warranty",
-      `BH: ${part.name}`,
       part.warrantyExpiry,
       now,
       vehicleId,
@@ -98,6 +97,7 @@ export function computePartAlerts(parts: Part[], now: Date, vehicleId: string): 
       ...base,
       key: buildAlertKey("part_warranty", part.id, part.warrantyExpiry),
       relatedId: part.id,
+      subject: part.name,
     };
   });
 }

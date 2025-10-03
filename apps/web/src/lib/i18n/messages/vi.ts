@@ -1,5 +1,6 @@
 export const vi = {
   common: {
+    error: "Đã xảy ra lỗi",
     close: "Đóng",
     loading: "Đang tải...",
     cancel: "Hủy",
@@ -28,6 +29,13 @@ export const vi = {
     expiredDays: "Quá {days} ngày",
     remainingDays: "Còn {days} ngày",
     title: "Cảnh báo",
+    labelWarranty: "Bảo hành xe",
+    labelRegistration: "Đăng kiểm",
+    labelInsurance: "Bảo hiểm",
+    labelPartWarranty: "BH: {name}",
+    labelOilOverdue: "Đã quá hạn thay nhớt!",
+    labelOilRemaining: "Nhớt: còn ~{days} ngày",
+    labelOilSinceLast: "Nhớt: đã {days} ngày từ lần cuối",
   },
 
   notifications: {
@@ -105,6 +113,7 @@ export const vi = {
   },
 
   oil: {
+    errorOdometerTooLow: "Số Odo phải từ {km} km trở lên (bằng hoặc lớn hơn lần thay trước)",
     cycleSettings: "Chu kỳ thay nhớt",
     cycleKm: "Chu kỳ km",
     useTimeLimit: "Giới hạn theo thời gian",
@@ -192,7 +201,21 @@ export const vi = {
     selectVehicle: "Chọn xe",
   },
 
+  colors: {
+    white: "Trắng",
+    black: "Đen",
+    silver: "Bạc",
+    gray: "Xám",
+    red: "Đỏ",
+    blue: "Xanh dương",
+    green: "Xanh lá",
+    brown: "Nâu",
+    orange: "Cam",
+    yellow: "Vàng",
+  },
+
   expenses: {
+    oilChangeName: "Thay nhớt",
     title: "Chi phí",
     totalMonth: "Tổng tháng này",
     totalYear: "Tổng năm nay",

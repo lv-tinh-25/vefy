@@ -29,7 +29,7 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // Match all routes except static files and API
-    "/((?!_next/static|_next/image|favicon.ico|icon.svg|api).*)",
+    // Everything except static assets, SEO files and the API
+    "/((?!_next/static|_next/image|favicon.ico|icon.svg|opengraph-image|robots.txt|sitemap.xml|manifest.webmanifest|api).*)",
   ],
 };

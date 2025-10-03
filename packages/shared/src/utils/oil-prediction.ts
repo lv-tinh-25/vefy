@@ -54,7 +54,7 @@ export function predictOilChange(
     };
   }
 
-  // Bước 1: Tính trung bình km/ngày
+  // 1. Average km/day across the full history
   const totalKm = newest.odometer - oldest.odometer;
   const totalDays = daysBetweenDates(oldest.date, newest.date);
 
@@ -75,21 +75,21 @@ export function predictOilChange(
 
   const avgKmPerDay = totalKm / totalDays;
 
-  // Bước 2: Ước tính odometer hiện tại
+  // 2. Estimate the current odometer
   const estimatedOdo = newest.odometer + Math.round(avgKmPerDay * daysSinceLast);
   const kmSinceLast = Math.max(0, estimatedOdo - newest.odometer);
 
-  // Bước 3: Số ngày còn lại theo KM
+  // 3. Days left by distance
   const kmRemaining = Math.max(0, oilCycleKm - kmSinceLast);
   const daysUntilByKm = Math.round(kmRemaining / avgKmPerDay);
 
-  // Bước 4: Số ngày còn lại theo THỜI GIAN
+  // 4. Days left by time
   let daysUntilByTime: number | null = null;
   if (oilUseDays) {
     daysUntilByTime = Math.max(0, oilCycleDays - daysSinceLast);
   }
 
-  // Bước 5: Kết quả cuối cùng
+  // 5. Whichever limit comes first
   let effectiveDaysRemaining: number | null;
   if (daysUntilByTime !== null) {
     effectiveDaysRemaining = Math.min(daysUntilByKm, daysUntilByTime);
@@ -129,14 +129,13 @@ export function oilPredictionToAlert(
   const key = buildAlertKey("oil_change", vehicleId, prediction.lastDate);
 
   let status: AlertStatus;
-  let label: string;
 
   if (prediction.effectiveDaysRemaining === null) {
     if (prediction.daysSinceLast > 0) {
       return {
         type: "oil_change",
         status: "neutral",
-        label: `Nhớt: đã ${prediction.daysSinceLast} ngày từ lần cuối`,
+        daysSinceLast: prediction.daysSinceLast,
         daysRemaining: null,
         expiryDate: null,
         vehicleId,
@@ -149,21 +148,17 @@ export function oilPredictionToAlert(
   switch (prediction.urgency) {
     case "overdue":
       status = "danger";
-      label = "ĐÃ QUÁ HẠN THAY NHỚT!";
       break;
     case "warning":
       status = "warning";
-      label = `Nhớt: còn ~${prediction.effectiveDaysRemaining} ngày`;
       break;
     default:
       status = "success";
-      label = `Nhớt: còn ~${prediction.effectiveDaysRemaining} ngày nữa`;
   }
 
   return {
     type: "oil_change",
     status,
-    label,
     daysRemaining: prediction.effectiveDaysRemaining,
     expiryDate: null,
     vehicleId,

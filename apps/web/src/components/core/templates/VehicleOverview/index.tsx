@@ -8,6 +8,7 @@ import { OilPredictionCard } from "./OilPredictionCard";
 import { StatusCard } from "./StatusCard";
 import { VehicleActionsMenu } from "./VehicleActionsMenu";
 import { useT } from "@/lib/i18n";
+import { getBrandLabel } from "@/lib/brand-label";
 import { PageSpinner } from "@/components/core/atoms/Spinner";
 import { Car, Bike, Shield, FileCheck, HeartPulse } from "lucide-react";
 import type { AlertStatus } from "@vefy/shared";
@@ -49,10 +50,10 @@ export function VehicleOverviewContent() {
             </Badge>
           </div>
           <p className="text-sm text-muted-foreground truncate">
-            {vehicle.brand} {vehicle.model} · {vehicle.year} · {vehicle.licensePlate}
+            {getBrandLabel(vehicle.brand, t)} {vehicle.model} · {vehicle.year} · {vehicle.licensePlate}
           </p>
         </div>
-        <VehicleActionsMenu vehicleId={id} vehicleName={vehicle.name || `${vehicle.brand} ${vehicle.model}`} />
+        <VehicleActionsMenu vehicleId={id} vehicleName={vehicle.name || `${getBrandLabel(vehicle.brand, t)} ${vehicle.model}`} />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
