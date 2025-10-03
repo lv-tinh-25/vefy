@@ -6,8 +6,6 @@
 
 <p align="center">
   Personal vehicle management for cars and motorcycles — warranties, documents, oil changes, parts and expenses in one place.
-  <br />
-  <em>Quản lý xe cá nhân: bảo hành, giấy tờ, thay nhớt, phụ tùng và chi phí.</em>
 </p>
 
 <p align="center">
