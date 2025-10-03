@@ -51,7 +51,8 @@ export type AppType = typeof app // <-- The contract
 import { hc } from "hono/client"
 import type { AppType } from "@vefy/api/client"
 
-export const api = hc<AppType>(process.env.NEXT_PUBLIC_API_URL)
+// The API is mounted inside the Next app, so the client calls the same origin
+export const api = hc<AppType>("/")
 
 // Usage - fully typed, autocomplete for routes and params
 const res = await api.api.vehicles.$get()

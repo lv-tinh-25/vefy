@@ -184,18 +184,25 @@ function toVehicle(row: typeof vehicles.$inferSelect): Vehicle {
 ```
 apps/api/
 ├── src/
-│   ├── index.ts            # Server entry (serve on port 3001)
+│   ├── index.ts            # Standalone node server (pnpm --filter @vefy/api dev:standalone, port 3001)
 │   ├── app.ts              # Hono app instance, routes, exports AppType
+│   │                       # Normally served by Next.js: apps/web/src/app/api/[...route]/route.ts
+│   ├── lib/
+│   │   ├── auth.ts         # better-auth config (email/password, Google, rate limit)
+│   │   └── email.ts        # nodemailer (verification + reset password mails)
+│   ├── middleware/
+│   │   └── auth.ts         # requireAuth: sets userId on context
 │   ├── routes/
-│   │   ├── vehicles.ts     # /api/vehicles CRUD
+│   │   ├── vehicles.ts     # /api/vehicles CRUD + requireVehicleOwner on /:id and nested routes
 │   │   ├── oil-changes.ts  # /api/vehicles/:vehicleId/oil-changes
 │   │   ├── parts.ts        # /api/vehicles/:vehicleId/parts
-│   │   └── ocr.ts          # /api/ocr/read-odometer
-│   └── services/
-│       ├── vehicle.service.ts
-│       ├── oil-change.service.ts
-│       ├── part.service.ts
-│       └── ocr.service.ts
+│   │   ├── expenses.ts     # /api/vehicles/:vehicleId/expenses
+│   │   ├── expenses-global.ts # /api/expenses (all vehicles of the user)
+│   │   ├── notifications.ts   # /api/notifications (alerts + dismiss)
+│   │   ├── profile.ts      # /api/profile
+│   │   ├── upload.ts       # /api/upload/avatar
+│   │   └── ocr.ts          # /api/ocr/read-odometer (per-user limits)
+│   └── services/           # one *.service.ts per domain (functional, no classes)
 ├── package.json
 └── tsconfig.json
 ```

@@ -12,7 +12,6 @@
     "start": "node dist/index.js"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.39.0",
     "@google/genai": "^1.50.1",
     "@hono/node-server": "^1.13.0",
     "@hono/zod-validator": "^0.4.0",

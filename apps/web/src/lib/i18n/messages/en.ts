@@ -44,6 +44,8 @@ export const en: Messages = {
   userMenu: {
     notifications: "Notifications",
     expenses: "Expenses",
+    lightMode: "Light mode",
+    darkMode: "Dark mode",
   },
 
   garage: {

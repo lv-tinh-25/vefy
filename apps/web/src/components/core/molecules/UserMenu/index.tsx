@@ -108,7 +108,7 @@ export function UserMenu() {
               />
               <MenuItem
                 icon={theme === "dark" ? Sun : Moon}
-                label={theme === "dark" ? "Light mode" : "Dark mode"}
+                label={theme === "dark" ? t("userMenu.lightMode") : t("userMenu.darkMode")}
                 onClick={() => {
                   toggleTheme();
                   setOpen(false);

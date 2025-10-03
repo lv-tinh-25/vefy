@@ -42,6 +42,8 @@ export const vi = {
   userMenu: {
     notifications: "Thông báo",
     expenses: "Chi phí",
+    lightMode: "Giao diện sáng",
+    darkMode: "Giao diện tối",
   },
 
   garage: {

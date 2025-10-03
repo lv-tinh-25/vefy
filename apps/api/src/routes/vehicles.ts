@@ -28,7 +28,7 @@ export const vehicleRoutes = new Hono<AuthEnv>()
   .get("/:id", async (c) => {
     const id = c.req.param("id");
     const vehicle = await vehicleService.getById(id);
-    if (!vehicle) return c.json({ error: "Không tìm thấy xe" }, 404);
+    if (!vehicle) return c.json({ error: "Vehicle not found" }, 404);
     return c.json(vehicle);
   })
   .post("/", zValidator("json", insertVehicleSchema), async (c) => {
@@ -41,7 +41,7 @@ export const vehicleRoutes = new Hono<AuthEnv>()
     const id = c.req.param("id");
     const data = c.req.valid("json");
     const vehicle = await vehicleService.update(id, data);
-    if (!vehicle) return c.json({ error: "Không tìm thấy xe" }, 404);
+    if (!vehicle) return c.json({ error: "Vehicle not found" }, 404);
     return c.json(vehicle);
   })
   .delete("/:id", async (c) => {

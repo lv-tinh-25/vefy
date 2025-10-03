@@ -22,7 +22,7 @@ export const profileRoutes = new Hono<AuthEnv>()
       .from(userTable)
       .where(eq(userTable.id, userId));
 
-    if (!row) return c.json({ error: "Không tìm thấy người dùng" }, 404);
+    if (!row) return c.json({ error: "User not found" }, 404);
 
     const authMethods = await getAuthMethods(userId);
 
@@ -54,7 +54,7 @@ export const profileRoutes = new Hono<AuthEnv>()
         .where(eq(userTable.id, userId))
         .returning();
 
-      if (!row) return c.json({ error: "Không tìm thấy người dùng" }, 404);
+      if (!row) return c.json({ error: "User not found" }, 404);
 
       return c.json({
         id: row.id,
@@ -82,7 +82,7 @@ export const profileRoutes = new Hono<AuthEnv>()
         .where(eq(userTable.id, userId))
         .returning();
 
-      if (!row) return c.json({ error: "Không tìm thấy người dùng" }, 404);
+      if (!row) return c.json({ error: "User not found" }, 404);
 
       const authMethods = await getAuthMethods(userId);
 

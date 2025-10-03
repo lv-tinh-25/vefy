@@ -14,7 +14,7 @@ export async function requireAuth(c: Context, next: Next) {
   });
 
   if (!session) {
-    return c.json({ error: "Chưa đăng nhập" }, 401);
+    return c.json({ error: "Unauthorized" }, 401);
   }
 
   c.set("userId" as never, session.user.id);
