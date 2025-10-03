@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
+    "@vefy/api": "workspace:*",
     "@vefy/shared": "workspace:*",
     "better-auth": "^1.6.2",
     "clsx": "^2.1.1",
@@ -28,7 +29,6 @@
     "@tailwindcss/postcss": "^4.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
-    "@vefy/api": "workspace:*",
     "@vefy/tsconfig": "workspace:*",
     "postcss": "^8.5.0",
     "tailwindcss": "^4.0.0",

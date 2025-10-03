@@ -5,7 +5,8 @@ import { sendVerificationEmail, sendResetPasswordEmail } from "./email";
 
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
 
-const BASE_URL = process.env.BETTER_AUTH_URL || "http://localhost:3001";
+// API is served from the web app (apps/web/src/app/api), so auth lives on the frontend origin
+const BASE_URL = process.env.BETTER_AUTH_URL || FRONTEND_URL;
 
 const EMAIL_LINK_EXPIRES_IN = 30 * 60;
 
