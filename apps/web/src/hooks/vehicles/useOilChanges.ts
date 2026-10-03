@@ -18,8 +18,8 @@ export function useOilChanges(vehicleId: string) {
       await api.api.vehicles[":vehicleId"]["oil-changes"][":id"].$delete({
         param: { vehicleId, id: deleteId },
       });
+      await mutate();
       setDeleteId(null);
-      mutate();
     } finally {
       setDeleting(false);
     }
@@ -36,7 +36,7 @@ export function useOilChanges(vehicleId: string) {
         param: { id: vehicleId },
         json: data,
       });
-      mutate();
+      await mutate();
     } finally {
       setSavingSettings(false);
     }

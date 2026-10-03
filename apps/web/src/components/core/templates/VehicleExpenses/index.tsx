@@ -38,10 +38,7 @@ export function VehicleExpensesContent() {
     period,
   );
 
-  const refresh = () => {
-    mutateList();
-    mutateSummary();
-  };
+  const refresh = () => Promise.all([mutateList(), mutateSummary()]);
 
   if (!expenses || !summary) return <PageSpinner />;
 
@@ -52,8 +49,8 @@ export function VehicleExpensesContent() {
       await api.api.vehicles[":vehicleId"].expenses[":id"].$delete({
         param: { vehicleId, id: deleteTarget.id },
       });
+      await refresh();
       setDeleteTarget(null);
-      refresh();
     } finally {
       setDeleting(false);
     }

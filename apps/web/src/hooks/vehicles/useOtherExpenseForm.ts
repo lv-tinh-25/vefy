@@ -8,7 +8,7 @@ import { api } from "@/lib/api";
 
 export function useOtherExpenseForm(
   vehicleId: string,
-  onSuccess: () => void,
+  onSuccess: () => Promise<unknown> | void,
   onClose: () => void,
 ) {
   const [loading, setLoading] = useState(false);
@@ -37,7 +37,8 @@ export function useOtherExpenseForm(
       });
       if (res.ok) {
         form.reset();
-        onSuccess();
+        // Wait for the list to refetch so the dialog closes onto fresh data
+        await onSuccess();
         onClose();
       }
     } finally {

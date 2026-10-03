@@ -34,7 +34,7 @@ export function useVehicleDocuments(vehicleId: string) {
         param: { id: vehicleId },
         json: data,
       });
-      mutate();
+      await mutate();
     } finally {
       setSaving(false);
     }

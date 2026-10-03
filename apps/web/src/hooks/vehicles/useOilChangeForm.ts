@@ -8,7 +8,7 @@ import { api } from "@/lib/api";
 import { useT } from "@/lib/i18n";
 import { formatNumber } from "@/lib/utils";
 
-export function useOilChangeForm(vehicleId: string, onSuccess: () => void, onClose: () => void) {
+export function useOilChangeForm(vehicleId: string, onSuccess: () => Promise<unknown> | void, onClose: () => void) {
   const { t, locale } = useT();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -34,7 +34,8 @@ export function useOilChangeForm(vehicleId: string, onSuccess: () => void, onClo
       });
       if (res.ok) {
         form.reset();
-        onSuccess();
+        // Wait for the list to refetch so the dialog closes onto fresh data
+        await onSuccess();
         onClose();
       } else {
         const body = await res.json();

@@ -13,7 +13,7 @@ import { useOilChangeForm } from "@/hooks/vehicles/useOilChangeForm";
 interface OilChangeFormModalProps {
   open: boolean;
   onClose: () => void;
-  onSuccess: () => void;
+  onSuccess: () => Promise<unknown> | void;
   vehicleId: string;
 }
 

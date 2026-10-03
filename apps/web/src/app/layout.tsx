@@ -3,6 +3,8 @@ import { getAppOrigin } from "@vefy/api/origin";
 import { Sora, Outfit } from "next/font/google";
 import { I18nProvider } from "@/lib/i18n";
 import { ThemeProvider } from "@/lib/theme";
+import { SWRActivityProvider } from "@/lib/swr-activity";
+import { RefreshIndicator } from "@/components/core/atoms/RefreshIndicator";
 import { Toaster } from "sonner";
 import "./globals.css";
 
@@ -55,7 +57,12 @@ export default function RootLayout({
       </head>
       <body className="min-h-screen bg-background text-foreground antialiased">
         <ThemeProvider>
-          <I18nProvider>{children}</I18nProvider>
+          <I18nProvider>
+            <SWRActivityProvider>
+              <RefreshIndicator />
+              {children}
+            </SWRActivityProvider>
+          </I18nProvider>
         </ThemeProvider>
         <Toaster
           position="top-right"

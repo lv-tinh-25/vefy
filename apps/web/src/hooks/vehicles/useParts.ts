@@ -17,8 +17,8 @@ export function useParts(vehicleId: string) {
       await api.api.vehicles[":vehicleId"].parts[":id"].$delete({
         param: { vehicleId, id: deleteId },
       });
+      await mutate();
       setDeleteId(null);
-      mutate();
     } finally {
       setDeleting(false);
     }

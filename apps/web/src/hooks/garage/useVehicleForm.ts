@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { insertVehicleSchema, type InsertVehicle } from "@vefy/shared";
 import { api } from "@/lib/api";
 
-export function useVehicleForm(onSuccess: () => void, onClose: () => void) {
+export function useVehicleForm(onSuccess: () => Promise<unknown> | void, onClose: () => void) {
   const [loading, setLoading] = useState(false);
 
   const form = useForm<InsertVehicle>({
@@ -28,7 +28,8 @@ export function useVehicleForm(onSuccess: () => void, onClose: () => void) {
       const res = await api.api.vehicles.$post({ json: data });
       if (res.ok) {
         form.reset();
-        onSuccess();
+        // Wait for the list to refetch so the dialog closes onto fresh data
+        await onSuccess();
         onClose();
       }
     } catch {

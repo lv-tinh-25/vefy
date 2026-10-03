@@ -64,6 +64,8 @@ pnpm --filter @vefy/api dev:standalone   # Optional: run the Hono API alone on p
 - **Ownership checks are enforced in the backend**: `requireVehicleOwner` in `routes/vehicles.ts` guards `/api/vehicles/:id` and every nested route (returns 404 for other users' vehicles); nested deletes also filter by `vehicleId`.
 - **DB client**: `postgres` with `prepare: false` (Supabase transaction pooler compatible) and a pool cached on `globalThis` in dev so Next HMR doesn't leak connections.
 - **App origin** (`apps/api/src/lib/origin.ts`): Vercel preview URL → `FRONTEND_URL` → Vercel production domain → localhost. Used by auth, CORS and SEO, so `FRONTEND_URL` is optional on Vercel.
+- **Vehicle tabs are static**: `app/vehicle/[id]/layout.tsx` returns `[]` from `generateStaticParams`, so each vehicle's shell is rendered once and cached; `<Link>` then prefetches whole tabs and switching is instant. Pages there must stay client-only (data via SWR) — no `cookies()`/`headers()`/server data fetching.
+- **SWR feedback**: `SWRActivityProvider` (`lib/swr-activity.tsx`) drives the thin top `RefreshIndicator` while a hook refetches over existing data. Mutating dialogs `await` the revalidation before closing so they never close onto stale data.
 - **Third-party clients are created lazily** (Supabase, Gemini) so importing the API never throws during `next build` when env vars are missing.
 - **No `.js` extensions in imports**: tsx and drizzle-kit require extensionless imports.
 

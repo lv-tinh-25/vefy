@@ -12,7 +12,7 @@ import { useOtherExpenseForm } from "@/hooks/vehicles/useOtherExpenseForm";
 interface OtherExpenseFormModalProps {
   open: boolean;
   onClose: () => void;
-  onSuccess: () => void;
+  onSuccess: () => Promise<unknown> | void;
   vehicleId: string;
 }
 

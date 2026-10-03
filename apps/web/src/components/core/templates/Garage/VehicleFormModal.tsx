@@ -15,7 +15,7 @@ import { vehicleColorSchema, type VehicleType } from "@vefy/shared";
 interface VehicleFormModalProps {
   open: boolean;
   onClose: () => void;
-  onSuccess: () => void;
+  onSuccess: () => Promise<unknown> | void;
 }
 
 export function VehicleFormModal({ open, onClose, onSuccess }: VehicleFormModalProps) {

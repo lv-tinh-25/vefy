@@ -10,7 +10,7 @@ export type PartFormType = "part" | "other";
 
 export function usePartForm(
   vehicleId: string,
-  onSuccess: () => void,
+  onSuccess: () => Promise<unknown> | void,
   onClose: () => void,
 ) {
   const [loading, setLoading] = useState(false);
@@ -38,7 +38,8 @@ export function usePartForm(
       if (res.ok) {
         form.reset();
         setFormType("part");
-        onSuccess();
+        // Wait for the list to refetch so the dialog closes onto fresh data
+        await onSuccess();
         onClose();
       }
     } finally {
@@ -70,7 +71,8 @@ export function usePartForm(
       if (res.ok) {
         form.reset();
         setFormType("part");
-        onSuccess();
+        // Wait for the list to refetch so the dialog closes onto fresh data
+        await onSuccess();
         onClose();
       }
     } finally {

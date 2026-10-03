@@ -12,7 +12,7 @@ import { usePartForm } from "@/hooks/vehicles/usePartForm";
 interface PartFormModalProps {
   open: boolean;
   onClose: () => void;
-  onSuccess: () => void;
+  onSuccess: () => Promise<unknown> | void;
   vehicleId: string;
 }
 
