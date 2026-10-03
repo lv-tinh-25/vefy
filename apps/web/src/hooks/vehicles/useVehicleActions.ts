@@ -17,6 +17,10 @@ export function useVehicleActions(vehicleId: string) {
   const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
+    router.prefetch("/garage");
+  }, [router]);
+
+  useEffect(() => {
     if (!menuOpen) return;
     function handleClick(e: MouseEvent) {
       if (menuRef.current && e.target instanceof Node && !menuRef.current.contains(e.target)) {
@@ -43,18 +47,18 @@ export function useVehicleActions(vehicleId: string) {
     setDeleting(true);
     try {
       const res = await api.api.vehicles[":id"].$delete({ param: { id: vehicleId } });
-      if (!res.ok) {
-        toast.error(t("auth.errorConnection"));
+      if (res.ok) {
+        await Promise.all([mutate("vehicles"), mutate("notifications")]);
+        toast.success(t("vehicleActions.deleteSuccess"));
+        // Keep the dialog locked until the garage replaces this page
+        router.replace("/garage");
         return;
       }
-      await Promise.all([mutate("vehicles"), mutate("notifications")]);
-      toast.success(t("vehicleActions.deleteSuccess"));
-      router.replace("/garage");
+      toast.error(t("auth.errorConnection"));
     } catch {
       toast.error(t("auth.errorConnection"));
-    } finally {
-      setDeleting(false);
     }
+    setDeleting(false);
   };
 
   return {

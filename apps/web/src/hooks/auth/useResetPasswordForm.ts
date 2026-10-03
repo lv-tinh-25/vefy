@@ -29,21 +29,18 @@ export function useResetPasswordForm() {
     setIsSubmitting(true);
     try {
       const result = await resetPassword({ newPassword: data.newPassword, token });
-      if (result.error) {
-        if (result.error.code === "INVALID_TOKEN") {
-          setIsTokenInvalid(true);
-          return;
-        }
-        toast.error(t("auth.errorConnection"));
+      if (!result.error) {
+        toast.success(t("auth.resetPasswordSuccess"));
+        // Keep the form locked while navigating away
+        router.push("/auth/login");
         return;
       }
-      toast.success(t("auth.resetPasswordSuccess"));
-      router.push("/auth/login");
+      if (result.error.code === "INVALID_TOKEN") setIsTokenInvalid(true);
+      else toast.error(t("auth.errorConnection"));
     } catch {
       toast.error(t("auth.errorConnection"));
-    } finally {
-      setIsSubmitting(false);
     }
+    setIsSubmitting(false);
   });
 
   return { control, onSubmit, isSubmitting, isTokenInvalid };

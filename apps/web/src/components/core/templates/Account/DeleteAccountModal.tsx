@@ -19,7 +19,7 @@ export function DeleteAccountModal({ open, onClose }: DeleteAccountModalProps) {
   const { profile } = useAuth();
   const email = profile?.email ?? "";
   const { emailInput, setEmailInput, isMatch, error, isSubmitting, onConfirm } =
-    useDeleteAccount(email, onClose);
+    useDeleteAccount(email);
 
   return (
     <Dialog

@@ -37,6 +37,7 @@ export function useCompleteProfile() {
         });
         if (!uploadRes.ok) {
           setError("auth.errorConnection");
+          setIsSubmitting(false);
           return;
         }
         const { url } = await uploadRes.json();
@@ -46,16 +47,16 @@ export function useCompleteProfile() {
       const res = await api.api.profile.complete.$patch({
         json: { name: data.name, image: imageUrl },
       });
-      if (!res.ok) {
-        setError("auth.errorConnection");
+      if (res.ok) {
+        // Keep the form locked while navigating away
+        router.push("/garage");
         return;
       }
-      router.push("/garage");
+      setError("auth.errorConnection");
     } catch {
       setError("auth.errorConnection");
-    } finally {
-      setIsSubmitting(false);
     }
+    setIsSubmitting(false);
   });
 
   return {

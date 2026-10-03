@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { useAuth } from "@/hooks/auth/useAuth";
 import { useNotifications } from "@/hooks/notifications/useNotifications";
 import { NotificationsDialog } from "@/components/core/molecules/NotificationsDialog";
@@ -10,7 +11,7 @@ import { useT } from "@/lib/i18n";
 import type { Locale } from "@/lib/i18n";
 import { useTheme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
-import { Bell, LogOut, Settings, Globe, Sun, Moon, User, Coins } from "lucide-react";
+import { Bell, LogOut, Settings, Globe, Sun, Moon, User, Coins, Loader2 } from "lucide-react";
 
 const LOCALE_LABELS: Record<Locale, string> = {
   vi: "Tiếng Việt",
@@ -25,17 +26,19 @@ export function UserMenu() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
+      if (loggingOut) return;
       if (ref.current && !ref.current.contains(e.target as Node)) {
         setOpen(false);
       }
     }
     if (open) document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
-  }, [open]);
+  }, [open, loggingOut]);
 
   // Session usually resolves before the profile request; until either does, show a placeholder
   const displayName = profile?.name ?? user?.name;
@@ -44,8 +47,19 @@ export function UserMenu() {
   const badgeLabel = unreadCount > 9 ? "9+" : String(unreadCount);
 
   const handleLogout = async () => {
-    await signOut();
-    router.push("/auth/login");
+    setLoggingOut(true);
+    try {
+      const result = await signOut();
+      if (!result.error) {
+        // Full reload drops the SWR cache and any in-memory state of the signed-out user
+        window.location.replace("/auth/login");
+        return;
+      }
+    } catch {
+      // handled below
+    }
+    toast.error(t("auth.errorConnection"));
+    setLoggingOut(false);
   };
 
   const toggleLocale = () => {
@@ -63,6 +77,7 @@ export function UserMenu() {
       <div ref={ref} className="relative">
         <button
           onClick={() => setOpen(!open)}
+          disabled={loggingOut}
           className="relative flex items-center gap-2 rounded-full transition-all duration-200 hover:ring-2 hover:ring-primary/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           {avatarUrl ? (
@@ -99,7 +114,7 @@ export function UserMenu() {
               </p>
             </div>
 
-            <div className="py-1.5">
+            <fieldset disabled={loggingOut} className="min-w-0 py-1.5">
               <MenuItem
                 icon={Bell}
                 label={t("userMenu.notifications")}
@@ -137,15 +152,13 @@ export function UserMenu() {
               />
               <div className="my-1 border-t border-border" />
               <MenuItem
-                icon={LogOut}
+                icon={loggingOut ? Loader2 : LogOut}
+                iconClassName={loggingOut ? "animate-spin" : undefined}
                 label={t("auth.logout")}
-                onClick={() => {
-                  setOpen(false);
-                  handleLogout();
-                }}
+                onClick={handleLogout}
                 variant="danger"
               />
-            </div>
+            </fieldset>
           </div>
         )}
       </div>
@@ -164,8 +177,10 @@ function MenuItem({
   onClick,
   variant,
   badge,
+  iconClassName,
 }: {
   icon: typeof User;
+  iconClassName?: string;
   label: string;
   onClick: () => void;
   variant?: "danger";
@@ -175,13 +190,13 @@ function MenuItem({
     <button
       onClick={onClick}
       className={cn(
-        "w-full flex items-center gap-2.5 px-4 py-2 text-sm transition-colors cursor-pointer",
+        "w-full flex items-center gap-2.5 px-4 py-2 text-sm transition-colors disabled:opacity-50 disabled:pointer-events-none",
         variant === "danger"
           ? "text-danger hover:bg-danger-muted"
           : "text-foreground hover:bg-surface",
       )}
     >
-      <Icon className="h-4 w-4" />
+      <Icon className={cn("h-4 w-4", iconClassName)} />
       <span className="flex-1 text-left">{label}</span>
       {badge && (
         <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-danger px-1.5 text-[10px] font-bold leading-none text-white">

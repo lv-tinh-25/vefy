@@ -1,12 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { deleteUser } from "@/lib/auth-client";
 import { getAuthErrorKey } from "@/lib/auth-errors";
 
-export function useDeleteAccount(expectedEmail: string, onClose: () => void) {
-  const router = useRouter();
+export function useDeleteAccount(expectedEmail: string) {
   const [emailInput, setEmailInput] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -22,17 +20,16 @@ export function useDeleteAccount(expectedEmail: string, onClose: () => void) {
     setIsSubmitting(true);
     try {
       const result = await deleteUser();
-      if (result.error) {
-        setError(getAuthErrorKey(result.error, "auth.errorConnection"));
+      if (!result.error) {
+        // Full reload drops the SWR cache of the deleted account; the dialog stays locked until then
+        window.location.replace("/auth/login");
         return;
       }
-      onClose();
-      router.push("/auth/login");
+      setError(getAuthErrorKey(result.error, "auth.errorConnection"));
     } catch {
       setError("auth.errorConnection");
-    } finally {
-      setIsSubmitting(false);
     }
+    setIsSubmitting(false);
   };
 
   return { emailInput, setEmailInput, isMatch, error, isSubmitting, onConfirm };
