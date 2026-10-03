@@ -130,7 +130,7 @@ export function SearchableSelect({
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         placeholder={searchPlaceholder ?? placeholder}
-        className="w-full h-10 rounded-lg bg-surface border border-border pl-10 pr-9 text-sm text-foreground placeholder:text-faint focus:outline-none focus:ring-2 focus:ring-ring"
+        className="w-full h-10 rounded-lg bg-surface border border-border pl-10 pr-9 text-base sm:text-sm text-foreground placeholder:text-faint focus:outline-none focus:ring-2 focus:ring-ring"
         autoFocus
       />
       {search && (

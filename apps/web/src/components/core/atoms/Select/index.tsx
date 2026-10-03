@@ -9,7 +9,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectHTMLAttributes<HTMLSel
         <select
           ref={ref}
           className={cn(
-            "flex h-10 w-full appearance-none rounded-lg border border-border bg-surface px-3 py-2 pr-9 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 transition-colors cursor-pointer",
+            "flex h-10 w-full appearance-none rounded-lg border border-border bg-surface px-3 py-2 pr-9 text-base sm:text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 transition-colors cursor-pointer",
             className,
           )}
           {...props}
