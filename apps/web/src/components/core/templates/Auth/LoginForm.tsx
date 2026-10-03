@@ -23,56 +23,58 @@ export function LoginForm() {
         </h1>
       </div>
 
-      <form onSubmit={onSubmit} className="space-y-4">
-        <Controller
-          control={control}
-          name="email"
-          render={({ field, fieldState }) => (
-            <div className="space-y-1.5">
-              <Label>{t("auth.email")}</Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-faint" />
-                <Input
+      <form onSubmit={onSubmit}>
+        <fieldset disabled={isBusy} className="min-w-0 space-y-4">
+          <Controller
+            control={control}
+            name="email"
+            render={({ field, fieldState }) => (
+              <div className="space-y-1.5">
+                <Label>{t("auth.email")}</Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-faint" />
+                  <Input
+                    {...field}
+                    type="email"
+                    placeholder={t("auth.emailHint")}
+                    className="pl-10"
+                    autoComplete="email"
+                  />
+                </div>
+                {fieldState.error && (
+                  <p className="text-xs text-danger">{tRaw(fieldState.error.message)}</p>
+                )}
+              </div>
+            )}
+          />
+
+          <Controller
+            control={control}
+            name="password"
+            render={({ field, fieldState }) => (
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <Label>{t("auth.password")}</Label>
+                  <TextLink href="/auth/forgot-password" className="text-xs" disabled={isBusy}>
+                    {t("auth.forgotPassword")}
+                  </TextLink>
+                </div>
+                <PasswordInput
                   {...field}
-                  type="email"
-                  placeholder={t("auth.emailHint")}
-                  className="pl-10"
-                  autoComplete="email"
+                  placeholder="••••••••"
+                  autoComplete="current-password"
                 />
+                {fieldState.error && (
+                  <p className="text-xs text-danger">{tRaw(fieldState.error.message)}</p>
+                )}
               </div>
-              {fieldState.error && (
-                <p className="text-xs text-danger">{tRaw(fieldState.error.message)}</p>
-              )}
-            </div>
-          )}
-        />
+            )}
+          />
 
-        <Controller
-          control={control}
-          name="password"
-          render={({ field, fieldState }) => (
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <Label>{t("auth.password")}</Label>
-                <TextLink href="/auth/forgot-password" className="text-xs" disabled={isBusy}>
-                  {t("auth.forgotPassword")}
-                </TextLink>
-              </div>
-              <PasswordInput
-                {...field}
-                placeholder="••••••••"
-                autoComplete="current-password"
-              />
-              {fieldState.error && (
-                <p className="text-xs text-danger">{tRaw(fieldState.error.message)}</p>
-              )}
-            </div>
-          )}
-        />
-
-        <Button type="submit" className="w-full" disabled={isBusy}>
-          {isSubmitting ? t("common.loading") : t("auth.login")}
-        </Button>
+          <Button type="submit" className="w-full" disabled={isBusy}>
+            {isSubmitting ? t("common.loading") : t("auth.login")}
+          </Button>
+        </fieldset>
       </form>
 
       <div className="relative my-6">

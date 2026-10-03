@@ -42,43 +42,45 @@ export function ResetPasswordForm() {
         <p className="text-muted-foreground text-sm">{t("auth.resetPasswordDesc")}</p>
       </div>
 
-      <form onSubmit={onSubmit} className="space-y-4">
-        <Controller
-          control={control}
-          name="newPassword"
-          render={({ field, fieldState }) => (
-            <div className="space-y-1.5">
-              <Label>{t("auth.newPassword")}</Label>
-              <PasswordInput
-                {...field}
-                placeholder={t("auth.passwordHint")}
-                autoComplete="new-password"
-                autoFocus
-              />
-              {fieldState.error && (
-                <p className="text-xs text-danger">{tRaw(fieldState.error.message)}</p>
-              )}
-            </div>
-          )}
-        />
+      <form onSubmit={onSubmit}>
+        <fieldset disabled={isSubmitting} className="min-w-0 space-y-4">
+          <Controller
+            control={control}
+            name="newPassword"
+            render={({ field, fieldState }) => (
+              <div className="space-y-1.5">
+                <Label>{t("auth.newPassword")}</Label>
+                <PasswordInput
+                  {...field}
+                  placeholder={t("auth.passwordHint")}
+                  autoComplete="new-password"
+                  autoFocus
+                />
+                {fieldState.error && (
+                  <p className="text-xs text-danger">{tRaw(fieldState.error.message)}</p>
+                )}
+              </div>
+            )}
+          />
 
-        <Controller
-          control={control}
-          name="confirmNewPassword"
-          render={({ field, fieldState }) => (
-            <div className="space-y-1.5">
-              <Label>{t("auth.confirmNewPassword")}</Label>
-              <PasswordInput {...field} placeholder="••••••••" autoComplete="new-password" />
-              {fieldState.error && (
-                <p className="text-xs text-danger">{tRaw(fieldState.error.message)}</p>
-              )}
-            </div>
-          )}
-        />
+          <Controller
+            control={control}
+            name="confirmNewPassword"
+            render={({ field, fieldState }) => (
+              <div className="space-y-1.5">
+                <Label>{t("auth.confirmNewPassword")}</Label>
+                <PasswordInput {...field} placeholder="••••••••" autoComplete="new-password" />
+                {fieldState.error && (
+                  <p className="text-xs text-danger">{tRaw(fieldState.error.message)}</p>
+                )}
+              </div>
+            )}
+          />
 
-        <Button type="submit" className="w-full" disabled={isSubmitting}>
-          {isSubmitting ? t("common.loading") : t("auth.resetPassword")}
-        </Button>
+          <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {isSubmitting ? t("common.loading") : t("auth.resetPassword")}
+          </Button>
+        </fieldset>
       </form>
 
       <BackToLoginLink className="mt-6" disabled={isSubmitting} />

@@ -23,75 +23,77 @@ export function RegisterForm() {
         </h1>
       </div>
 
-      <form onSubmit={onSubmit} className="space-y-4">
-        <Controller
-          control={control}
-          name="email"
-          render={({ field, fieldState }) => (
-            <div className="space-y-1.5">
-              <Label>{t("auth.email")}</Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-faint" />
-                <Input
-                  {...field}
-                  type="email"
-                  placeholder={t("auth.emailHint")}
-                  className="pl-10"
-                  autoComplete="email"
-                />
+      <form onSubmit={onSubmit}>
+        <fieldset disabled={isBusy} className="min-w-0 space-y-4">
+          <Controller
+            control={control}
+            name="email"
+            render={({ field, fieldState }) => (
+              <div className="space-y-1.5">
+                <Label>{t("auth.email")}</Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-faint" />
+                  <Input
+                    {...field}
+                    type="email"
+                    placeholder={t("auth.emailHint")}
+                    className="pl-10"
+                    autoComplete="email"
+                  />
+                </div>
+                {fieldState.error && (
+                  <p className="text-xs text-danger">{tRaw(fieldState.error.message)}</p>
+                )}
               </div>
-              {fieldState.error && (
-                <p className="text-xs text-danger">{tRaw(fieldState.error.message)}</p>
-              )}
-            </div>
+            )}
+          />
+
+          <Controller
+            control={control}
+            name="password"
+            render={({ field, fieldState }) => (
+              <div className="space-y-1.5">
+                <Label>{t("auth.password")}</Label>
+                <PasswordInput
+                  {...field}
+                  placeholder={t("auth.passwordHint")}
+                  autoComplete="new-password"
+                />
+                {fieldState.error && (
+                  <p className="text-xs text-danger">{tRaw(fieldState.error.message)}</p>
+                )}
+              </div>
+            )}
+          />
+
+          <Controller
+            control={control}
+            name="confirmPassword"
+            render={({ field, fieldState }) => (
+              <div className="space-y-1.5">
+                <Label>{t("auth.confirmPassword")}</Label>
+                <PasswordInput
+                  {...field}
+                  placeholder="••••••••"
+                  autoComplete="new-password"
+                />
+                {fieldState.error && (
+                  <p className="text-xs text-danger">{tRaw(fieldState.error.message)}</p>
+                )}
+              </div>
+            )}
+          />
+
+          {error && (
+            <p className="text-sm text-danger text-center">
+              {t("auth.errorRegister")}
+            </p>
           )}
-        />
 
-        <Controller
-          control={control}
-          name="password"
-          render={({ field, fieldState }) => (
-            <div className="space-y-1.5">
-              <Label>{t("auth.password")}</Label>
-              <PasswordInput
-                {...field}
-                placeholder={t("auth.passwordHint")}
-                autoComplete="new-password"
-              />
-              {fieldState.error && (
-                <p className="text-xs text-danger">{tRaw(fieldState.error.message)}</p>
-              )}
-            </div>
-          )}
-        />
-
-        <Controller
-          control={control}
-          name="confirmPassword"
-          render={({ field, fieldState }) => (
-            <div className="space-y-1.5">
-              <Label>{t("auth.confirmPassword")}</Label>
-              <PasswordInput
-                {...field}
-                placeholder="••••••••"
-                autoComplete="new-password"
-              />
-              {fieldState.error && (
-                <p className="text-xs text-danger">{tRaw(fieldState.error.message)}</p>
-              )}
-            </div>
-          )}
-        />
-
-        {error && (
-          <p className="text-sm text-danger text-center">
-            {t("auth.errorRegister")}
-          </p>
-        )}
-
-        <Button type="submit" className="w-full" disabled={isBusy}>
-          {isSubmitting ? t("common.loading") : t("auth.register")}
-        </Button>
+          <Button type="submit" className="w-full" disabled={isBusy}>
+            {isSubmitting ? t("common.loading") : t("auth.register")}
+          </Button>
+        </fieldset>
       </form>
 
       <div className="relative my-6">

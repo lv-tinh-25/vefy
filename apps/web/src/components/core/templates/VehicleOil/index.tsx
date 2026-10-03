@@ -62,46 +62,48 @@ export function VehicleOilContent() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSaveSettings} className="space-y-3">
-            <div>
-              <Label>{t("oil.cycleKm")}</Label>
-              <InputNumber
-                control={settingsForm.control}
-                name="oilCycleKm"
-                thousandSeparator
-                suffix="km"
-                className="mt-1.5"
-              />
-            </div>
-            <div className="flex items-center gap-2">
-              <Controller
-                control={settingsForm.control}
-                name="oilUseDays"
-                render={({ field }) => (
-                  <input
-                    type="checkbox"
-                    checked={field.value ?? false}
-                    onChange={(e) => field.onChange(e.target.checked)}
-                    className="h-4 w-4 rounded border-border bg-surface accent-primary"
-                  />
-                )}
-              />
-              <Label>{t("oil.useTimeLimit")}</Label>
-            </div>
-            {useDays && (
+          <form onSubmit={handleSaveSettings}>
+            <fieldset disabled={savingSettings} className="min-w-0 space-y-3">
               <div>
-                <Label>{t("oil.cycleDays")}</Label>
+                <Label>{t("oil.cycleKm")}</Label>
                 <InputNumber
                   control={settingsForm.control}
-                  name="oilCycleDays"
-                  suffix={t("common.days")}
+                  name="oilCycleKm"
+                  thousandSeparator
+                  suffix="km"
                   className="mt-1.5"
                 />
               </div>
-            )}
-            <Button type="submit" size="sm" variant="outline" disabled={savingSettings}>
-              {savingSettings ? t("common.saving") : t("common.saveSettings")}
-            </Button>
+              <div className="flex items-center gap-2">
+                <Controller
+                  control={settingsForm.control}
+                  name="oilUseDays"
+                  render={({ field }) => (
+                    <input
+                      type="checkbox"
+                      checked={field.value ?? false}
+                      onChange={(e) => field.onChange(e.target.checked)}
+                      className="h-4 w-4 rounded border-border bg-surface accent-primary"
+                    />
+                  )}
+                />
+                <Label>{t("oil.useTimeLimit")}</Label>
+              </div>
+              {useDays && (
+                <div>
+                  <Label>{t("oil.cycleDays")}</Label>
+                  <InputNumber
+                    control={settingsForm.control}
+                    name="oilCycleDays"
+                    suffix={t("common.days")}
+                    className="mt-1.5"
+                  />
+                </div>
+              )}
+              <Button type="submit" size="sm" variant="outline" disabled={savingSettings}>
+                {savingSettings ? t("common.saving") : t("common.saveSettings")}
+              </Button>
+            </fieldset>
           </form>
         </CardContent>
       </Card>

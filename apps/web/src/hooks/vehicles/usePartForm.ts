@@ -36,8 +36,6 @@ export function usePartForm(
         json: data,
       });
       if (res.ok) {
-        form.reset();
-        setFormType("part");
         // Wait for the list to refetch so the dialog closes onto fresh data
         await onSuccess();
         onClose();
@@ -69,8 +67,6 @@ export function usePartForm(
         },
       });
       if (res.ok) {
-        form.reset();
-        setFormType("part");
         // Wait for the list to refetch so the dialog closes onto fresh data
         await onSuccess();
         onClose();

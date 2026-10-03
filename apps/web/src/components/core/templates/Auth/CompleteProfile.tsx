@@ -33,69 +33,71 @@ export function CompleteProfile() {
         </p>
       </div>
 
-      <form onSubmit={onSubmit} className="space-y-5">
-        {/* Avatar upload */}
-        <Controller
-          control={control}
-          name="image"
-          render={({ field, fieldState }) => (
-            <div className="space-y-1.5">
-              <Label className="text-center block">
-                {t("auth.avatar")}{" "}
-                <span className="text-faint">({t("common.optional")})</span>
-              </Label>
-              <div className="flex justify-center">
-                <AvatarUpload
-                  value={field.value ?? ""}
-                  onChange={field.onChange}
-                  name={watchedName}
-                  size="lg"
-                  alwaysShowOverlay
-                />
+      <form onSubmit={onSubmit}>
+        <fieldset disabled={isSubmitting} className="min-w-0 space-y-5">
+          {/* Avatar upload */}
+          <Controller
+            control={control}
+            name="image"
+            render={({ field, fieldState }) => (
+              <div className="space-y-1.5">
+                <Label className="text-center block">
+                  {t("auth.avatar")}{" "}
+                  <span className="text-faint">({t("common.optional")})</span>
+                </Label>
+                <div className="flex justify-center">
+                  <AvatarUpload
+                    value={field.value ?? ""}
+                    onChange={field.onChange}
+                    name={watchedName}
+                    size="lg"
+                    alwaysShowOverlay
+                  />
+                </div>
+                {fieldState.error && (
+                  <p className="text-xs text-danger text-center">
+                    {tRaw(fieldState.error.message)}
+                  </p>
+                )}
               </div>
-              {fieldState.error && (
-                <p className="text-xs text-danger text-center">
-                  {tRaw(fieldState.error.message)}
-                </p>
-              )}
-            </div>
-          )}
-        />
+            )}
+          />
 
-        {/* Name */}
-        <Controller
-          control={control}
-          name="name"
-          render={({ field, fieldState }) => (
-            <div className="space-y-1.5">
-              <Label>{t("auth.name")}</Label>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-faint" />
-                <Input
-                  {...field}
-                  placeholder={t("auth.nameHint")}
-                  className="pl-10"
-                  autoFocus
-                />
+          {/* Name */}
+          <Controller
+            control={control}
+            name="name"
+            render={({ field, fieldState }) => (
+              <div className="space-y-1.5">
+                <Label>{t("auth.name")}</Label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-faint" />
+                  <Input
+                    {...field}
+                    placeholder={t("auth.nameHint")}
+                    className="pl-10"
+                    autoFocus
+                  />
+                </div>
+                {fieldState.error && (
+                  <p className="text-xs text-danger">
+                    {tRaw(fieldState.error.message)}
+                  </p>
+                )}
               </div>
-              {fieldState.error && (
-                <p className="text-xs text-danger">
-                  {tRaw(fieldState.error.message)}
-                </p>
-              )}
-            </div>
+            )}
+          />
+
+          {error && (
+            <p className="text-sm text-danger text-center">
+              {t("auth.errorConnection")}
+            </p>
           )}
-        />
 
-        {error && (
-          <p className="text-sm text-danger text-center">
-            {t("auth.errorConnection")}
-          </p>
-        )}
-
-        <Button type="submit" className="w-full" disabled={isSubmitting}>
-          {isSubmitting ? t("auth.completing") : t("auth.completeProfile")}
-        </Button>
+          <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {isSubmitting ? t("auth.completing") : t("auth.completeProfile")}
+          </Button>
+        </fieldset>
       </form>
     </div>
   );

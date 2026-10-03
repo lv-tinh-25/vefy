@@ -27,7 +27,6 @@ export function useVehicleForm(onSuccess: () => Promise<unknown> | void, onClose
     try {
       const res = await api.api.vehicles.$post({ json: data });
       if (res.ok) {
-        form.reset();
         // Wait for the list to refetch so the dialog closes onto fresh data
         await onSuccess();
         onClose();

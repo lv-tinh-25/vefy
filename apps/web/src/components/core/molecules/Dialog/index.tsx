@@ -78,7 +78,10 @@ export function Dialog({ open, onClose, title, children, actions, className, bus
 
         {/* Content — scrollable */}
         <div className="flex-1 overflow-y-auto px-5 py-4 sm:px-6">
-          {children}
+          {/* Locks every field inside while saving, so the submitted values can't be edited */}
+          <fieldset disabled={busy} className="min-w-0">
+            {children}
+          </fieldset>
         </div>
 
         {/* Footer actions — sticky */}
