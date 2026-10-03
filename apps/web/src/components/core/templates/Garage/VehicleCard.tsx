@@ -30,7 +30,7 @@ export function VehicleCard({ vehicle }: VehicleCardProps) {
   const colorHex = getColorHex(vehicle.color);
 
   return (
-    <Link href={`/vehicle/${vehicle.id}`}>
+    <Link href={`/vehicle/${vehicle.id}/overview`}>
       <Card className="hover:border-primary/20 hover:shadow-glow hover:scale-[1.02] transition-all duration-300 cursor-pointer group">
         <CardContent className="p-4">
           <div className="flex items-start gap-3">
