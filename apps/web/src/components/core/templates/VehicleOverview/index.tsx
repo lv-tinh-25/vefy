@@ -4,6 +4,7 @@ import { useParams } from "next/navigation";
 import { useVehicle } from "@/hooks/vehicles/useVehicle";
 import { Card, CardContent } from "@/components/core/molecules/Card";
 import { Badge } from "@/components/core/atoms/Badge";
+import { VehicleThumb } from "@/components/core/atoms/VehicleThumb";
 import { OilStatusList } from "./OilStatusList";
 import { StatusCard } from "./StatusCard";
 import { VehicleActionsMenu } from "./VehicleActionsMenu";
@@ -40,9 +41,15 @@ export function VehicleOverviewContent() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary-muted">
-          <VehicleIcon className="h-6 w-6 text-primary" />
-        </div>
+        <VehicleThumb
+          imageUrl={vehicle.imageUrl}
+          alt={vehicle.name}
+          fallback={
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary-muted shrink-0">
+              <VehicleIcon className="h-6 w-6 text-primary" />
+            </div>
+          }
+        />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <h2 className="text-xl font-bold text-foreground truncate">{vehicle.name}</h2>

@@ -4,7 +4,7 @@ import { IconButton } from "@/components/core/atoms/IconButton";
 import { RecordItem } from "@/components/core/molecules/RecordItem";
 import { Badge } from "@/components/core/atoms/Badge";
 import { useT } from "@/lib/i18n";
-import { formatDate, formatCurrency } from "@/lib/utils";
+import { formatDate } from "@/lib/utils";
 import type { Expense } from "@vefy/shared";
 import { Droplets, Receipt, Trash2, Wrench } from "lucide-react";
 
@@ -46,7 +46,7 @@ export function ExpensesList({ expenses, onDelete }: ExpensesListProps) {
             }
             meta={[formatDate(expense.date, locale)]}
             details={[expense.note]}
-            amount={formatCurrency(expense.amount, locale)}
+            amount={expense.amount}
             action={
               <IconButton
                 icon={Trash2}

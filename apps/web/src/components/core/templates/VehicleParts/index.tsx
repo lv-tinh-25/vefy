@@ -10,7 +10,7 @@ import { ConfirmDialog } from "@/components/core/molecules/ConfirmDialog";
 import { useParts } from "@/hooks/vehicles/useParts";
 import { getLastOdometer } from "@/lib/last-odometer";
 import { useT } from "@/lib/i18n";
-import { formatCurrency, formatDate, formatNumber } from "@/lib/utils";
+import { formatDate, formatNumber } from "@/lib/utils";
 import { PageSpinner } from "@/components/core/atoms/Spinner";
 import { Plus, Trash2, Wrench } from "lucide-react";
 import { daysUntil } from "@vefy/shared";
@@ -63,7 +63,7 @@ export function VehiclePartsContent() {
                   t("parts.warrantyPeriod", { months: part.warrantyMonths }),
                 ]}
                 details={[t("parts.warrantyEnds", { date: formatDate(part.warrantyExpiry, locale) }), part.note]}
-                amount={formatCurrency(part.cost, locale)}
+                amount={part.cost}
                 action={
                   <IconButton icon={Trash2} tone="danger" label={t("common.delete")} onClick={() => setDeleteId(part.id)} />
                 }

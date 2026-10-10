@@ -14,6 +14,7 @@ export const vehicles = pgTable("vehicles", {
   year: integer("year").notNull(),
   licensePlate: varchar("license_plate", { length: 20 }).notNull(),
   color: varchar("color", { length: 30 }).notNull(),
+  imageUrl: text("image_url"),
   warrantyExpiry: date("warranty_expiry", { mode: "string" }),
   registrationExpiry: date("registration_expiry", { mode: "string" }),
   insuranceExpiry: date("insurance_expiry", { mode: "string" }),

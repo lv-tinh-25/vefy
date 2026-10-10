@@ -63,6 +63,10 @@ export const updateVehicleInfoSchema = z.object({
 
 export type UpdateVehicleInfo = z.infer<typeof updateVehicleInfoSchema>;
 
+export const vehicleImageSchema = z.object({
+  image: z.string().startsWith("data:image/", "validation.imageInvalid"),
+});
+
 export interface Vehicle {
   id: string;
   userId: string;
@@ -75,6 +79,7 @@ export interface Vehicle {
   year: number;
   licensePlate: string;
   color: string;
+  imageUrl: string | null;
   warrantyExpiry: string | null;
   registrationExpiry: string | null;
   insuranceExpiry: string | null;

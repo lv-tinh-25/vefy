@@ -1,5 +1,5 @@
 import { db } from "@vefy/db";
-import { vehicles, oilChanges, parts, vehicleOilSettings } from "@vefy/db";
+import { vehicles, oilChanges, parts, vehicleOilSettings, expenses } from "@vefy/db";
 import { and, eq, desc } from "drizzle-orm";
 import {
   computeAllAlerts,
@@ -15,6 +15,7 @@ import {
   type UpdateVehicleInfo,
 } from "@vefy/shared";
 import { toOilChange } from "./oil-change.service";
+import * as uploadService from "./upload.service";
 
 function toVehicle(row: typeof vehicles.$inferSelect): Vehicle {
   return {
@@ -28,6 +29,7 @@ function toVehicle(row: typeof vehicles.$inferSelect): Vehicle {
     year: row.year,
     licensePlate: row.licensePlate,
     color: row.color,
+    imageUrl: row.imageUrl,
     warrantyExpiry: row.warrantyExpiry,
     registrationExpiry: row.registrationExpiry,
     insuranceExpiry: row.insuranceExpiry,
@@ -96,12 +98,25 @@ export async function listAll(userId: string) {
   );
 }
 
+/**
+ * The variant decides which oil kinds apply, so it's fixed once the vehicle has any expense; oil
+ * changes and parts each create one, so this also covers them.
+ */
+async function hasExpenses(vehicleId: string): Promise<boolean> {
+  const [row] = await db
+    .select({ id: expenses.id })
+    .from(expenses)
+    .where(eq(expenses.vehicleId, vehicleId))
+    .limit(1);
+  return !!row;
+}
+
 export async function getById(id: string) {
   const [row] = await db.select().from(vehicles).where(eq(vehicles.id, id));
   if (!row) return null;
 
-  const { vehicle, oilData, partData, oilSettings, oilPredictions, alerts } =
-    await loadVehicleState(row, new Date());
+  const [{ vehicle, oilData, partData, oilSettings, oilPredictions, alerts }, variantLocked] =
+    await Promise.all([loadVehicleState(row, new Date()), hasExpenses(id)]);
 
   return {
     ...vehicle,
@@ -110,6 +125,7 @@ export async function getById(id: string) {
     alerts,
     oilSettings,
     oilPredictions,
+    variantLocked,
   };
 }
 
@@ -157,13 +173,7 @@ export async function update(id: string, data: UpdateVehicleInfo) {
       .from(vehicles)
       .where(eq(vehicles.id, id));
     if (current?.type === "motorcycle" && current.variant !== variant) {
-      // The variant decides which oil kinds apply, so it's fixed once oil history exists
-      const [oilChange] = await db
-        .select({ id: oilChanges.id })
-        .from(oilChanges)
-        .where(eq(oilChanges.vehicleId, id))
-        .limit(1);
-      if (oilChange) throw new VariantLockedError();
+      if (await hasExpenses(id)) throw new VariantLockedError();
       changes.variant = variant;
     }
   }
@@ -190,6 +200,22 @@ export async function isOwnedBy(id: string, userId: string): Promise<boolean> {
   return !!row;
 }
 
+export async function setImage(id: string, dataUrl: string): Promise<string> {
+  const imageUrl = await uploadService.uploadVehicleImage(id, dataUrl);
+  await db.update(vehicles).set({ imageUrl, updatedAt: new Date() }).where(eq(vehicles.id, id));
+  return imageUrl;
+}
+
+export async function clearImage(id: string) {
+  await uploadService.deleteVehicleImage(id);
+  await db.update(vehicles).set({ imageUrl: null, updatedAt: new Date() }).where(eq(vehicles.id, id));
+}
+
 export async function remove(id: string) {
-  await db.delete(vehicles).where(eq(vehicles.id, id));
+  const [row] = await db
+    .delete(vehicles)
+    .where(eq(vehicles.id, id))
+    .returning({ imageUrl: vehicles.imageUrl });
+  // Best effort: an orphaned file is harmless, a failed delete response is not
+  if (row?.imageUrl) await uploadService.deleteVehicleImage(id).catch(() => {});
 }

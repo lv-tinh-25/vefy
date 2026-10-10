@@ -8,6 +8,7 @@ import { api } from "@/lib/api";
 
 export function useVehicleForm(onSuccess: () => Promise<unknown> | void, onClose: () => void) {
   const [loading, setLoading] = useState(false);
+  const [image, setImage] = useState("");
 
   const form = useForm<InsertVehicle>({
     resolver: zodResolver(insertVehicleSchema),
@@ -27,6 +28,13 @@ export function useVehicleForm(onSuccess: () => Promise<unknown> | void, onClose
     try {
       const res = await api.api.vehicles.$post({ json: data });
       if (res.ok) {
+        if (image) {
+          const vehicle = await res.json();
+          // The vehicle exists either way; a failed photo upload can be retried from its documents tab
+          await api.api.vehicles[":vehicleId"].image
+            .$post({ param: { vehicleId: vehicle.id }, json: { image } })
+            .catch(() => {});
+        }
         // Wait for the list to refetch so the dialog closes onto fresh data
         await onSuccess();
         onClose();
@@ -38,5 +46,5 @@ export function useVehicleForm(onSuccess: () => Promise<unknown> | void, onClose
     }
   });
 
-  return { form, loading, onSubmit };
+  return { form, loading, onSubmit, image, setImage };
 }

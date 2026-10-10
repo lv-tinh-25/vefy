@@ -13,7 +13,7 @@ Personal vehicle management app for cars and motorcycles, targeting the Vietname
 - **Validation**: Zod (shared FE/BE)
 - **Auth**: better-auth 1.6 (email/password + Google OAuth, Drizzle adapter, DB-backed rate limiting)
 - **AI/OCR**: Google Gemini (`@google/genai`, `gemini-2.5-flash` with fallback to `gemini-2.5-flash-lite` on quota errors)
-- **Storage**: Supabase Storage (avatar uploads)
+- **Storage**: Supabase Storage, bucket `avatars` (user avatars at the root, vehicle photos under `vehicles/`)
 - **Mail**: nodemailer over SMTP (Gmail App Password) — email verification + password reset
 
 ## Monorepo Structure
@@ -88,7 +88,7 @@ pnpm --filter @vefy/api dev:standalone   # Optional: run the Hono API alone on p
 ## Database Tables
 
 **App tables:**
-- `vehicles` — 18 columns (id, userId, type, variant, name, brand, model, year, licensePlate, color, warranty/registration/insurance expiry, timestamps; the legacy `oil_cycle_*` columns are unused and pending a drop)
+- `vehicles` — 19 columns (id, userId, type, variant, name, brand, model, year, licensePlate, color, imageUrl, warranty/registration/insurance expiry, timestamps; the legacy `oil_cycle_*` columns are unused and pending a drop)
 - `oil_changes` — 9 columns (id, vehicleId FK cascade, kind, date, odometer, cost, oilType, note, createdAt)
 - `vehicle_oil_settings` — 6 columns (vehicleId FK cascade, kind, enabled, cycleKm, useDays, cycleDays); PK (vehicleId, kind). Only overrides are stored; missing kinds use `OIL_KIND_DEFAULTS`
 - `parts` — 10 columns (id, vehicleId FK cascade, name, installDate, warrantyMonths, warrantyExpiry, odometer, cost, note, createdAt)
@@ -121,8 +121,10 @@ DELETE /api/upload/avatar
 GET    /api/vehicles
 GET    /api/vehicles/:id
 POST   /api/vehicles
-PATCH  /api/vehicles/:id                            # 409 VARIANT_LOCKED when changing variant after oil history exists
-DELETE /api/vehicles/:id
+PATCH  /api/vehicles/:id                            # 409 VARIANT_LOCKED when changing variant once the vehicle has any expense
+DELETE /api/vehicles/:id                           # also removes the vehicle photo
+POST   /api/vehicles/:vehicleId/image                # base64 data URL → Supabase Storage avatars/vehicles/{id}.jpg
+DELETE /api/vehicles/:vehicleId/image
 
 GET    /api/vehicles/:vehicleId/oil-changes
 POST   /api/vehicles/:vehicleId/oil-changes           # { date, odometer, note, items: [{ kind, cost, oilType }] } — one record per item
@@ -176,7 +178,7 @@ The user menu holds notifications (swipe or "dismiss all"), theme, language, exp
 
 ### Vehicle Types
 - **Car** (`car`): has registration inspection
-- **Motorcycle** (`motorcycle`): no registration inspection; `variant` is `manual`, `scooter` or `electric` (required on create; legacy rows without one count as manual). The variant can't change once the vehicle has oil changes
+- **Motorcycle** (`motorcycle`): no registration inspection; `variant` is `manual`, `scooter` or `electric` (required on create; legacy rows without one count as manual). The variant can't change once the vehicle has any expense (oil changes and parts create one too)
 
 ### Oil Kinds (`OIL_KIND_DEFAULTS` in `@vefy/shared`)
 | Profile | Kind | Default km | Time limit (default) | Enabled by default |

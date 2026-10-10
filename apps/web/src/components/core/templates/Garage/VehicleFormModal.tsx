@@ -8,6 +8,7 @@ import { Label } from "@/components/core/atoms/Label";
 import { BrandSelect } from "@/components/core/molecules/BrandSelect";
 import { ColorPicker } from "@/components/core/molecules/ColorPicker";
 import { YearDropdown } from "@/components/core/molecules/YearDropdown";
+import { VehiclePhotoField } from "@/components/core/molecules/VehiclePhotoField";
 import { useT } from "@/lib/i18n";
 import { useVehicleForm } from "@/hooks/garage/useVehicleForm";
 import { motorcycleVariantSchema, vehicleColorSchema, type VehicleType } from "@vefy/shared";
@@ -20,7 +21,7 @@ interface VehicleFormModalProps {
 
 export function VehicleFormModal({ open, onClose, onSuccess }: VehicleFormModalProps) {
   const { t, tRaw } = useT();
-  const { form, loading, onSubmit } = useVehicleForm(onSuccess, onClose);
+  const { form, loading, onSubmit, image, setImage } = useVehicleForm(onSuccess, onClose);
   const { control, watch, setValue, formState: { errors } } = form;
   const watchedType = watch("type");
   const vehicleType: VehicleType = watchedType === "car" ? "car" : "motorcycle";
@@ -41,6 +42,8 @@ export function VehicleFormModal({ open, onClose, onSuccess }: VehicleFormModalP
       }
     >
       <form id="vehicle-form" onSubmit={onSubmit} className="space-y-4">
+        <VehiclePhotoField value={image} onChange={setImage} />
+
         <div>
           <Label>{t("vehicleForm.type")}</Label>
           <Controller

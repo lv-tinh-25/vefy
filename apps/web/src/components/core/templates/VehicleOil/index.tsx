@@ -13,7 +13,7 @@ import { ConfirmDialog } from "@/components/core/molecules/ConfirmDialog";
 import { useOilChanges } from "@/hooks/vehicles/useOilChanges";
 import { getLastOdometer } from "@/lib/last-odometer";
 import { useT } from "@/lib/i18n";
-import { cn, formatCurrency, formatDate, formatNumber } from "@/lib/utils";
+import { cn, formatDate, formatNumber } from "@/lib/utils";
 import { PageSpinner } from "@/components/core/atoms/Spinner";
 import { daysBetweenDates, todayDateStr, type OilKind } from "@vefy/shared";
 import { Plus, Trash2, Droplets, TrendingUp } from "lucide-react";
@@ -127,7 +127,7 @@ export function VehicleOilContent() {
                 title={t(`oilKinds.${oc.kind}`)}
                 meta={[formatDate(oc.date, locale), `${formatNumber(oc.odometer, locale)} km`]}
                 details={[oc.oilType, oc.note]}
-                amount={formatCurrency(oc.cost, locale)}
+                amount={oc.cost}
                 action={
                   <IconButton icon={Trash2} tone="danger" label={t("common.delete")} onClick={() => setDeleteId(oc.id)} />
                 }

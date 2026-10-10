@@ -64,6 +64,13 @@
       "when": 1791610371053,
       "tag": "0008_oil_kinds",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1791620625676,
+      "tag": "0009_vehicle_image",
+      "breakpoints": true
     }
   ]
 }

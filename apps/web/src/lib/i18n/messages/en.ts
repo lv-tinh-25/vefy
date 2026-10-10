@@ -130,7 +130,7 @@ export const en: Messages = {
     registrationExpiry: "Registration expiry",
     insuranceExpiry: "Insurance expiry",
     variant: "Vehicle category",
-    variantLocked: "The category can't be changed once the vehicle has oil change history",
+    variantLocked: "The category can't be changed once the vehicle has expenses (oil, parts or other costs)",
   },
 
   oil: {
@@ -263,6 +263,10 @@ export const en: Messages = {
     title: "Add new vehicle",
     type: "Vehicle type",
     variant: "Category",
+    photo: "Vehicle photo",
+    removePhoto: "Remove photo",
+    photoHintAdd: "Tap the box to choose or take a photo",
+    photoHintChange: "Tap the photo to replace it, or × to remove it",
     color: "Color",
     brand: "Brand",
     brandHint: "Select brand",

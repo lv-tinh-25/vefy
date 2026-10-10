@@ -16,6 +16,7 @@ function vehicle(overrides: Partial<Vehicle> = {}): Vehicle {
     year: 2026,
     licensePlate: "51A-123.45",
     color: "Trắng",
+    imageUrl: null,
     warrantyExpiry: null,
     registrationExpiry: null,
     insuranceExpiry: null,

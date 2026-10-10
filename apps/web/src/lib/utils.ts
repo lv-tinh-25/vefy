@@ -24,10 +24,9 @@ export function formatNumber(n: number, locale: Locale = "vi"): string {
   return n.toLocaleString(localeMap[locale]);
 }
 
+// Spelled out: the ₫ glyph renders as a tiny underlined superscript in the app font
+export const CURRENCY_UNIT: Record<Locale, string> = { vi: "đ", en: "VND" };
+
 export function formatCurrency(amount: number, locale: Locale = "vi"): string {
-  return new Intl.NumberFormat(localeMap[locale], {
-    style: "currency",
-    currency: "VND",
-    maximumFractionDigits: 0,
-  }).format(amount);
+  return `${formatNumber(Math.round(amount), locale)} ${CURRENCY_UNIT[locale]}`;
 }

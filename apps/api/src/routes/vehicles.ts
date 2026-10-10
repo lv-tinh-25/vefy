@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { createMiddleware } from "hono/factory";
 import { zValidator } from "@hono/zod-validator";
-import { insertVehicleSchema, updateVehicleInfoSchema } from "@vefy/shared";
+import { insertVehicleSchema, updateVehicleInfoSchema, vehicleImageSchema } from "@vefy/shared";
 import * as vehicleService from "../services/vehicle.service";
 import { oilChangeRoutes, oilSettingsRoutes } from "./oil-changes";
 import { partRoutes } from "./parts";
@@ -55,6 +55,14 @@ export const vehicleRoutes = new Hono<AuthEnv>()
     const id = c.req.param("id");
     await vehicleService.remove(id);
     return c.json({ success: true });
+  })
+  .post("/:vehicleId/image", zValidator("json", vehicleImageSchema), async (c) => {
+    const url = await vehicleService.setImage(c.req.param("vehicleId"), c.req.valid("json").image);
+    return c.json({ url }, 201);
+  })
+  .delete("/:vehicleId/image", async (c) => {
+    await vehicleService.clearImage(c.req.param("vehicleId"));
+    return c.json({ success: true }, 200);
   })
   .route("/:vehicleId/oil-changes", oilChangeRoutes)
   .route("/:vehicleId/oil-settings", oilSettingsRoutes)

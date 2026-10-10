@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Card, CardContent } from "@/components/core/molecules/Card";
 import { Badge } from "@/components/core/atoms/Badge";
+import { VehicleThumb } from "@/components/core/atoms/VehicleThumb";
 import { useT } from "@/lib/i18n";
 import { getBrandLabel } from "@/lib/brand-label";
 import { getVehicleTypeLabel } from "@/lib/vehicle-label";
@@ -20,6 +21,7 @@ interface VehicleCardProps {
     year: number;
     licensePlate: string;
     color: string;
+    imageUrl: string | null;
     activeAlertCount: number;
     oilChangeCount: number;
     partCount: number;
@@ -36,12 +38,19 @@ export function VehicleCard({ vehicle }: VehicleCardProps) {
       <Card className="hover:border-primary/20 hover:shadow-glow hover:scale-[1.02] transition-all duration-300 cursor-pointer group">
         <CardContent className="p-4">
           <div className="flex items-start gap-3">
-            <div
-              className="flex h-12 w-12 items-center justify-center rounded-xl shrink-0 transition-transform duration-300 group-hover:scale-105"
-              style={{ backgroundColor: colorHex + "20" }}
-            >
-              <Icon className="h-6 w-6" style={{ color: colorHex === "#FFFFFF" ? "#94a3b8" : colorHex }} />
-            </div>
+            <VehicleThumb
+              imageUrl={vehicle.imageUrl}
+              alt={vehicle.name}
+              className="transition-transform duration-300 group-hover:scale-105"
+              fallback={
+                <div
+                  className="flex h-12 w-12 items-center justify-center rounded-xl shrink-0 transition-transform duration-300 group-hover:scale-105"
+                  style={{ backgroundColor: colorHex + "20" }}
+                >
+                  <Icon className="h-6 w-6" style={{ color: colorHex === "#FFFFFF" ? "#94a3b8" : colorHex }} />
+                </div>
+              }
+            />
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
                 <h3 className="font-semibold text-sm truncate text-foreground">{vehicle.name}</h3>

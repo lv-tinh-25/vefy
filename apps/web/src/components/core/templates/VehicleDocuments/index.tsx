@@ -10,6 +10,7 @@ import { Select } from "@/components/core/atoms/Select";
 import { BrandSelect } from "@/components/core/molecules/BrandSelect";
 import { YearDropdown } from "@/components/core/molecules/YearDropdown";
 import { AlertBadge } from "@/components/core/molecules/AlertBadge";
+import { VehiclePhotoField } from "@/components/core/molecules/VehiclePhotoField";
 import { useVehicleDocuments } from "@/hooks/vehicles/useVehicleDocuments";
 import { useT } from "@/lib/i18n";
 import { motorcycleVariantSchema } from "@vefy/shared";
@@ -19,7 +20,7 @@ import { Save } from "lucide-react";
 export function VehicleDocumentsContent() {
   const params = useParams();
   const vehicleId = String(params.id);
-  const { vehicle, form, saving, onSubmit, findAlert, variantLocked, variantLockedError } =
+  const { vehicle, form, saving, onSubmit, findAlert, variantLocked, variantLockedError, image, setImage } =
     useVehicleDocuments(vehicleId);
   const { t } = useT();
 
@@ -37,6 +38,7 @@ export function VehicleDocumentsContent() {
               <CardTitle className="text-base">{t("documents.vehicleInfo")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              <VehiclePhotoField value={image} onChange={setImage} />
               <div>
                 <Label>{t("documents.name")}</Label>
                 <Controller control={control} name="name" render={({ field }) => <Input {...field} value={field.value ?? ""} className="mt-1.5" />} />

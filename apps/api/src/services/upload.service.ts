@@ -3,24 +3,15 @@ import { getSupabase } from "../lib/supabase";
 const BUCKET = "avatars";
 
 /**
- * Upload avatar to Supabase Storage.
- * Accepts a base64 data URL, decodes it, uploads as JPEG, returns public URL.
- * Overwrites existing avatar for the same user.
+ * Upload a base64 data URL as JPEG to Supabase Storage, overwriting the file at `filePath`.
+ * Returns the public URL with a cache-busting timestamp.
  */
-export async function uploadAvatar(
-  userId: string,
-  dataUrl: string,
-): Promise<string> {
-  // Decode base64 data URL → Buffer
+async function uploadImage(filePath: string, dataUrl: string): Promise<string> {
   const matches = dataUrl.match(/^data:image\/(\w+);base64,(.+)$/);
   if (!matches) throw new Error("Invalid data URL");
 
-  const base64Data = matches[2];
-  const buffer = Buffer.from(base64Data, "base64");
+  const buffer = Buffer.from(matches[2], "base64");
 
-  const filePath = `${userId}.jpg`;
-
-  // Upload (upsert — overwrite if exists)
   const { error } = await getSupabase().storage
     .from(BUCKET)
     .upload(filePath, buffer, {
@@ -30,7 +21,6 @@ export async function uploadAvatar(
 
   if (error) throw new Error(`Upload failed: ${error.message}`);
 
-  // Get public URL with cache-busting timestamp
   const {
     data: { publicUrl },
   } = getSupabase().storage.from(BUCKET).getPublicUrl(filePath);
@@ -38,9 +28,16 @@ export async function uploadAvatar(
   return `${publicUrl}?t=${Date.now()}`;
 }
 
-/**
- * Delete avatar from Supabase Storage.
- */
-export async function deleteAvatar(userId: string): Promise<void> {
-  await getSupabase().storage.from(BUCKET).remove([`${userId}.jpg`]);
+async function deleteImage(filePath: string): Promise<void> {
+  await getSupabase().storage.from(BUCKET).remove([filePath]);
 }
+
+const avatarPath = (userId: string) => `${userId}.jpg`;
+const vehicleImagePath = (vehicleId: string) => `vehicles/${vehicleId}.jpg`;
+
+export const uploadAvatar = (userId: string, dataUrl: string) => uploadImage(avatarPath(userId), dataUrl);
+export const deleteAvatar = (userId: string) => deleteImage(avatarPath(userId));
+
+export const uploadVehicleImage = (vehicleId: string, dataUrl: string) =>
+  uploadImage(vehicleImagePath(vehicleId), dataUrl);
+export const deleteVehicleImage = (vehicleId: string) => deleteImage(vehicleImagePath(vehicleId));

@@ -8,8 +8,9 @@ const eslintConfig = [
   { ignores: [".next/**", "node_modules/**", "next-env.d.ts"] },
   ...compat.extends("next/core-web-vitals", "next/typescript"),
   {
-    // Avatars can be data: URLs (local preview) or arbitrary storage URLs that next/image can't optimize
+    // Avatars and vehicle photos can be data: URLs (local preview) or arbitrary storage URLs that next/image can't optimize
     files: [
+      "src/components/core/atoms/VehicleThumb/index.tsx",
       "src/components/core/molecules/AvatarUpload/index.tsx",
       "src/components/core/molecules/UserMenu/index.tsx",
       "src/components/core/templates/Account/ProfileSection.tsx",

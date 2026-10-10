@@ -128,7 +128,7 @@ export const vi = {
     registrationExpiry: "Hạn đăng kiểm",
     insuranceExpiry: "Hạn bảo hiểm",
     variant: "Phân loại xe",
-    variantLocked: "Không thể đổi phân loại vì xe đã có lịch sử thay nhớt",
+    variantLocked: "Không thể đổi phân loại vì xe đã phát sinh chi phí (nhớt, phụ tùng hoặc chi phí khác)",
   },
 
   oil: {
@@ -261,6 +261,10 @@ export const vi = {
     title: "Thêm xe mới",
     type: "Loại xe",
     variant: "Phân loại",
+    photo: "Ảnh xe",
+    removePhoto: "Xoá ảnh xe",
+    photoHintAdd: "Bấm vào ô bên cạnh để chọn hoặc chụp ảnh",
+    photoHintChange: "Bấm vào ảnh để thay, hoặc nút × để xoá",
     color: "Màu xe",
     brand: "Hãng xe",
     brandHint: "Chọn hãng xe",
