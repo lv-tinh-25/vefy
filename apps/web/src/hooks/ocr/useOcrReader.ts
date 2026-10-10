@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { toast } from "sonner";
+import { notify } from "@/lib/notify";
 import { api } from "@/lib/api";
 import { resizeImage } from "@/lib/image-utils";
 import { useT } from "@/lib/i18n";
@@ -36,10 +36,10 @@ export function useOcrReader(onResult: (km: number) => void) {
         const body = await res.json();
         if (body.code === "OCR_DAILY_LIMIT") {
           setLimitReached(true);
-          toast.error(t("ocr.dailyLimit", { limit: body.limit }));
+          notify.error(t("ocr.dailyLimit", { limit: body.limit }));
         } else {
           setCooldown(body.retryAfter);
-          toast.error(t("ocr.cooldown", { seconds: body.retryAfter }));
+          notify.error(t("ocr.cooldown", { seconds: body.retryAfter }));
         }
         return;
       }
@@ -47,12 +47,12 @@ export function useOcrReader(onResult: (km: number) => void) {
       if (res.status === 503) {
         const body = await res.json();
         setCooldown(body.cooldownSeconds);
-        toast.error(t("ocr.unavailable"));
+        notify.error(t("ocr.unavailable"));
         return;
       }
 
       if (!res.ok) {
-        toast.error(t("ocr.error"));
+        notify.error(t("ocr.error"));
         return;
       }
 
@@ -62,14 +62,14 @@ export function useOcrReader(onResult: (km: number) => void) {
 
       if (result.success) {
         onResult(result.km);
-        toast.success(
+        notify.success(
           t("ocr.success", { km: formatNumber(result.km, locale), remaining: result.remaining }),
         );
       } else {
-        toast.error(t("ocr.fail", { remaining: result.remaining }));
+        notify.error(t("ocr.fail", { remaining: result.remaining }));
       }
     } catch {
-      toast.error(t("ocr.error"));
+      notify.error(t("ocr.error"));
     } finally {
       setLoading(false);
       if (fileRef.current) fileRef.current.value = "";

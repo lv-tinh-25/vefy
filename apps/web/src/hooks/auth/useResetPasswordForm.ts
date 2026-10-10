@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter, useSearchParams } from "next/navigation";
 import { resetPasswordSchema, type ResetPasswordInput } from "@vefy/shared";
 import { resetPassword } from "@/lib/auth-client";
-import { toast } from "sonner";
+import { notify } from "@/lib/notify";
 import { useT } from "@/lib/i18n";
 
 export function useResetPasswordForm() {
@@ -30,15 +30,15 @@ export function useResetPasswordForm() {
     try {
       const result = await resetPassword({ newPassword: data.newPassword, token });
       if (!result.error) {
-        toast.success(t("auth.resetPasswordSuccess"));
+        notify.success(t("auth.resetPasswordSuccess"));
         // Keep the form locked while navigating away
         router.push("/auth/login");
         return;
       }
       if (result.error.code === "INVALID_TOKEN") setIsTokenInvalid(true);
-      else toast.error(t("auth.errorConnection"));
+      else notify.error(t("auth.errorConnection"));
     } catch {
-      toast.error(t("auth.errorConnection"));
+      notify.error(t("auth.errorConnection"));
     }
     setIsSubmitting(false);
   });

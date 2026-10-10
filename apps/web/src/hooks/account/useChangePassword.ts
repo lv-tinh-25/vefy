@@ -9,8 +9,11 @@ import {
 } from "@vefy/shared";
 import { changePassword } from "@/lib/auth-client";
 import { getAuthErrorKey } from "@/lib/auth-errors";
+import { useT } from "@/lib/i18n";
+import { notify } from "@/lib/notify";
 
 export function useChangePassword(onClose: () => void) {
+  const { tRaw } = useT();
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -36,6 +39,7 @@ export function useChangePassword(onClose: () => void) {
       });
       if (result.error) {
         const key = getAuthErrorKey(result.error, "auth.errorConnection");
+        notify.error(tRaw(key));
         if (key === "account.errorWrongPassword") {
           setFieldError("currentPassword", { message: key });
         } else {
@@ -44,6 +48,7 @@ export function useChangePassword(onClose: () => void) {
         return;
       }
       setSuccess(true);
+      notify.success(tRaw("toast.passwordChanged"));
       reset();
       setTimeout(() => {
         onClose();
@@ -51,6 +56,7 @@ export function useChangePassword(onClose: () => void) {
       }, 1200);
     } catch {
       setError("auth.errorConnection");
+      notify.error(tRaw("auth.errorConnection"));
     } finally {
       setIsSubmitting(false);
     }

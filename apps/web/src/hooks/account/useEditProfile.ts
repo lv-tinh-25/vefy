@@ -5,10 +5,13 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { updateProfileSchema, type UpdateProfileInput } from "@vefy/shared";
 import { api } from "@/lib/api";
+import { useT } from "@/lib/i18n";
+import { notify } from "@/lib/notify";
 import { useAuth } from "@/hooks/auth/useAuth";
 
 export function useEditProfile(onClose: () => void) {
   const { profile, mutate } = useAuth();
+  const { t } = useT();
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -32,6 +35,7 @@ export function useEditProfile(onClose: () => void) {
         });
         if (!uploadRes.ok) {
           setError("auth.errorConnection");
+          notify.error(t("toast.saveFailed"));
           return;
         }
         const { url } = await uploadRes.json();
@@ -49,12 +53,15 @@ export function useEditProfile(onClose: () => void) {
       });
       if (!res.ok) {
         setError("auth.errorConnection");
+        notify.error(t("toast.saveFailed"));
         return;
       }
       await mutate();
       onClose();
+      notify.success(t("toast.profileSaved"));
     } catch {
       setError("auth.errorConnection");
+      notify.error(t("auth.errorConnection"));
     } finally {
       setIsSubmitting(false);
     }

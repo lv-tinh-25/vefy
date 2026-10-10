@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+import { notify } from "@/lib/notify";
 import { useAuth } from "@/hooks/auth/useAuth";
 import { useNotifications } from "@/hooks/notifications/useNotifications";
 import { NotificationsDialog } from "@/components/core/molecules/NotificationsDialog";
@@ -51,6 +51,7 @@ export function UserMenu() {
     try {
       const result = await signOut();
       if (!result.error) {
+        notify.afterReload("success", t("toast.loggedOut"));
         // Full reload drops the SWR cache and any in-memory state of the signed-out user
         window.location.replace("/auth/login");
         return;
@@ -58,7 +59,7 @@ export function UserMenu() {
     } catch {
       // handled below
     }
-    toast.error(t("auth.errorConnection"));
+    notify.error(t("auth.errorConnection"));
     setLoggingOut(false);
   };
 

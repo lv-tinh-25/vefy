@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSWRConfig } from "swr";
-import { toast } from "sonner";
+import { notify } from "@/lib/notify";
 import { api } from "@/lib/api";
 import { useT } from "@/lib/i18n";
 
@@ -49,14 +49,14 @@ export function useVehicleActions(vehicleId: string) {
       const res = await api.api.vehicles[":id"].$delete({ param: { id: vehicleId } });
       if (res.ok) {
         await Promise.all([mutate("vehicles"), mutate("notifications")]);
-        toast.success(t("vehicleActions.deleteSuccess"));
+        notify.success(t("vehicleActions.deleteSuccess"));
         // Keep the dialog locked until the garage replaces this page
         router.replace("/garage");
         return;
       }
-      toast.error(t("auth.errorConnection"));
+      notify.error(t("toast.deleteFailed"));
     } catch {
-      toast.error(t("auth.errorConnection"));
+      notify.error(t("auth.errorConnection"));
     }
     setDeleting(false);
   };

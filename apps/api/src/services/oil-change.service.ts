@@ -27,7 +27,7 @@ export async function listByVehicle(vehicleId: string) {
     .select()
     .from(oilChanges)
     .where(eq(oilChanges.vehicleId, vehicleId))
-    .orderBy(desc(oilChanges.date), desc(oilChanges.odometer));
+    .orderBy(desc(oilChanges.date), desc(oilChanges.odometer), desc(oilChanges.createdAt));
 
   return rows.map(toOilChange);
 }
@@ -91,7 +91,7 @@ export async function create(vehicleId: string, data: InsertOilChanges) {
     .select()
     .from(oilChanges)
     .where(eq(oilChanges.vehicleId, vehicleId))
-    .orderBy(desc(oilChanges.date), desc(oilChanges.odometer))
+    .orderBy(desc(oilChanges.date), desc(oilChanges.odometer), desc(oilChanges.createdAt))
     .limit(1);
 
   if (latest && data.date >= latest.date && data.odometer < latest.odometer) {

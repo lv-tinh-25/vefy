@@ -42,7 +42,7 @@ export const en: Messages = {
   },
 
   vehicleVariant: {
-    manual: "Manual / clutch",
+    manual: "Manual",
     scooter: "Scooter",
     electric: "Electric",
   },
@@ -54,6 +54,30 @@ export const en: Messages = {
     power_steering: "Power steering fluid",
     differential: "Differential oil",
     gear: "Gear oil",
+  },
+
+  toast: {
+    vehicleCreated: "Vehicle added",
+    vehiclePhotoFailed: "Vehicle added, but the photo didn't upload. Try again from the Documents tab",
+    vehicleSaved: "Vehicle details saved",
+    oilChangeAdded: "Change added",
+    oilChangeDeleted: "Change deleted",
+    oilSettingsSaved: "Change cycles saved",
+    partAdded: "Part added",
+    partDeleted: "Part deleted",
+    expenseAdded: "Expense added",
+    expenseDeleted: "Expense deleted",
+    profileSaved: "Profile updated",
+    profileCompleted: "Profile completed",
+    passwordChanged: "Password changed",
+    otherSessionsRevoked: "Signed out of other devices",
+    accountDeleted: "Account deleted",
+    loggedIn: "Signed in",
+    loggedOut: "Signed out",
+    registered: "Account created. Check your email to verify it",
+    resetEmailSent: "Password reset email sent",
+    saveFailed: "Couldn't save, please try again",
+    deleteFailed: "Couldn't delete, please try again",
   },
 
   notifications: {

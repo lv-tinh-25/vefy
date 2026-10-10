@@ -66,6 +66,7 @@ pnpm --filter @vefy/api dev:standalone   # Optional: run the Hono API alone on p
 - **App origin** (`apps/api/src/lib/origin.ts`): Vercel preview URL → `FRONTEND_URL` → Vercel production domain → localhost. Used by auth, CORS and SEO, so `FRONTEND_URL` is optional on Vercel.
 - **Vehicle tabs are static**: `app/vehicle/[id]/layout.tsx` returns `[]` from `generateStaticParams`, so each vehicle's shell is rendered once and cached; `<Link>` then prefetches whole tabs and switching is instant. Pages there must stay client-only (data via SWR) — no `cookies()`/`headers()`/server data fetching.
 - **SWR feedback**: `SWRActivityProvider` (`lib/swr-activity.tsx`) drives the thin top `RefreshIndicator` while a hook refetches over existing data. Mutating dialogs `await` the revalidation before closing so they never close onto stale data.
+- **Toasts report API actions**: every mutating call (POST/PATCH/PUT/DELETE, better-auth actions) reports success and failure through `notify` (`lib/notify.ts`), rendered by `AppToaster` (bottom-right on desktop, top-centre on phones). Form validation stays inline. Actions that end in a full reload use `notify.afterReload`.
 - **Third-party clients are created lazily** (Supabase, Gemini) so importing the API never throws during `next build` when env vars are missing.
 - **No `.js` extensions in imports**: tsx and drizzle-kit require extensionless imports.
 

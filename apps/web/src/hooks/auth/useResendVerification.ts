@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { sendVerificationEmail } from "@/lib/auth-client";
-import { toast } from "sonner";
+import { notify } from "@/lib/notify";
 import { useT } from "@/lib/i18n";
 
 const RESEND_COOLDOWN_SECONDS = 60;
@@ -24,15 +24,15 @@ export function useResendVerification(email: string) {
     try {
       const result = await sendVerificationEmail({ email });
       if (result.error) {
-        toast.error(
+        notify.error(
           result.error.status === 429 ? t("auth.errorTooManyRequests") : t("auth.errorConnection"),
         );
         return;
       }
-      toast.success(t("auth.resendEmailSuccess"));
+      notify.success(t("auth.resendEmailSuccess"));
       setCooldown(RESEND_COOLDOWN_SECONDS);
     } catch {
-      toast.error(t("auth.errorConnection"));
+      notify.error(t("auth.errorConnection"));
     } finally {
       setIsSending(false);
     }

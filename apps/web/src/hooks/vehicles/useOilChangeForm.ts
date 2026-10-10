@@ -12,6 +12,7 @@ import {
 import { api } from "@/lib/api";
 import { useT } from "@/lib/i18n";
 import { formatNumber } from "@/lib/utils";
+import { notify } from "@/lib/notify";
 
 // Cost starts empty; the schema rejects it on submit if it's never filled in
 const newItem = (kind: OilKind) => ({ kind, cost: undefined as unknown as number, oilType: "" });
@@ -62,7 +63,9 @@ export function useOilChangeForm(
         // Wait for the list to refetch so the dialog closes onto fresh data
         await onSuccess();
         onClose();
+        notify.success(t("toast.oilChangeAdded"));
       } else {
+        notify.error(t("toast.saveFailed"));
         const body = await res.json();
         if ("code" in body && body.code === "ODOMETER_TOO_LOW") {
           setError(t("oil.errorOdometerTooLow", { km: formatNumber(body.minOdometer, locale) }));
@@ -74,6 +77,7 @@ export function useOilChangeForm(
       }
     } catch {
       setError(t("auth.errorConnection"));
+      notify.error(t("auth.errorConnection"));
     } finally {
       setLoading(false);
     }

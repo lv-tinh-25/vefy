@@ -60,7 +60,7 @@ async function loadVehicleState(row: typeof vehicles.$inferSelect, now: Date) {
       .select()
       .from(oilChanges)
       .where(eq(oilChanges.vehicleId, row.id))
-      .orderBy(desc(oilChanges.date), desc(oilChanges.odometer)),
+      .orderBy(desc(oilChanges.date), desc(oilChanges.odometer), desc(oilChanges.createdAt)),
     db.select().from(parts).where(eq(parts.vehicleId, row.id)),
     db.select().from(vehicleOilSettings).where(eq(vehicleOilSettings.vehicleId, row.id)),
   ]);

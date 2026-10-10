@@ -5,7 +5,7 @@ import { I18nProvider } from "@/lib/i18n";
 import { ThemeProvider } from "@/lib/theme";
 import { SWRActivityProvider } from "@/lib/swr-activity";
 import { RefreshIndicator } from "@/components/core/atoms/RefreshIndicator";
-import { Toaster } from "sonner";
+import { AppToaster } from "@/components/core/molecules/AppToaster";
 import "./globals.css";
 
 const sora = Sora({
@@ -64,16 +64,7 @@ export default function RootLayout({
             </SWRActivityProvider>
           </I18nProvider>
         </ThemeProvider>
-        <Toaster
-          position="top-right"
-          richColors
-          closeButton
-          toastOptions={{
-            style: {
-              fontFamily: "var(--font-outfit), sans-serif",
-            },
-          }}
-        />
+        <AppToaster />
       </body>
     </html>
   );

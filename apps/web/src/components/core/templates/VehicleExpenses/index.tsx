@@ -20,6 +20,7 @@ import { useVehicleExpenses } from "@/hooks/vehicles/useVehicleExpenses";
 import { useVehicleExpenseSummary } from "@/hooks/vehicles/useVehicleExpenseSummary";
 import { useT } from "@/lib/i18n";
 import { api } from "@/lib/api";
+import { notify } from "@/lib/notify";
 import type { Expense, StatsPeriod } from "@vefy/shared";
 import { Plus } from "lucide-react";
 
@@ -46,11 +47,18 @@ export function VehicleExpensesContent() {
     if (!deleteTarget) return;
     setDeleting(true);
     try {
-      await api.api.vehicles[":vehicleId"].expenses[":id"].$delete({
+      const res = await api.api.vehicles[":vehicleId"].expenses[":id"].$delete({
         param: { vehicleId, id: deleteTarget.id },
       });
+      if (!res.ok) {
+        notify.error(t("toast.deleteFailed"));
+        return;
+      }
       await refresh();
       setDeleteTarget(null);
+      notify.success(t("toast.expenseDeleted"));
+    } catch {
+      notify.error(t("auth.errorConnection"));
     } finally {
       setDeleting(false);
     }

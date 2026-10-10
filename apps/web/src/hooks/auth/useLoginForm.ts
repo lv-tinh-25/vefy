@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { loginSchema, type LoginInput } from "@vefy/shared";
 import { signIn } from "@/lib/auth-client";
-import { toast } from "sonner";
+import { notify } from "@/lib/notify";
 import { useT } from "@/lib/i18n";
 
 export function useLoginForm() {
@@ -32,15 +32,16 @@ export function useLoginForm() {
           router.push(`/auth/verify-email?email=${encodeURIComponent(data.email)}&from=login`);
           return;
         }
-        toast.error(t("auth.errorLogin"));
+        notify.error(t("auth.errorLogin"));
         setIsSubmitting(false);
         return;
       }
+      notify.success(t("toast.loggedIn"));
       // Keep the form locked while navigating away
       router.push("/garage");
       return;
     } catch {
-      toast.error(t("auth.errorConnection"));
+      notify.error(t("auth.errorConnection"));
     }
     setIsSubmitting(false);
   });
@@ -54,11 +55,11 @@ export function useLoginForm() {
       });
       // On success the browser is already leaving for Google; only an error lands here
       if (result.error) {
-        toast.error(t("auth.errorConnection"));
+        notify.error(t("auth.errorConnection"));
         setIsGoogleLoading(false);
       }
     } catch {
-      toast.error(t("auth.errorConnection"));
+      notify.error(t("auth.errorConnection"));
       setIsGoogleLoading(false);
     }
   };

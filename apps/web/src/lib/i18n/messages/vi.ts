@@ -40,7 +40,7 @@ export const vi = {
   },
 
   vehicleVariant: {
-    manual: "Xe số / côn tay",
+    manual: "Xe số",
     scooter: "Tay ga",
     electric: "Xe điện",
   },
@@ -52,6 +52,30 @@ export const vi = {
     power_steering: "Dầu trợ lực lái",
     differential: "Dầu cầu",
     gear: "Nhớt láp",
+  },
+
+  toast: {
+    vehicleCreated: "Đã thêm xe",
+    vehiclePhotoFailed: "Đã thêm xe nhưng chưa tải được ảnh, hãy thử lại ở tab Giấy tờ",
+    vehicleSaved: "Đã lưu thông tin xe",
+    oilChangeAdded: "Đã thêm lần thay",
+    oilChangeDeleted: "Đã xoá lần thay",
+    oilSettingsSaved: "Đã lưu chu kỳ thay",
+    partAdded: "Đã thêm phụ tùng",
+    partDeleted: "Đã xoá phụ tùng",
+    expenseAdded: "Đã thêm chi phí",
+    expenseDeleted: "Đã xoá chi phí",
+    profileSaved: "Đã cập nhật hồ sơ",
+    profileCompleted: "Đã hoàn tất hồ sơ",
+    passwordChanged: "Đã đổi mật khẩu",
+    otherSessionsRevoked: "Đã đăng xuất các thiết bị khác",
+    accountDeleted: "Đã xoá tài khoản",
+    loggedIn: "Đăng nhập thành công",
+    loggedOut: "Đã đăng xuất",
+    registered: "Đăng ký thành công, hãy kiểm tra email để xác minh",
+    resetEmailSent: "Đã gửi email đặt lại mật khẩu",
+    saveFailed: "Không lưu được, vui lòng thử lại",
+    deleteFailed: "Không xoá được, vui lòng thử lại",
   },
 
   notifications: {

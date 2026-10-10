@@ -5,6 +5,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertPartSchema, type InsertPart, todayDateStr } from "@vefy/shared";
 import { api } from "@/lib/api";
+import { useT } from "@/lib/i18n";
+import { notify } from "@/lib/notify";
 
 export type PartFormType = "part" | "other";
 
@@ -14,6 +16,7 @@ export function usePartForm(
   onSuccess: () => Promise<unknown> | void,
   onClose: () => void,
 ) {
+  const { t } = useT();
   const [loading, setLoading] = useState(false);
   const [formType, setFormType] = useState<PartFormType>("part");
 
@@ -36,11 +39,16 @@ export function usePartForm(
         param: { vehicleId },
         json: data,
       });
-      if (res.ok) {
-        // Wait for the list to refetch so the dialog closes onto fresh data
-        await onSuccess();
-        onClose();
+      if (!res.ok) {
+        notify.error(t("toast.saveFailed"));
+        return;
       }
+      // Wait for the list to refetch so the dialog closes onto fresh data
+      await onSuccess();
+      onClose();
+      notify.success(t("toast.partAdded"));
+    } catch {
+      notify.error(t("auth.errorConnection"));
     } finally {
       setLoading(false);
     }
@@ -71,11 +79,16 @@ export function usePartForm(
           note: note || undefined,
         },
       });
-      if (res.ok) {
-        // Wait for the list to refetch so the dialog closes onto fresh data
-        await onSuccess();
-        onClose();
+      if (!res.ok) {
+        notify.error(t("toast.saveFailed"));
+        return;
       }
+      // Wait for the list to refetch so the dialog closes onto fresh data
+      await onSuccess();
+      onClose();
+      notify.success(t("toast.expenseAdded"));
+    } catch {
+      notify.error(t("auth.errorConnection"));
     } finally {
       setLoading(false);
     }

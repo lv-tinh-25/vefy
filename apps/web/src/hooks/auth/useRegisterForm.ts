@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { registerSchema, type RegisterInput } from "@vefy/shared";
 import { signUp, signIn } from "@/lib/auth-client";
-import { toast } from "sonner";
+import { notify } from "@/lib/notify";
 import { useT } from "@/lib/i18n";
 
 export function useRegisterForm() {
@@ -32,14 +32,17 @@ export function useRegisterForm() {
       });
       if (result.error) {
         setError(result.error.message ?? "auth.errorRegister");
+        notify.error(t("auth.errorRegister"));
         setIsSubmitting(false);
         return;
       }
+      notify.success(t("toast.registered"));
       // Keep the form locked while navigating away
       router.push(`/auth/verify-email?email=${encodeURIComponent(data.email)}`);
       return;
     } catch {
       setError("auth.errorConnection");
+      notify.error(t("auth.errorConnection"));
     }
     setIsSubmitting(false);
   });
@@ -53,11 +56,11 @@ export function useRegisterForm() {
       });
       // On success the browser is already leaving for Google; only an error lands here
       if (result.error) {
-        toast.error(t("auth.errorConnection"));
+        notify.error(t("auth.errorConnection"));
         setIsGoogleLoading(false);
       }
     } catch {
-      toast.error(t("auth.errorConnection"));
+      notify.error(t("auth.errorConnection"));
       setIsGoogleLoading(false);
     }
   };

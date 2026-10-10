@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { forgotPasswordSchema, type ForgotPasswordInput } from "@vefy/shared";
 import { requestPasswordReset } from "@/lib/auth-client";
-import { toast } from "sonner";
+import { notify } from "@/lib/notify";
 import { useT } from "@/lib/i18n";
 
 export function useForgotPasswordForm() {
@@ -26,14 +26,15 @@ export function useForgotPasswordForm() {
         redirectTo: `${window.location.origin}/auth/reset-password`,
       });
       if (result.error) {
-        toast.error(
+        notify.error(
           result.error.status === 429 ? t("auth.errorTooManyRequests") : t("auth.errorConnection"),
         );
         return;
       }
       setSentTo(data.email);
+      notify.success(t("toast.resetEmailSent"));
     } catch {
-      toast.error(t("auth.errorConnection"));
+      notify.error(t("auth.errorConnection"));
     } finally {
       setIsSubmitting(false);
     }

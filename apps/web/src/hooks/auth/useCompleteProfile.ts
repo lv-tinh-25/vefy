@@ -6,11 +6,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { completeProfileSchema, type CompleteProfileInput } from "@vefy/shared";
 import { api } from "@/lib/api";
+import { useT } from "@/lib/i18n";
+import { notify } from "@/lib/notify";
 import { useAuth } from "@/hooks/auth/useAuth";
 
 export function useCompleteProfile() {
   const router = useRouter();
   const { isProfileCompleted, isProfileLoading } = useAuth();
+  const { t } = useT();
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -37,6 +40,7 @@ export function useCompleteProfile() {
         });
         if (!uploadRes.ok) {
           setError("auth.errorConnection");
+          notify.error(t("toast.saveFailed"));
           setIsSubmitting(false);
           return;
         }
@@ -48,13 +52,16 @@ export function useCompleteProfile() {
         json: { name: data.name, image: imageUrl },
       });
       if (res.ok) {
+        notify.success(t("toast.profileCompleted"));
         // Keep the form locked while navigating away
         router.push("/garage");
         return;
       }
       setError("auth.errorConnection");
+      notify.error(t("toast.saveFailed"));
     } catch {
       setError("auth.errorConnection");
+      notify.error(t("auth.errorConnection"));
     }
     setIsSubmitting(false);
   });

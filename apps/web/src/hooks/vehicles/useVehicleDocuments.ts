@@ -6,9 +6,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useVehicle } from "./useVehicle";
 import { updateVehicleInfoSchema, type UpdateVehicleInfo } from "@vefy/shared";
 import { api } from "@/lib/api";
+import { useT } from "@/lib/i18n";
+import { notify } from "@/lib/notify";
 
 export function useVehicleDocuments(vehicleId: string) {
   const { data: vehicle, mutate } = useVehicle(vehicleId);
+  const { t } = useT();
   const [saving, setSaving] = useState(false);
   const [variantLockedError, setVariantLockedError] = useState(false);
   // null = unchanged; "" = removed; a data URL = new photo awaiting save
@@ -36,10 +39,13 @@ export function useVehicleDocuments(vehicleId: string) {
     setSaving(true);
     setVariantLockedError(false);
     try {
+      let photoOk = true;
       if (imageDraft) {
-        await api.api.vehicles[":vehicleId"].image.$post({ param: { vehicleId }, json: { image: imageDraft } });
+        const r = await api.api.vehicles[":vehicleId"].image.$post({ param: { vehicleId }, json: { image: imageDraft } });
+        photoOk = r.ok;
       } else if (imageDraft === "" && vehicle?.imageUrl) {
-        await api.api.vehicles[":vehicleId"].image.$delete({ param: { vehicleId } });
+        const r = await api.api.vehicles[":vehicleId"].image.$delete({ param: { vehicleId } });
+        photoOk = r.ok;
       }
       const res = await api.api.vehicles[":id"].$patch({
         param: { id: vehicleId },
@@ -48,7 +54,11 @@ export function useVehicleDocuments(vehicleId: string) {
       // An expense was added elsewhere after this page loaded
       if (res.status === 409) setVariantLockedError(true);
       await mutate();
-      setImageDraft(null);
+      if (photoOk) setImageDraft(null);
+      if (res.ok && photoOk) notify.success(t("toast.vehicleSaved"));
+      else notify.error(t("toast.saveFailed"));
+    } catch {
+      notify.error(t("auth.errorConnection"));
     } finally {
       setSaving(false);
     }

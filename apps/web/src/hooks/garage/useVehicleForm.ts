@@ -5,8 +5,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertVehicleSchema, type InsertVehicle } from "@vefy/shared";
 import { api } from "@/lib/api";
+import { useT } from "@/lib/i18n";
+import { notify } from "@/lib/notify";
 
 export function useVehicleForm(onSuccess: () => Promise<unknown> | void, onClose: () => void) {
+  const { t } = useT();
   const [loading, setLoading] = useState(false);
   const [image, setImage] = useState("");
 
@@ -27,20 +30,25 @@ export function useVehicleForm(onSuccess: () => Promise<unknown> | void, onClose
     setLoading(true);
     try {
       const res = await api.api.vehicles.$post({ json: data });
-      if (res.ok) {
-        if (image) {
-          const vehicle = await res.json();
-          // The vehicle exists either way; a failed photo upload can be retried from its documents tab
-          await api.api.vehicles[":vehicleId"].image
-            .$post({ param: { vehicleId: vehicle.id }, json: { image } })
-            .catch(() => {});
-        }
-        // Wait for the list to refetch so the dialog closes onto fresh data
-        await onSuccess();
-        onClose();
+      if (!res.ok) {
+        notify.error(t("toast.saveFailed"));
+        return;
       }
+      let photoUploaded = true;
+      if (image) {
+        const vehicle = await res.json();
+        // The vehicle exists either way; a failed photo upload can be retried from its documents tab
+        photoUploaded = await api.api.vehicles[":vehicleId"].image
+          .$post({ param: { vehicleId: vehicle.id }, json: { image } })
+          .then((r) => r.ok, () => false);
+      }
+      // Wait for the list to refetch so the dialog closes onto fresh data
+      await onSuccess();
+      onClose();
+      if (photoUploaded) notify.success(t("toast.vehicleCreated"));
+      else notify.error(t("toast.vehiclePhotoFailed"));
     } catch {
-      // handle error
+      notify.error(t("auth.errorConnection"));
     } finally {
       setLoading(false);
     }
