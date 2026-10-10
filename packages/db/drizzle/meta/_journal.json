@@ -57,6 +57,13 @@
       "when": 1791023716886,
       "tag": "0007_living_black_bolt",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1791610371053,
+      "tag": "0008_oil_kinds",
+      "breakpoints": true
     }
   ]
 }

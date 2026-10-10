@@ -6,18 +6,21 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/core/mole
 import { Input } from "@/components/core/atoms/Input";
 import { Label } from "@/components/core/atoms/Label";
 import { Button } from "@/components/core/atoms/Button";
+import { Select } from "@/components/core/atoms/Select";
 import { BrandSelect } from "@/components/core/molecules/BrandSelect";
 import { YearDropdown } from "@/components/core/molecules/YearDropdown";
 import { AlertBadge } from "@/components/core/molecules/AlertBadge";
 import { useVehicleDocuments } from "@/hooks/vehicles/useVehicleDocuments";
 import { useT } from "@/lib/i18n";
+import { motorcycleVariantSchema } from "@vefy/shared";
 import { PageSpinner } from "@/components/core/atoms/Spinner";
 import { Save } from "lucide-react";
 
 export function VehicleDocumentsContent() {
   const params = useParams();
   const vehicleId = String(params.id);
-  const { vehicle, form, saving, onSubmit, findAlert } = useVehicleDocuments(vehicleId);
+  const { vehicle, form, saving, onSubmit, findAlert, variantLocked, variantLockedError } =
+    useVehicleDocuments(vehicleId);
   const { t } = useT();
 
   if (!vehicle) return <PageSpinner />;
@@ -38,6 +41,28 @@ export function VehicleDocumentsContent() {
                 <Label>{t("documents.name")}</Label>
                 <Controller control={control} name="name" render={({ field }) => <Input {...field} value={field.value ?? ""} className="mt-1.5" />} />
               </div>
+              {vehicleType === "motorcycle" && (
+                <div>
+                  <Label>{t("documents.variant")}</Label>
+                  <Controller control={control} name="variant" render={({ field }) => (
+                    <Select
+                      value={field.value ?? "manual"}
+                      onChange={(e) => field.onChange(e.target.value)}
+                      disabled={variantLocked}
+                      className="mt-1.5"
+                    >
+                      {motorcycleVariantSchema.options.map((variant) => (
+                        <option key={variant} value={variant}>{t(`vehicleVariant.${variant}`)}</option>
+                      ))}
+                    </Select>
+                  )} />
+                  {(variantLocked || variantLockedError) && (
+                    <p className={variantLockedError ? "text-sm text-danger mt-1" : "text-xs text-faint mt-1"}>
+                      {t("documents.variantLocked")}
+                    </p>
+                  )}
+                </div>
+              )}
               <div>
                 <Label>{t("documents.brand")}</Label>
                 <Controller control={control} name="brand" render={({ field }) => (

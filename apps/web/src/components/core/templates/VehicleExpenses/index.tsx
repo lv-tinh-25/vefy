@@ -66,7 +66,7 @@ export function VehicleExpensesContent() {
           <PeriodToggle value={period} onChange={setPeriod} />
         </CardHeader>
         <CardContent>
-          <ExpensesChart data={summary} />
+          <ExpensesChart data={summary} period={period} />
         </CardContent>
       </Card>
 

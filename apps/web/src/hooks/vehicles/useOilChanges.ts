@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useVehicle } from "./useVehicle";
 import { api } from "@/lib/api";
+import type { OilSetting } from "@vefy/shared";
 
 export function useOilChanges(vehicleId: string) {
   const { data: vehicle, mutate } = useVehicle(vehicleId);
@@ -25,16 +26,12 @@ export function useOilChanges(vehicleId: string) {
     }
   };
 
-  const saveSettings = async (data: {
-    oilCycleKm: number;
-    oilUseDays: boolean;
-    oilCycleDays?: number;
-  }) => {
+  const saveSettings = async (settings: OilSetting[]) => {
     setSavingSettings(true);
     try {
-      await api.api.vehicles[":id"].$patch({
-        param: { id: vehicleId },
-        json: data,
+      await api.api.vehicles[":vehicleId"]["oil-settings"].$put({
+        param: { vehicleId },
+        json: { settings },
       });
       await mutate();
     } finally {

@@ -1,4 +1,5 @@
 import type { Expense, ExpenseSummary } from "../schemas/expense";
+import { todayDateStr } from "./date";
 
 export type StatsPeriod = "month" | "year";
 
@@ -31,4 +32,25 @@ export function sumForPeriod(
     if (periodKey(e.date, period) === targetKey) total += e.amount;
   }
   return total;
+}
+
+export const CHART_YEARS = 5;
+
+/**
+ * Fixed chart slots so empty periods still get a column: the 12 months of the current year, or the
+ * last CHART_YEARS years. Periods outside the window are dropped.
+ */
+export function fillChartPeriods(
+  summary: ExpenseSummary[],
+  period: StatsPeriod,
+  now: Date = new Date(),
+): ExpenseSummary[] {
+  const year = Number(todayDateStr(now).slice(0, 4));
+  const keys =
+    period === "month"
+      ? Array.from({ length: 12 }, (_, i) => `${year}-${String(i + 1).padStart(2, "0")}`)
+      : Array.from({ length: CHART_YEARS }, (_, i) => String(year - CHART_YEARS + 1 + i));
+  return keys.map(
+    (key) => summary.find((s) => s.period === key) ?? { period: key, part: 0, other: 0, total: 0 },
+  );
 }

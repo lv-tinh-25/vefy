@@ -21,6 +21,7 @@ export const en: Messages = {
     selectYear: "Select a year",
     days: "days",
     months: "months",
+    lastOdometerHint: "Last: {km} km ({date})",
   },
 
   alerts: {
@@ -35,9 +36,24 @@ export const en: Messages = {
     labelRegistration: "Registration",
     labelInsurance: "Insurance",
     labelPartWarranty: "Warranty: {name}",
-    labelOilOverdue: "Oil change overdue!",
-    labelOilRemaining: "Oil: ~{days} days left",
-    labelOilSinceLast: "Oil: {days} days since last change",
+    labelOilOverdue: "{kind}: change overdue!",
+    labelOilRemaining: "{kind}: ~{days} days left",
+    labelOilSinceLast: "{kind}: {days} days since last change",
+  },
+
+  vehicleVariant: {
+    manual: "Manual / clutch",
+    scooter: "Scooter",
+    electric: "Electric",
+  },
+
+  oilKinds: {
+    engine: "Engine oil",
+    transmission: "Transmission fluid",
+    brake: "Brake fluid",
+    power_steering: "Power steering fluid",
+    differential: "Differential oil",
+    gear: "Gear oil",
   },
 
   notifications: {
@@ -90,6 +106,7 @@ export const en: Messages = {
     insurance: "Insurance",
     oilStatus: "Oil status",
     noOilData: "No oil data yet. Add an oil change in the Oil tab.",
+    noKindData: "No changes yet",
   },
 
   vehicleActions: {
@@ -112,24 +129,34 @@ export const en: Messages = {
     warrantyExpiry: "Warranty expiry",
     registrationExpiry: "Registration expiry",
     insuranceExpiry: "Insurance expiry",
+    variant: "Vehicle category",
+    variantLocked: "The category can't be changed once the vehicle has oil change history",
   },
 
   oil: {
     errorOdometerTooLow: "Odometer must be at least {km} km (not lower than the previous change)",
-    cycleSettings: "Oil change cycle",
+    cycleSettings: "Change cycles",
+    electricNoOil: "Electric vehicles don't need oil changes.",
+    averageKmPerDay: "Average ~{km} km/day",
+    estimatedOdo: "Estimated odometer ~{km} km",
+    filterAll: "All",
+    errorKindUnavailable: "This fluid is turned off in the cycle settings",
     cycleKm: "Cycle (km)",
     useTimeLimit: "Use time-based limit",
     cycleDays: "Cycle (days)",
-    addOilChange: "Add oil change",
-    history: "Oil change history",
+    addOilChange: "Add change",
+    history: "Change history",
     noHistory: "No oil changes yet",
     deleteTitle: "Delete oil change",
     deleteConfirm: "Are you sure you want to delete this oil change?",
   },
 
   oilForm: {
-    title: "Add oil change",
+    title: "Add change",
     date: "Date",
+    kind: "Fluid",
+    addKind: "Add fluid",
+    removeKind: "Remove this row",
     odometer: "Odometer (km)",
     odometerHint: "e.g. 45230",
     cost: "Cost (VND)",
@@ -142,7 +169,7 @@ export const en: Messages = {
 
   prediction: {
     title: "AI Analysis",
-    overdueAlert: "OIL CHANGE OVERDUE!",
+    overdueAlert: "CHANGE OVERDUE!",
     remainingDays: "~{days} days left",
     remainingDaysMore: "~{days} days remaining",
     daysSinceLast: "{days} days since last change",
@@ -154,7 +181,7 @@ export const en: Messages = {
     byKm: "By km: ~{days} days left",
     byTime: "By time: ~{days} days left",
     result: "Result",
-    hint: "Tip: Add at least 2 oil changes for prediction",
+    hint: "Add at least 2 changes (any fluid) to estimate by km",
   },
 
   parts: {
@@ -164,11 +191,8 @@ export const en: Messages = {
     deleteConfirm: "Are you sure you want to delete this part?",
     warrantyExpired: "Expired {days} days",
     warrantyRemaining: "{days} days warranty",
-    installDate: "Installed",
-    odo: "Odo",
-    warrantyMonths: "Warranty",
-    warrantyExpiry: "Expires",
-    monthUnit: "months",
+    warrantyPeriod: "{months}-month warranty",
+    warrantyEnds: "Warranty ends {date}",
   },
 
   partForm: {
@@ -217,7 +241,7 @@ export const en: Messages = {
   },
 
   expenses: {
-    oilChangeName: "Oil change",
+    oilChangeName: "Replace {kind}",
     title: "Expenses",
     totalMonth: "Total this month",
     totalYear: "Total this year",
@@ -238,6 +262,7 @@ export const en: Messages = {
   vehicleForm: {
     title: "Add new vehicle",
     type: "Vehicle type",
+    variant: "Category",
     color: "Color",
     brand: "Brand",
     brandHint: "Select brand",
@@ -391,6 +416,10 @@ export const en: Messages = {
     warrantyMonthsInvalid: "Invalid warranty months",
     warrantyMonthsMin: "Warranty months cannot be negative",
     costMin: "Invalid cost",
+    costRequired: "Please enter the cost",
+    warrantyMonthsRequired: "Please enter the warranty period",
+    variantRequired: "Please choose a vehicle category",
+    oilKindDuplicate: "Each fluid can only be chosen once",
     expenseNameRequired: "Please enter expense name",
   },
 };

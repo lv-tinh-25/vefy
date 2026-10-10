@@ -1,11 +1,13 @@
 import { pgTable, uuid, text, varchar, integer, date, boolean, timestamp, pgEnum } from "drizzle-orm/pg-core";
 
 export const vehicleTypeEnum = pgEnum("vehicle_type", ["car", "motorcycle"]);
+export const motorcycleVariantEnum = pgEnum("motorcycle_variant", ["manual", "scooter", "electric"]);
 
 export const vehicles = pgTable("vehicles", {
   id: uuid("id").primaryKey().defaultRandom(),
   userId: text("user_id").notNull(),
   type: vehicleTypeEnum("type").notNull(),
+  variant: motorcycleVariantEnum("variant"),
   name: varchar("name", { length: 100 }).notNull(),
   brand: varchar("brand", { length: 100 }).notNull(),
   model: varchar("model", { length: 100 }).notNull(),
@@ -15,6 +17,7 @@ export const vehicles = pgTable("vehicles", {
   warrantyExpiry: date("warranty_expiry", { mode: "string" }),
   registrationExpiry: date("registration_expiry", { mode: "string" }),
   insuranceExpiry: date("insurance_expiry", { mode: "string" }),
+  // Superseded by vehicle_oil_settings; kept until the deployed code stops reading them, then dropped
   oilCycleKm: integer("oil_cycle_km").notNull().default(5000),
   oilUseDays: boolean("oil_use_days").notNull().default(false),
   oilCycleDays: integer("oil_cycle_days").notNull().default(180),

@@ -10,6 +10,7 @@ import { api } from "@/lib/api";
 export function useVehicleDocuments(vehicleId: string) {
   const { data: vehicle, mutate } = useVehicle(vehicleId);
   const [saving, setSaving] = useState(false);
+  const [variantLockedError, setVariantLockedError] = useState(false);
 
   const form = useForm<UpdateVehicleInfo>({
     resolver: zodResolver(updateVehicleInfoSchema),
@@ -23,17 +24,21 @@ export function useVehicleDocuments(vehicleId: string) {
           warrantyExpiry: vehicle.warrantyExpiry,
           registrationExpiry: vehicle.registrationExpiry,
           insuranceExpiry: vehicle.insuranceExpiry,
+          variant: vehicle.variant ?? undefined,
         }
       : undefined,
   });
 
   const onSubmit = form.handleSubmit(async (data) => {
     setSaving(true);
+    setVariantLockedError(false);
     try {
-      await api.api.vehicles[":id"].$patch({
+      const res = await api.api.vehicles[":id"].$patch({
         param: { id: vehicleId },
         json: data,
       });
+      // Oil history was added elsewhere after this page loaded
+      if (res.status === 409) setVariantLockedError(true);
       await mutate();
     } finally {
       setSaving(false);
@@ -42,5 +47,7 @@ export function useVehicleDocuments(vehicleId: string) {
 
   const findAlert = (type: string) => vehicle?.alerts.find((a) => a.type === type);
 
-  return { vehicle, form, saving, onSubmit, findAlert };
+  const variantLocked = (vehicle?.oilChanges.length ?? 0) > 0;
+
+  return { vehicle, form, saving, onSubmit, findAlert, variantLocked, variantLockedError };
 }

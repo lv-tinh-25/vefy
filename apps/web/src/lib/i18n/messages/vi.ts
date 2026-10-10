@@ -19,6 +19,7 @@ export const vi = {
     selectYear: "Chọn năm",
     days: "ngày",
     months: "tháng",
+    lastOdometerHint: "Lần gần nhất: {km} km ({date})",
   },
 
   alerts: {
@@ -33,9 +34,24 @@ export const vi = {
     labelRegistration: "Đăng kiểm",
     labelInsurance: "Bảo hiểm",
     labelPartWarranty: "BH: {name}",
-    labelOilOverdue: "Đã quá hạn thay nhớt!",
-    labelOilRemaining: "Nhớt: còn ~{days} ngày",
-    labelOilSinceLast: "Nhớt: đã {days} ngày từ lần cuối",
+    labelOilOverdue: "{kind}: đã quá hạn thay!",
+    labelOilRemaining: "{kind}: còn ~{days} ngày",
+    labelOilSinceLast: "{kind}: đã {days} ngày từ lần cuối",
+  },
+
+  vehicleVariant: {
+    manual: "Xe số / côn tay",
+    scooter: "Tay ga",
+    electric: "Xe điện",
+  },
+
+  oilKinds: {
+    engine: "Nhớt động cơ",
+    transmission: "Dầu hộp số",
+    brake: "Dầu phanh",
+    power_steering: "Dầu trợ lực lái",
+    differential: "Dầu cầu",
+    gear: "Nhớt láp",
   },
 
   notifications: {
@@ -88,6 +104,7 @@ export const vi = {
     insurance: "Bảo hiểm",
     oilStatus: "Tình trạng nhớt",
     noOilData: "Chưa có dữ liệu nhớt. Thêm lần thay nhớt tại tab Nhớt.",
+    noKindData: "Chưa có lần thay",
   },
 
   vehicleActions: {
@@ -110,24 +127,34 @@ export const vi = {
     warrantyExpiry: "Hạn bảo hành xe",
     registrationExpiry: "Hạn đăng kiểm",
     insuranceExpiry: "Hạn bảo hiểm",
+    variant: "Phân loại xe",
+    variantLocked: "Không thể đổi phân loại vì xe đã có lịch sử thay nhớt",
   },
 
   oil: {
     errorOdometerTooLow: "Số Odo phải từ {km} km trở lên (bằng hoặc lớn hơn lần thay trước)",
-    cycleSettings: "Chu kỳ thay nhớt",
+    cycleSettings: "Chu kỳ thay",
+    electricNoOil: "Xe điện không cần thay nhớt.",
+    averageKmPerDay: "Trung bình ~{km} km/ngày",
+    estimatedOdo: "Odo ước tính ~{km} km",
+    filterAll: "Tất cả",
+    errorKindUnavailable: "Loại dầu này đang tắt trong cài đặt chu kỳ",
     cycleKm: "Chu kỳ km",
     useTimeLimit: "Giới hạn theo thời gian",
     cycleDays: "Chu kỳ ngày",
-    addOilChange: "Thêm lần thay nhớt",
-    history: "Lịch sử thay nhớt",
+    addOilChange: "Thêm lần thay",
+    history: "Lịch sử thay",
     noHistory: "Chưa có lần thay nhớt nào",
     deleteTitle: "Xóa lần thay nhớt",
     deleteConfirm: "Bạn có chắc muốn xóa lần thay nhớt này?",
   },
 
   oilForm: {
-    title: "Thêm lần thay nhớt",
+    title: "Thêm lần thay",
     date: "Ngày thay",
+    kind: "Loại",
+    addKind: "Thêm loại",
+    removeKind: "Bỏ dòng này",
     odometer: "Số Odo (km)",
     odometerHint: "VD: 45230",
     cost: "Chi phí (VNĐ)",
@@ -140,7 +167,7 @@ export const vi = {
 
   prediction: {
     title: "Phân tích AI",
-    overdueAlert: "ĐÃ QUÁ HẠN THAY NHỚT!",
+    overdueAlert: "ĐÃ QUÁ HẠN THAY!",
     remainingDays: "Còn ~{days} ngày",
     remainingDaysMore: "Còn ~{days} ngày nữa",
     daysSinceLast: "Đã {days} ngày từ lần thay cuối",
@@ -152,7 +179,7 @@ export const vi = {
     byKm: "Theo km: còn ~{days} ngày",
     byTime: "Theo TG: còn ~{days} ngày",
     result: "Kết quả",
-    hint: "Gợi ý: Thêm ít nhất 2 lần thay nhớt để dự đoán",
+    hint: "Cần ít nhất 2 lần thay (loại bất kỳ) để ước tính theo km",
   },
 
   parts: {
@@ -162,11 +189,8 @@ export const vi = {
     deleteConfirm: "Bạn có chắc muốn xóa phụ tùng này?",
     warrantyExpired: "Hết BH {days} ngày",
     warrantyRemaining: "Còn {days} ngày BH",
-    installDate: "Thay",
-    odo: "Odo",
-    warrantyMonths: "BH",
-    warrantyExpiry: "Hết BH",
-    monthUnit: "tháng",
+    warrantyPeriod: "BH {months} tháng",
+    warrantyEnds: "Hết BH {date}",
   },
 
   partForm: {
@@ -215,7 +239,7 @@ export const vi = {
   },
 
   expenses: {
-    oilChangeName: "Thay nhớt",
+    oilChangeName: "Thay {kind}",
     title: "Chi phí",
     totalMonth: "Tổng tháng này",
     totalYear: "Tổng năm nay",
@@ -236,6 +260,7 @@ export const vi = {
   vehicleForm: {
     title: "Thêm xe mới",
     type: "Loại xe",
+    variant: "Phân loại",
     color: "Màu xe",
     brand: "Hãng xe",
     brandHint: "Chọn hãng xe",
@@ -389,6 +414,10 @@ export const vi = {
     warrantyMonthsInvalid: "Số tháng BH không hợp lệ",
     warrantyMonthsMin: "Số tháng BH không được âm",
     costMin: "Chi phí không hợp lệ",
+    costRequired: "Vui lòng nhập chi phí",
+    warrantyMonthsRequired: "Vui lòng nhập thời gian bảo hành",
+    variantRequired: "Vui lòng chọn phân loại xe",
+    oilKindDuplicate: "Mỗi loại chỉ chọn một lần",
     expenseNameRequired: "Vui lòng nhập tên chi phí",
   },
 } as const;

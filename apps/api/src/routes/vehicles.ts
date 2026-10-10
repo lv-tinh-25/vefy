@@ -3,7 +3,7 @@ import { createMiddleware } from "hono/factory";
 import { zValidator } from "@hono/zod-validator";
 import { insertVehicleSchema, updateVehicleInfoSchema } from "@vefy/shared";
 import * as vehicleService from "../services/vehicle.service";
-import { oilChangeRoutes } from "./oil-changes";
+import { oilChangeRoutes, oilSettingsRoutes } from "./oil-changes";
 import { partRoutes } from "./parts";
 import { expenseRoutes } from "./expenses";
 import type { AuthEnv } from "../middleware/auth";
@@ -40,9 +40,16 @@ export const vehicleRoutes = new Hono<AuthEnv>()
   .patch("/:id", zValidator("json", updateVehicleInfoSchema), async (c) => {
     const id = c.req.param("id");
     const data = c.req.valid("json");
-    const vehicle = await vehicleService.update(id, data);
-    if (!vehicle) return c.json({ error: "Vehicle not found" }, 404);
-    return c.json(vehicle);
+    try {
+      const vehicle = await vehicleService.update(id, data);
+      if (!vehicle) return c.json({ error: "Vehicle not found" }, 404);
+      return c.json(vehicle, 200);
+    } catch (err) {
+      if (err instanceof vehicleService.VariantLockedError) {
+        return c.json({ code: "VARIANT_LOCKED" as const }, 409);
+      }
+      throw err;
+    }
   })
   .delete("/:id", async (c) => {
     const id = c.req.param("id");
@@ -50,5 +57,6 @@ export const vehicleRoutes = new Hono<AuthEnv>()
     return c.json({ success: true });
   })
   .route("/:vehicleId/oil-changes", oilChangeRoutes)
+  .route("/:vehicleId/oil-settings", oilSettingsRoutes)
   .route("/:vehicleId/parts", partRoutes)
   .route("/:vehicleId/expenses", expenseRoutes);

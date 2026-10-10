@@ -105,7 +105,7 @@ export function ExpensesContent() {
             options={vehicleOptions}
             placeholder={t("expenseForm.selectVehicle")}
           />
-          <ExpensesChart data={chartData} />
+          <ExpensesChart data={chartData} period={period} />
         </CardContent>
       </Card>
 

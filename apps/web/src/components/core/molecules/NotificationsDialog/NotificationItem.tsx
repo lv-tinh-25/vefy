@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useSwipeable } from "react-swipeable";
 import { AlertTriangle, Trash2, X } from "lucide-react";
+import { IconButton } from "@/components/core/atoms/IconButton";
 import type { Alert } from "@vefy/shared";
 import { useT } from "@/lib/i18n";
 import { getAlertLabel } from "@/lib/alert-label";
@@ -83,14 +84,13 @@ export function NotificationItem({ alert, onDismiss, onNavigate }: NotificationI
                 : t("alerts.remainingDays", { days: alert.daysRemaining })}
             </span>
           )}
-          <button
-            type="button"
+          <IconButton
+            icon={X}
+            size="sm"
+            label={t("notifications.dismiss")}
             onClick={handleDismiss}
-            className="hidden md:inline-flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:bg-danger/10 hover:text-danger transition-colors"
-            aria-label={t("notifications.dismiss")}
-          >
-            <X className="h-4 w-4" />
-          </button>
+            className="hidden md:inline-flex"
+          />
         </div>
       </Link>
     </div>

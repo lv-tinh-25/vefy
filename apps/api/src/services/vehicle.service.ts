@@ -1,28 +1,27 @@
 import { db } from "@vefy/db";
-import { vehicles, oilChanges, parts } from "@vefy/db";
+import { vehicles, oilChanges, parts, vehicleOilSettings } from "@vefy/db";
 import { and, eq, desc } from "drizzle-orm";
 import {
   computeAllAlerts,
   getActiveAlerts,
   countAlertsByStatus,
-  predictOilChange,
+  predictOilChanges,
   oilPredictionToAlert,
-  OIL_CYCLE_DEFAULTS,
+  resolveOilSettings,
   type Alert,
   type Vehicle,
-  type OilChange,
   type Part,
   type InsertVehicle,
   type UpdateVehicleInfo,
 } from "@vefy/shared";
-
-// userId is now passed from the auth middleware
+import { toOilChange } from "./oil-change.service";
 
 function toVehicle(row: typeof vehicles.$inferSelect): Vehicle {
   return {
     id: row.id,
     userId: row.userId,
     type: row.type,
+    variant: row.type === "car" ? null : row.variant,
     name: row.name,
     brand: row.brand,
     model: row.model,
@@ -32,24 +31,8 @@ function toVehicle(row: typeof vehicles.$inferSelect): Vehicle {
     warrantyExpiry: row.warrantyExpiry,
     registrationExpiry: row.registrationExpiry,
     insuranceExpiry: row.insuranceExpiry,
-    oilCycleKm: row.oilCycleKm,
-    oilUseDays: row.oilUseDays,
-    oilCycleDays: row.oilCycleDays,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
-  };
-}
-
-function toOilChange(row: typeof oilChanges.$inferSelect): OilChange {
-  return {
-    id: row.id,
-    vehicleId: row.vehicleId,
-    date: row.date,
-    odometer: row.odometer,
-    cost: row.cost,
-    oilType: row.oilType,
-    note: row.note,
-    createdAt: row.createdAt.toISOString(),
   };
 }
 
@@ -68,6 +51,30 @@ function toPart(row: typeof parts.$inferSelect): Part {
   };
 }
 
+async function loadVehicleState(row: typeof vehicles.$inferSelect, now: Date) {
+  const vehicle = toVehicle(row);
+  const [ocs, ps, storedSettings] = await Promise.all([
+    db
+      .select()
+      .from(oilChanges)
+      .where(eq(oilChanges.vehicleId, row.id))
+      .orderBy(desc(oilChanges.date), desc(oilChanges.odometer)),
+    db.select().from(parts).where(eq(parts.vehicleId, row.id)),
+    db.select().from(vehicleOilSettings).where(eq(vehicleOilSettings.vehicleId, row.id)),
+  ]);
+
+  const oilData = ocs.map(toOilChange);
+  const partData = ps.map(toPart);
+  const oilSettings = resolveOilSettings(vehicle.type, vehicle.variant, storedSettings);
+  const oilPredictions = predictOilChanges(oilData, oilSettings, now);
+  const oilAlerts = oilPredictions
+    .map((p) => oilPredictionToAlert(p, vehicle.id))
+    .filter((a): a is Alert => a !== null);
+  const alerts = computeAllAlerts(vehicle, partData, oilAlerts, now);
+
+  return { vehicle, oilData, partData, oilSettings, oilPredictions, alerts };
+}
+
 export async function listAll(userId: string) {
   const rows = await db
     .select()
@@ -75,82 +82,34 @@ export async function listAll(userId: string) {
     .where(eq(vehicles.userId, userId));
   const now = new Date();
 
-  const results = await Promise.all(
+  return Promise.all(
     rows.map(async (row) => {
-      const vehicle = toVehicle(row);
-      const ocs = await db
-        .select()
-        .from(oilChanges)
-        .where(eq(oilChanges.vehicleId, row.id))
-        .orderBy(desc(oilChanges.date));
-      const ps = await db
-        .select()
-        .from(parts)
-        .where(eq(parts.vehicleId, row.id));
-
-      const oilData = ocs.map(toOilChange);
-      const partData = ps.map(toPart);
-
-      const prediction = predictOilChange(
-        oilData,
-        vehicle.oilCycleKm,
-        vehicle.oilUseDays,
-        vehicle.oilCycleDays,
-        now,
-      );
-      const oilAlert = oilPredictionToAlert(prediction, vehicle.id);
-      const alerts = computeAllAlerts(vehicle, partData, oilAlert, now);
-
+      const { vehicle, oilData, partData, alerts } = await loadVehicleState(row, now);
       return {
         ...vehicle,
         alertSummary: countAlertsByStatus(alerts),
         activeAlertCount: getActiveAlerts(alerts).length,
-        oilChangeCount: ocs.length,
-        partCount: ps.length,
+        oilChangeCount: oilData.length,
+        partCount: partData.length,
       };
     }),
   );
-
-  return results;
 }
 
 export async function getById(id: string) {
   const [row] = await db.select().from(vehicles).where(eq(vehicles.id, id));
   if (!row) return null;
 
-  const vehicle = toVehicle(row);
-  const now = new Date();
-
-  const ocs = await db
-    .select()
-    .from(oilChanges)
-    .where(eq(oilChanges.vehicleId, id))
-    .orderBy(desc(oilChanges.date));
-
-  const ps = await db
-    .select()
-    .from(parts)
-    .where(eq(parts.vehicleId, id));
-
-  const oilData = ocs.map(toOilChange);
-  const partData = ps.map(toPart);
-
-  const prediction = predictOilChange(
-    oilData,
-    vehicle.oilCycleKm,
-    vehicle.oilUseDays,
-    vehicle.oilCycleDays,
-    now,
-  );
-  const oilAlert = oilPredictionToAlert(prediction, vehicle.id);
-  const alerts = computeAllAlerts(vehicle, partData, oilAlert, now);
+  const { vehicle, oilData, partData, oilSettings, oilPredictions, alerts } =
+    await loadVehicleState(row, new Date());
 
   return {
     ...vehicle,
     oilChanges: oilData,
     parts: partData,
     alerts,
-    oilPrediction: prediction,
+    oilSettings,
+    oilPredictions,
   };
 }
 
@@ -161,40 +120,11 @@ export async function listAllAlerts(userId: string) {
     .where(eq(vehicles.userId, userId));
 
   const now = new Date();
-  const allAlerts: Alert[] = [];
-
-  for (const row of vehicleRows) {
-    const vehicle = toVehicle(row);
-    const [ocs, ps] = await Promise.all([
-      db
-        .select()
-        .from(oilChanges)
-        .where(eq(oilChanges.vehicleId, row.id))
-        .orderBy(desc(oilChanges.date)),
-      db.select().from(parts).where(eq(parts.vehicleId, row.id)),
-    ]);
-
-    const oilData = ocs.map(toOilChange);
-    const partData = ps.map(toPart);
-
-    const prediction = predictOilChange(
-      oilData,
-      vehicle.oilCycleKm,
-      vehicle.oilUseDays,
-      vehicle.oilCycleDays,
-      now,
-    );
-    const oilAlert = oilPredictionToAlert(prediction, vehicle.id);
-    const alerts = computeAllAlerts(vehicle, partData, oilAlert, now);
-
-    allAlerts.push(...getActiveAlerts(alerts));
-  }
-
-  return allAlerts;
+  const states = await Promise.all(vehicleRows.map((row) => loadVehicleState(row, now)));
+  return states.flatMap((s) => getActiveAlerts(s.alerts));
 }
 
 export async function create(userId: string, data: InsertVehicle) {
-  const defaults = OIL_CYCLE_DEFAULTS[data.type];
   const name = data.name || `${data.brand} ${data.model}`;
 
   const [row] = await db
@@ -202,24 +132,45 @@ export async function create(userId: string, data: InsertVehicle) {
     .values({
       userId,
       type: data.type,
+      variant: data.type === "car" ? null : data.variant,
       name,
       brand: data.brand,
       model: data.model,
       year: data.year,
       licensePlate: data.licensePlate,
       color: data.color,
-      oilCycleKm: defaults.km,
-      oilCycleDays: defaults.days,
     })
     .returning();
 
   return toVehicle(row);
 }
 
+export class VariantLockedError extends Error {}
+
 export async function update(id: string, data: UpdateVehicleInfo) {
+  const { variant, ...rest } = data;
+  const changes: Partial<typeof vehicles.$inferInsert> = rest;
+
+  if (variant !== undefined) {
+    const [current] = await db
+      .select({ type: vehicles.type, variant: vehicles.variant })
+      .from(vehicles)
+      .where(eq(vehicles.id, id));
+    if (current?.type === "motorcycle" && current.variant !== variant) {
+      // The variant decides which oil kinds apply, so it's fixed once oil history exists
+      const [oilChange] = await db
+        .select({ id: oilChanges.id })
+        .from(oilChanges)
+        .where(eq(oilChanges.vehicleId, id))
+        .limit(1);
+      if (oilChange) throw new VariantLockedError();
+      changes.variant = variant;
+    }
+  }
+
   const [row] = await db
     .update(vehicles)
-    .set({ ...data, updatedAt: new Date() })
+    .set({ ...changes, updatedAt: new Date() })
     .where(eq(vehicles.id, id))
     .returning();
 

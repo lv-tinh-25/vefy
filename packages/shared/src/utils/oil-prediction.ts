@@ -1,4 +1,5 @@
 import type { OilChange } from "../schemas/oil-change";
+import type { OilKind, OilSetting } from "../constants/oil";
 import type { Alert, AlertStatus } from "./alerts";
 import { buildAlertKey } from "./alerts";
 import { ALERT_THRESHOLDS } from "../constants/defaults";
@@ -7,6 +8,8 @@ import { daysBetweenDates, todayDateStr } from "./date";
 export type OilUrgency = "overdue" | "warning" | "ok";
 
 export interface OilPrediction {
+  kind: OilKind;
+  cycleKm: number;
   daysSinceLast: number;
   lastOdo: number;
   lastDate: string;
@@ -19,98 +22,67 @@ export interface OilPrediction {
   urgency: OilUrgency;
 }
 
+function byDateAsc(a: OilChange, b: OilChange) {
+  return a.date.localeCompare(b.date) || a.odometer - b.odometer;
+}
 
-export function predictOilChange(
-  oilChanges: OilChange[],
-  oilCycleKm: number,
-  oilUseDays: boolean,
-  oilCycleDays: number,
-  currentDate: Date,
-): OilPrediction | null {
-  if (oilChanges.length === 0) return null;
-
-  const sorted = [...oilChanges].sort(
-    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
-  );
-
-  const newest = sorted[sorted.length - 1];
+/**
+ * Average km/day across every oil change of the vehicle, whatever the kind: the vehicle drives the
+ * same distance regardless of which fluid was changed, and rarely changed fluids (60,000 km) would
+ * otherwise never have two records to measure from.
+ */
+export function computeAvgKmPerDay(oilChanges: OilChange[]): number | null {
+  if (oilChanges.length < 2) return null;
+  const sorted = [...oilChanges].sort(byDateAsc);
   const oldest = sorted[0];
-  const todayStr = todayDateStr(currentDate);
-
-  const daysSinceLast = Math.max(0, daysBetweenDates(newest.date, todayStr));
-
-  if (sorted.length < 2) {
-    return {
-      daysSinceLast,
-      lastOdo: newest.odometer,
-      lastDate: newest.date,
-      avgKmPerDay: null,
-      estimatedOdo: null,
-      kmSinceLast: null,
-      daysUntilByKm: null,
-      daysUntilByTime: null,
-      effectiveDaysRemaining: null,
-      urgency: "ok",
-    };
-  }
-
-  // 1. Average km/day across the full history
+  const newest = sorted[sorted.length - 1];
   const totalKm = newest.odometer - oldest.odometer;
   const totalDays = daysBetweenDates(oldest.date, newest.date);
+  if (totalDays <= 0 || totalKm <= 0) return null;
+  return totalKm / totalDays;
+}
 
-  if (totalDays <= 0 || totalKm <= 0) {
-    return {
-      daysSinceLast,
-      lastOdo: newest.odometer,
-      lastDate: newest.date,
-      avgKmPerDay: null,
-      estimatedOdo: null,
-      kmSinceLast: null,
-      daysUntilByKm: null,
-      daysUntilByTime: null,
-      effectiveDaysRemaining: null,
-      urgency: "ok",
-    };
+export function predictOilChange(
+  kindChanges: OilChange[],
+  setting: OilSetting,
+  avgKmPerDay: number | null,
+  currentDate: Date,
+): OilPrediction | null {
+  if (kindChanges.length === 0) return null;
+
+  const sorted = [...kindChanges].sort(byDateAsc);
+  const newest = sorted[sorted.length - 1];
+  const daysSinceLast = Math.max(0, daysBetweenDates(newest.date, todayDateStr(currentDate)));
+
+  let estimatedOdo: number | null = null;
+  let kmSinceLast: number | null = null;
+  let daysUntilByKm: number | null = null;
+  if (avgKmPerDay !== null) {
+    estimatedOdo = newest.odometer + Math.round(avgKmPerDay * daysSinceLast);
+    kmSinceLast = Math.max(0, estimatedOdo - newest.odometer);
+    daysUntilByKm = Math.round(Math.max(0, setting.cycleKm - kmSinceLast) / avgKmPerDay);
   }
 
-  const avgKmPerDay = totalKm / totalDays;
+  const daysUntilByTime = setting.useDays
+    ? Math.max(0, setting.cycleDays - daysSinceLast)
+    : null;
 
-  // 2. Estimate the current odometer
-  const estimatedOdo = newest.odometer + Math.round(avgKmPerDay * daysSinceLast);
-  const kmSinceLast = Math.max(0, estimatedOdo - newest.odometer);
+  const limits = [daysUntilByKm, daysUntilByTime].filter((d): d is number => d !== null);
+  const effectiveDaysRemaining = limits.length > 0 ? Math.min(...limits) : null;
 
-  // 3. Days left by distance
-  const kmRemaining = Math.max(0, oilCycleKm - kmSinceLast);
-  const daysUntilByKm = Math.round(kmRemaining / avgKmPerDay);
-
-  // 4. Days left by time
-  let daysUntilByTime: number | null = null;
-  if (oilUseDays) {
-    daysUntilByTime = Math.max(0, oilCycleDays - daysSinceLast);
-  }
-
-  // 5. Whichever limit comes first
-  let effectiveDaysRemaining: number | null;
-  if (daysUntilByTime !== null) {
-    effectiveDaysRemaining = Math.min(daysUntilByKm, daysUntilByTime);
-  } else {
-    effectiveDaysRemaining = daysUntilByKm;
-  }
-
-  let urgency: OilUrgency;
-  if (effectiveDaysRemaining <= 0) {
-    urgency = "overdue";
-  } else if (effectiveDaysRemaining <= ALERT_THRESHOLDS.oil.warningDays) {
-    urgency = "warning";
-  } else {
-    urgency = "ok";
+  let urgency: OilUrgency = "ok";
+  if (effectiveDaysRemaining !== null) {
+    if (effectiveDaysRemaining <= 0) urgency = "overdue";
+    else if (effectiveDaysRemaining <= ALERT_THRESHOLDS.oil.warningDays) urgency = "warning";
   }
 
   return {
+    kind: setting.kind,
+    cycleKm: setting.cycleKm,
     daysSinceLast,
     lastOdo: newest.odometer,
     lastDate: newest.date,
-    avgKmPerDay: Math.round(avgKmPerDay * 10) / 10,
+    avgKmPerDay: avgKmPerDay === null ? null : Math.round(avgKmPerDay * 10) / 10,
     estimatedOdo,
     kmSinceLast,
     daysUntilByKm,
@@ -120,48 +92,57 @@ export function predictOilChange(
   };
 }
 
+/** One prediction per enabled kind that has at least one record, in settings order. */
+export function predictOilChanges(
+  oilChanges: OilChange[],
+  settings: OilSetting[],
+  currentDate: Date,
+): OilPrediction[] {
+  const avgKmPerDay = computeAvgKmPerDay(oilChanges);
+  return settings
+    .filter((s) => s.enabled)
+    .map((s) =>
+      predictOilChange(
+        oilChanges.filter((oc) => oc.kind === s.kind),
+        s,
+        avgKmPerDay,
+        currentDate,
+      ),
+    )
+    .filter((p): p is OilPrediction => p !== null);
+}
+
 export function oilPredictionToAlert(
-  prediction: OilPrediction | null,
+  prediction: OilPrediction,
   vehicleId: string,
 ): Alert | null {
-  if (!prediction) return null;
-
-  const key = buildAlertKey("oil_change", vehicleId, prediction.lastDate);
-
-  let status: AlertStatus;
+  // Engine oil keeps the pre-kinds key format so alerts dismissed before stay dismissed
+  const discriminator =
+    prediction.kind === "engine" ? prediction.lastDate : `${prediction.kind}:${prediction.lastDate}`;
+  const key = buildAlertKey("oil_change", vehicleId, discriminator);
+  const base = { type: "oil_change" as const, oilKind: prediction.kind, expiryDate: null, vehicleId, key };
 
   if (prediction.effectiveDaysRemaining === null) {
     if (prediction.daysSinceLast > 0) {
       return {
-        type: "oil_change",
+        ...base,
         status: "neutral",
         daysSinceLast: prediction.daysSinceLast,
         daysRemaining: null,
-        expiryDate: null,
-        vehicleId,
-        key,
       };
     }
     return null;
   }
 
-  switch (prediction.urgency) {
-    case "overdue":
-      status = "danger";
-      break;
-    case "warning":
-      status = "warning";
-      break;
-    default:
-      status = "success";
-  }
+  const statusByUrgency: Record<OilUrgency, AlertStatus> = {
+    overdue: "danger",
+    warning: "warning",
+    ok: "success",
+  };
 
   return {
-    type: "oil_change",
-    status,
+    ...base,
+    status: statusByUrgency[prediction.urgency],
     daysRemaining: prediction.effectiveDaysRemaining,
-    expiryDate: null,
-    vehicleId,
-    key,
   };
 }

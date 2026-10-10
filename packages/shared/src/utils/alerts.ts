@@ -1,5 +1,6 @@
 import type { Vehicle } from "../schemas/vehicle";
 import type { Part } from "../schemas/part";
+import type { OilKind } from "../constants/oil";
 import { ALERT_THRESHOLDS } from "../constants/defaults";
 import { daysUntil } from "./date";
 
@@ -12,6 +13,7 @@ export interface Alert {
   status: AlertStatus;
   /** Part name for part_warranty alerts; display text is built by the client via i18n */
   subject?: string;
+  oilKind?: OilKind;
   /** Days since the last oil change, for oil alerts without a prediction yet */
   daysSinceLast?: number;
   daysRemaining: number | null;
@@ -105,19 +107,14 @@ export function computePartAlerts(parts: Part[], now: Date, vehicleId: string): 
 export function computeAllAlerts(
   vehicle: Vehicle,
   parts: Part[],
-  oilAlert: Alert | null,
+  oilAlerts: Alert[],
   now: Date,
 ): Alert[] {
-  const alerts: Alert[] = [
+  return [
     ...computeDocumentAlerts(vehicle, now),
     ...computePartAlerts(parts, now, vehicle.id),
+    ...oilAlerts,
   ];
-
-  if (oilAlert) {
-    alerts.push(oilAlert);
-  }
-
-  return alerts;
 }
 
 export function getActiveAlerts(alerts: Alert[]): Alert[] {

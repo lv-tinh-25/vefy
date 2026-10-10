@@ -10,7 +10,7 @@ import { ColorPicker } from "@/components/core/molecules/ColorPicker";
 import { YearDropdown } from "@/components/core/molecules/YearDropdown";
 import { useT } from "@/lib/i18n";
 import { useVehicleForm } from "@/hooks/garage/useVehicleForm";
-import { vehicleColorSchema, type VehicleType } from "@vefy/shared";
+import { motorcycleVariantSchema, vehicleColorSchema, type VehicleType } from "@vefy/shared";
 
 interface VehicleFormModalProps {
   open: boolean;
@@ -21,7 +21,7 @@ interface VehicleFormModalProps {
 export function VehicleFormModal({ open, onClose, onSuccess }: VehicleFormModalProps) {
   const { t, tRaw } = useT();
   const { form, loading, onSubmit } = useVehicleForm(onSuccess, onClose);
-  const { control, watch, formState: { errors } } = form;
+  const { control, watch, setValue, formState: { errors } } = form;
   const watchedType = watch("type");
   const vehicleType: VehicleType = watchedType === "car" ? "car" : "motorcycle";
 
@@ -48,12 +48,50 @@ export function VehicleFormModal({ open, onClose, onSuccess }: VehicleFormModalP
             name="type"
             render={({ field }) => (
               <div className="flex gap-2 mt-1.5">
-                <Button type="button" variant={field.value === "car" ? "default" : "outline"} size="sm" onClick={() => field.onChange("car")}>{t("common.car")}</Button>
+                <Button
+                  type="button"
+                  variant={field.value === "car" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => {
+                    field.onChange("car");
+                    setValue("variant", undefined);
+                  }}
+                >
+                  {t("common.car")}
+                </Button>
                 <Button type="button" variant={field.value === "motorcycle" ? "default" : "outline"} size="sm" onClick={() => field.onChange("motorcycle")}>{t("common.motorcycle")}</Button>
               </div>
             )}
           />
         </div>
+
+        {vehicleType === "motorcycle" && (
+          <div>
+            <Label>{t("vehicleForm.variant")}</Label>
+            <Controller
+              control={control}
+              name="variant"
+              render={({ field, fieldState }) => (
+                <>
+                  <div className="flex flex-wrap gap-2 mt-1.5">
+                    {motorcycleVariantSchema.options.map((variant) => (
+                      <Button
+                        key={variant}
+                        type="button"
+                        variant={field.value === variant ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => field.onChange(variant)}
+                      >
+                        {t(`vehicleVariant.${variant}`)}
+                      </Button>
+                    ))}
+                  </div>
+                  {fieldState.error && <p className="text-sm text-danger mt-1">{tRaw(fieldState.error.message)}</p>}
+                </>
+              )}
+            />
+          </div>
+        )}
 
         <div>
           <Label>{t("vehicleForm.color")}</Label>

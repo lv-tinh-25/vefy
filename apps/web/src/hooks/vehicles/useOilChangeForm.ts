@@ -1,28 +1,54 @@
 "use client";
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { insertOilChangeSchema, type InsertOilChange, todayDateStr } from "@vefy/shared";
+import {
+  insertOilChangesSchema,
+  todayDateStr,
+  type InsertOilChanges,
+  type OilKind,
+} from "@vefy/shared";
 import { api } from "@/lib/api";
 import { useT } from "@/lib/i18n";
 import { formatNumber } from "@/lib/utils";
 
-export function useOilChangeForm(vehicleId: string, onSuccess: () => Promise<unknown> | void, onClose: () => void) {
+// Cost starts empty; the schema rejects it on submit if it's never filled in
+const newItem = (kind: OilKind) => ({ kind, cost: undefined as unknown as number, oilType: "" });
+
+export function useOilChangeForm(
+  vehicleId: string,
+  enabledKinds: OilKind[],
+  prefillOdometer: number | undefined,
+  onSuccess: () => Promise<unknown> | void,
+  onClose: () => void,
+) {
   const { t, locale } = useT();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const form = useForm<Omit<InsertOilChange, "vehicleId">>({
-    resolver: zodResolver(insertOilChangeSchema.omit({ vehicleId: true })),
+  const form = useForm<InsertOilChanges>({
+    resolver: zodResolver(insertOilChangesSchema),
     defaultValues: {
       date: todayDateStr(),
-      odometer: undefined,
-      cost: undefined,
-      oilType: "",
+      odometer: prefillOdometer,
       note: "",
+      items: [newItem(enabledKinds[0])],
     },
   });
+
+  const items = useFieldArray({ control: form.control, name: "items" });
+  const chosenKinds = useWatch({ control: form.control, name: "items" }).map((i) => i.kind);
+  const unusedKinds = enabledKinds.filter((k) => !chosenKinds.includes(k));
+
+  const addItem = () => {
+    if (unusedKinds.length === 0) return;
+    items.append(newItem(unusedKinds[0]));
+  };
+
+  /** Kinds a row may pick: its own plus the ones no other row uses */
+  const kindOptions = (index: number) =>
+    enabledKinds.filter((k) => k === chosenKinds[index] || !chosenKinds.includes(k));
 
   const onSubmit = form.handleSubmit(async (data) => {
     setLoading(true);
@@ -38,11 +64,13 @@ export function useOilChangeForm(vehicleId: string, onSuccess: () => Promise<unk
         onClose();
       } else {
         const body = await res.json();
-        setError(
-          "code" in body && body.code === "ODOMETER_TOO_LOW"
-            ? t("oil.errorOdometerTooLow", { km: formatNumber(body.minOdometer, locale) })
-            : t("common.error"),
-        );
+        if ("code" in body && body.code === "ODOMETER_TOO_LOW") {
+          setError(t("oil.errorOdometerTooLow", { km: formatNumber(body.minOdometer, locale) }));
+        } else if ("code" in body && body.code === "OIL_KIND_UNAVAILABLE") {
+          setError(t("oil.errorKindUnavailable"));
+        } else {
+          setError(t("common.error"));
+        }
       }
     } catch {
       setError(t("auth.errorConnection"));
@@ -51,5 +79,15 @@ export function useOilChangeForm(vehicleId: string, onSuccess: () => Promise<unk
     }
   });
 
-  return { form, loading, error, onSubmit };
+  return {
+    form,
+    items: items.fields,
+    removeItem: items.remove,
+    addItem,
+    canAddItem: unusedKinds.length > 0,
+    kindOptions,
+    loading,
+    error,
+    onSubmit,
+  };
 }

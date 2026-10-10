@@ -10,12 +10,13 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import type { ExpenseSummary } from "@vefy/shared";
+import { fillChartPeriods, type ExpenseSummary, type StatsPeriod } from "@vefy/shared";
 import { useT } from "@/lib/i18n";
 import { formatCurrency } from "@/lib/utils";
 
 interface ExpensesChartProps {
   data: ExpenseSummary[];
+  period: StatsPeriod;
 }
 
 function compactNumber(v: number): string {
@@ -24,8 +25,32 @@ function compactNumber(v: number): string {
   return String(v);
 }
 
-export function ExpensesChart({ data }: ExpensesChartProps) {
+// Share of the tallest column a non-zero amount is drawn with at least, so a small month stays
+// visible next to a huge one instead of rendering under a pixel tall. Tooltips show real amounts.
+const MIN_VISIBLE_SHARE = 0.02;
+
+type ChartRow = ExpenseSummary & { partBar: number; otherBar: number };
+
+function toChartRows(summary: ExpenseSummary[]): ChartRow[] {
+  const floor = Math.max(...summary.map((s) => s.total), 0) * MIN_VISIBLE_SHARE;
+  const bar = (v: number) => (v > 0 ? Math.max(v, floor) : 0);
+  return summary.map((s) => ({ ...s, partBar: bar(s.part), otherBar: bar(s.other) }));
+}
+
+export function ExpensesChart({ data, period }: ExpensesChartProps) {
   const { t, locale } = useT();
+
+  const monthLabel = (key: string, style: "short" | "full") => {
+    const [year, month] = key.split("-").map(Number);
+    if (locale === "vi") return style === "short" ? `T${month}` : `Tháng ${month}/${year}`;
+    return new Date(Date.UTC(year, month - 1, 15)).toLocaleDateString("en-US", {
+      month: "short",
+      ...(style === "full" && { year: "numeric" }),
+      timeZone: "UTC",
+    });
+  };
+  const formatPeriod = (key: string, style: "short" | "full") =>
+    period === "month" ? monthLabel(key, style) : key;
 
   if (data.length === 0) {
     return (
@@ -37,20 +62,27 @@ export function ExpensesChart({ data }: ExpensesChartProps) {
 
   return (
     <ResponsiveContainer width="100%" height={280}>
-      <BarChart data={data} margin={{ top: 8, right: 8, left: 8, bottom: 8 }}>
+      <BarChart data={toChartRows(fillChartPeriods(data, period))} margin={{ top: 8, right: 8, left: 8, bottom: 8 }}>
         <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-        <XAxis dataKey="period" tick={{ fontSize: 12 }} />
+        <XAxis
+          dataKey="period"
+          tick={{ fontSize: 12 }}
+          interval={0}
+          tickFormatter={(key: string) => formatPeriod(key, "short")}
+        />
         <YAxis tick={{ fontSize: 12 }} tickFormatter={compactNumber} width={48} />
         <Tooltip
-          formatter={(value) =>
-            formatCurrency(typeof value === "number" ? value : Number(value) || 0, locale)
-          }
+          formatter={(_value, name, item) => {
+            const row = item.payload as ChartRow;
+            return [formatCurrency(item.dataKey === "partBar" ? row.part : row.other, locale), name];
+          }}
+          labelFormatter={(key) => formatPeriod(String(key), "full")}
           labelClassName="text-foreground"
           contentStyle={{ fontSize: 12 }}
         />
         <Legend wrapperStyle={{ fontSize: 12 }} />
-        <Bar dataKey="part" name={t("expenses.seriesPart")} stackId="a" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-        <Bar dataKey="other" name={t("expenses.seriesOther")} stackId="a" fill="#f59e0b" radius={[4, 4, 0, 0]} />
+        <Bar dataKey="partBar" name={t("expenses.seriesPart")} stackId="a" fill="#3b82f6" radius={[4, 4, 0, 0]} maxBarSize={28} />
+        <Bar dataKey="otherBar" name={t("expenses.seriesOther")} stackId="a" fill="#f59e0b" radius={[4, 4, 0, 0]} maxBarSize={28} />
       </BarChart>
     </ResponsiveContainer>
   );

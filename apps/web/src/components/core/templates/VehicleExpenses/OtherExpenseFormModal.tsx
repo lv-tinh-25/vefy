@@ -28,7 +28,10 @@ export function OtherExpenseFormModal({
     onSuccess,
     onClose,
   );
-  const { control } = form;
+  const {
+    control,
+    formState: { errors },
+  } = form;
 
   return (
     <Dialog
@@ -80,6 +83,9 @@ export function OtherExpenseFormModal({
             suffix="₫"
             className="mt-1.5"
           />
+          {errors.amount && (
+            <p className="text-sm text-danger mt-1">{tRaw(errors.amount.message as string)}</p>
+          )}
         </div>
 
         <div>

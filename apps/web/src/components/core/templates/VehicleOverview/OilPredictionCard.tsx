@@ -4,29 +4,26 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/core/mole
 import { Badge } from "@/components/core/atoms/Badge";
 import { cn } from "@/lib/utils";
 import { useT } from "@/lib/i18n";
+import type { MessageKey } from "@/lib/i18n";
 import type { OilPrediction } from "@vefy/shared";
 import { formatNumber } from "@/lib/utils";
-import { Brain, TrendingUp } from "lucide-react";
+import { Droplets } from "lucide-react";
 
-interface OilPredictionCardProps {
-  prediction: OilPrediction | null;
-  oilCycleKm: number;
+type Translate = (key: MessageKey, params?: Record<string, string | number>) => string;
+
+export function getPredictionBadge(prediction: OilPrediction, t: Translate) {
+  const days = prediction.effectiveDaysRemaining;
+  if (days === null) return null;
+  if (prediction.urgency === "overdue") return { variant: "danger" as const, label: t("prediction.overdueAlert") };
+  if (prediction.urgency === "warning") return { variant: "warning" as const, label: t("prediction.remainingDays", { days }) };
+  return { variant: "success" as const, label: t("prediction.remainingDaysMore", { days }) };
 }
 
-export function OilPredictionCard({ prediction, oilCycleKm }: OilPredictionCardProps) {
+export function OilPredictionCard({ prediction }: { prediction: OilPrediction }) {
   const { t, locale } = useT();
+  const badge = getPredictionBadge(prediction, t);
 
-  if (!prediction) return null;
-
-  const urgencyConfig = {
-    overdue: { variant: "danger" as const, label: t("prediction.overdueAlert") },
-    warning: { variant: "warning" as const, label: t("prediction.remainingDays", { days: prediction.effectiveDaysRemaining ?? 0 }) },
-    ok: { variant: "success" as const, label: t("prediction.remainingDaysMore", { days: prediction.effectiveDaysRemaining ?? 0 }) },
-  };
-
-  const config = urgencyConfig[prediction.urgency];
-
-  const progressPercent = Math.min(100, ((prediction.kmSinceLast || 0) / oilCycleKm) * 100);
+  const progressPercent = Math.min(100, ((prediction.kmSinceLast || 0) / prediction.cycleKm) * 100);
   const progressColor =
     prediction.urgency === "overdue"
       ? "bg-danger"
@@ -39,9 +36,9 @@ export function OilPredictionCard({ prediction, oilCycleKm }: OilPredictionCardP
       <CardHeader className="pb-2">
         <CardTitle className="text-sm flex items-center gap-2">
           <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary-muted">
-            <Brain className="h-3.5 w-3.5 text-primary" />
+            <Droplets className="h-3.5 w-3.5 text-primary" />
           </div>
-          {t("prediction.title")}
+          {t(`oilKinds.${prediction.kind}`)}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3 text-sm">
@@ -53,23 +50,12 @@ export function OilPredictionCard({ prediction, oilCycleKm }: OilPredictionCardP
           <span className="text-foreground">{formatNumber(prediction.lastOdo, locale)} km</span>
         </div>
 
-        {prediction.avgKmPerDay !== null && (
+        {prediction.kmSinceLast !== null && (
           <>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">{t("prediction.average")}</span>
-              <span className="flex items-center gap-1 text-foreground">
-                <TrendingUp className="h-3 w-3 text-primary" />
-                {t("prediction.kmPerDay", { km: prediction.avgKmPerDay })}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">{t("prediction.estimatedCurrent")}</span>
-              <span className="text-foreground">~{formatNumber(prediction.estimatedOdo!, locale)} km</span>
-            </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">{t("prediction.traveled")}</span>
               <span className="text-foreground">
-                ~{formatNumber(prediction.kmSinceLast!, locale)} / {formatNumber(oilCycleKm, locale)} km
+                ~{formatNumber(prediction.kmSinceLast, locale)} / {formatNumber(prediction.cycleKm, locale)} km
               </span>
             </div>
 
@@ -79,22 +65,26 @@ export function OilPredictionCard({ prediction, oilCycleKm }: OilPredictionCardP
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
-
-            <div className="flex justify-between text-xs text-faint">
-              <span>{t("prediction.byKm", { days: prediction.daysUntilByKm ?? 0 })}</span>
-              {prediction.daysUntilByTime !== null && (
-                <span>{t("prediction.byTime", { days: prediction.daysUntilByTime })}</span>
-              )}
-            </div>
           </>
         )}
 
-        <div className="pt-3 border-t border-border flex items-center justify-between">
+        {(prediction.daysUntilByKm !== null || prediction.daysUntilByTime !== null) && (
+          <div className="flex justify-between text-xs text-faint">
+            {prediction.daysUntilByKm !== null && (
+              <span>{t("prediction.byKm", { days: prediction.daysUntilByKm })}</span>
+            )}
+            {prediction.daysUntilByTime !== null && (
+              <span>{t("prediction.byTime", { days: prediction.daysUntilByTime })}</span>
+            )}
+          </div>
+        )}
+
+        <div className="pt-3 border-t border-border flex items-center justify-between gap-3">
           <span className="font-medium text-foreground">{t("prediction.result")}</span>
-          {prediction.effectiveDaysRemaining !== null ? (
-            <Badge variant={config.variant}>{config.label}</Badge>
+          {badge ? (
+            <Badge variant={badge.variant}>{badge.label}</Badge>
           ) : (
-            <span className="text-xs text-faint">{t("prediction.hint")}</span>
+            <span className="text-xs text-faint text-right">{t("prediction.hint")}</span>
           )}
         </div>
       </CardContent>

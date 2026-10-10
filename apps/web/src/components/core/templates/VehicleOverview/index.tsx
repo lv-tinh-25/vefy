@@ -4,11 +4,12 @@ import { useParams } from "next/navigation";
 import { useVehicle } from "@/hooks/vehicles/useVehicle";
 import { Card, CardContent } from "@/components/core/molecules/Card";
 import { Badge } from "@/components/core/atoms/Badge";
-import { OilPredictionCard } from "./OilPredictionCard";
+import { OilStatusList } from "./OilStatusList";
 import { StatusCard } from "./StatusCard";
 import { VehicleActionsMenu } from "./VehicleActionsMenu";
 import { useT } from "@/lib/i18n";
 import { getBrandLabel } from "@/lib/brand-label";
+import { getVehicleTypeLabel } from "@/lib/vehicle-label";
 import { PageSpinner } from "@/components/core/atoms/Spinner";
 import { Car, Bike, Shield, FileCheck, HeartPulse } from "lucide-react";
 import type { AlertStatus } from "@vefy/shared";
@@ -46,7 +47,7 @@ export function VehicleOverviewContent() {
           <div className="flex items-center gap-2">
             <h2 className="text-xl font-bold text-foreground truncate">{vehicle.name}</h2>
             <Badge className="shrink-0">
-              {vehicle.type === "car" ? t("common.car") : t("common.motorcycle")}
+              {getVehicleTypeLabel(vehicle, t)}
             </Badge>
           </div>
           <p className="text-sm text-muted-foreground truncate">
@@ -64,16 +65,18 @@ export function VehicleOverviewContent() {
         <StatusCard icon={HeartPulse} title={t("overview.insurance")} expiryDate={insurance.expiryDate} daysRemaining={insurance.daysRemaining} status={insurance.status} />
       </div>
 
-      <div>
-        <h3 className="text-sm font-medium text-muted-foreground mb-2">{t("overview.oilStatus")}</h3>
-        {vehicle.oilPrediction ? (
-          <OilPredictionCard prediction={vehicle.oilPrediction} oilCycleKm={vehicle.oilCycleKm} />
-        ) : (
-          <Card>
-            <CardContent className="p-4 text-center text-sm text-faint">{t("overview.noOilData")}</CardContent>
-          </Card>
-        )}
-      </div>
+      {vehicle.oilSettings.length > 0 && (
+        <div>
+          <h3 className="text-sm font-medium text-muted-foreground mb-2">{t("overview.oilStatus")}</h3>
+          {vehicle.oilChanges.length > 0 ? (
+            <OilStatusList vehicleId={id} settings={vehicle.oilSettings} predictions={vehicle.oilPredictions} />
+          ) : (
+            <Card>
+              <CardContent className="p-4 text-center text-sm text-faint">{t("overview.noOilData")}</CardContent>
+            </Card>
+          )}
+        </div>
+      )}
     </div>
   );
 }

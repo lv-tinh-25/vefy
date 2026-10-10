@@ -1,18 +1,20 @@
 import { db } from "@vefy/db";
-import { expenses, vehicles } from "@vefy/db";
+import { expenses, oilChanges, vehicles } from "@vefy/db";
 import { and, eq, desc } from "drizzle-orm";
 import {
   groupExpensesByPeriod,
   type Expense,
+  type OilKind,
   type ExpenseSummary,
   type StatsPeriod,
 } from "@vefy/shared";
 
-function toExpense(row: typeof expenses.$inferSelect): Expense {
+function toExpense(row: typeof expenses.$inferSelect, oilKind: OilKind | null): Expense {
   return {
     id: row.id,
     vehicleId: row.vehicleId,
     oilChangeId: row.oilChangeId,
+    oilKind,
     partId: row.partId,
     date: row.date,
     amount: row.amount,
@@ -25,21 +27,23 @@ function toExpense(row: typeof expenses.$inferSelect): Expense {
 
 export async function listByVehicle(vehicleId: string): Promise<Expense[]> {
   const rows = await db
-    .select()
+    .select({ expense: expenses, oilKind: oilChanges.kind })
     .from(expenses)
+    .leftJoin(oilChanges, eq(expenses.oilChangeId, oilChanges.id))
     .where(eq(expenses.vehicleId, vehicleId))
     .orderBy(desc(expenses.date), desc(expenses.createdAt));
-  return rows.map(toExpense);
+  return rows.map((r) => toExpense(r.expense, r.oilKind));
 }
 
 export async function listByUser(userId: string): Promise<Expense[]> {
   const rows = await db
-    .select({ expense: expenses })
+    .select({ expense: expenses, oilKind: oilChanges.kind })
     .from(expenses)
     .innerJoin(vehicles, eq(expenses.vehicleId, vehicles.id))
+    .leftJoin(oilChanges, eq(expenses.oilChangeId, oilChanges.id))
     .where(eq(vehicles.userId, userId))
     .orderBy(desc(expenses.date), desc(expenses.createdAt));
-  return rows.map((r) => toExpense(r.expense));
+  return rows.map((r) => toExpense(r.expense, r.oilKind));
 }
 
 export async function createOther(data: {
@@ -60,7 +64,7 @@ export async function createOther(data: {
       note: data.note || null,
     })
     .returning();
-  return toExpense(row);
+  return toExpense(row, null);
 }
 
 export async function remove(id: string, vehicleId: string) {

@@ -88,8 +88,9 @@ pnpm --filter @vefy/api dev:standalone   # Optional: run the Hono API alone on p
 ## Database Tables
 
 **App tables:**
-- `vehicles` — 17 columns (id, userId, type, name, brand, model, year, licensePlate, color, warranty/registration/insurance expiry, oil cycle settings, timestamps)
-- `oil_changes` — 8 columns (id, vehicleId FK cascade, date, odometer, cost, oilType, note, createdAt)
+- `vehicles` — 18 columns (id, userId, type, variant, name, brand, model, year, licensePlate, color, warranty/registration/insurance expiry, timestamps; the legacy `oil_cycle_*` columns are unused and pending a drop)
+- `oil_changes` — 9 columns (id, vehicleId FK cascade, kind, date, odometer, cost, oilType, note, createdAt)
+- `vehicle_oil_settings` — 6 columns (vehicleId FK cascade, kind, enabled, cycleKm, useDays, cycleDays); PK (vehicleId, kind). Only overrides are stored; missing kinds use `OIL_KIND_DEFAULTS`
 - `parts` — 10 columns (id, vehicleId FK cascade, name, installDate, warrantyMonths, warrantyExpiry, odometer, cost, note, createdAt)
 - `expenses` — 10 columns (id, vehicleId FK cascade, oilChangeId/partId FK cascade, date, amount, category `part|other`, name, note, createdAt). Rows linked to an oil change/part are auto-created and read-only.
 - `dismissed_alerts` — 4 columns (id, userId, alertKey, dismissedAt); unique (userId, alertKey)
@@ -120,12 +121,13 @@ DELETE /api/upload/avatar
 GET    /api/vehicles
 GET    /api/vehicles/:id
 POST   /api/vehicles
-PATCH  /api/vehicles/:id
+PATCH  /api/vehicles/:id                            # 409 VARIANT_LOCKED when changing variant after oil history exists
 DELETE /api/vehicles/:id
 
 GET    /api/vehicles/:vehicleId/oil-changes
-POST   /api/vehicles/:vehicleId/oil-changes
+POST   /api/vehicles/:vehicleId/oil-changes           # { date, odometer, note, items: [{ kind, cost, oilType }] } — one record per item
 DELETE /api/vehicles/:vehicleId/oil-changes/:id
+PUT    /api/vehicles/:vehicleId/oil-settings          # per-kind cycles
 
 GET    /api/vehicles/:vehicleId/parts
 POST   /api/vehicles/:vehicleId/parts
@@ -164,7 +166,7 @@ POST   /api/ocr/read-odometer   # 200 ok/unreadable · 429 OCR_DAILY_LIMIT|OCR_C
 - `/account` — profile, language/theme, change password, logout all devices, delete account
 - `/vehicle/[id]/overview` — status cards, oil prediction, ⋮ menu (delete vehicle)
 - `/vehicle/[id]/documents` — edit vehicle info, warranty/registration/insurance dates
-- `/vehicle/[id]/oil` — oil cycle settings, prediction, add/list oil changes, OCR
+- `/vehicle/[id]/oil` — per-kind cycle settings and predictions, add several kinds at one odometer reading, history filtered by kind, OCR (hidden for electric motorcycles)
 - `/vehicle/[id]/parts` — add/list parts with warranty tracking
 - `/vehicle/[id]/expenses` — per-vehicle expenses, chart, "other" expenses
 
@@ -173,8 +175,21 @@ The user menu holds notifications (swipe or "dismiss all"), theme, language, exp
 ## Business Logic
 
 ### Vehicle Types
-- **Car** (`car`): has registration inspection, default oil cycle 5,000 km / 180 days
-- **Motorcycle** (`motorcycle`): no registration inspection, default oil cycle 1,500 km / 90 days
+- **Car** (`car`): has registration inspection
+- **Motorcycle** (`motorcycle`): no registration inspection; `variant` is `manual`, `scooter` or `electric` (required on create; legacy rows without one count as manual). The variant can't change once the vehicle has oil changes
+
+### Oil Kinds (`OIL_KIND_DEFAULTS` in `@vefy/shared`)
+| Profile | Kind | Default km | Time limit (default) | Enabled by default |
+|---|---|---|---|---|
+| Car | engine | 5,000 | off · 180 days | yes |
+| Car | transmission | 60,000 | off · 730 days | yes |
+| Car | brake | 40,000 | **on** · 730 days | yes |
+| Car | power_steering | 60,000 | off · 730 days | no |
+| Car | differential | 40,000 | off · 730 days | no |
+| Manual / scooter | engine | 2,000 | off · 90 days | yes |
+| Scooter | gear | 6,000 | off · 180 days | yes |
+
+Electric motorcycles have no oil kinds.
 
 ### Brand Groups (Vietnam market)
 - Cars: Popular, Chinese, Luxury, Other
@@ -188,10 +203,11 @@ The user menu holds notifications (swipe or "dismiss all"), theme, language, exp
 | Oil change | ≤ 14 days remaining | Oil prediction |
 
 ### Oil Prediction Formula
-- Requires ≥ 2 oil change records
-- `avgKmPerDay = totalKm / totalDays` (across full history)
-- `estimatedOdo = newest.odo + avgKmPerDay × daysSince`
-- `effectiveDaysRemaining = min(daysUntilByKm, daysUntilByTime)`
+- Computed per enabled kind from that kind's newest record and its own cycle
+- `avgKmPerDay = totalKm / totalDays` across **every** oil change of the vehicle, whatever the kind (needs ≥ 2 records); the vehicle drives the same distance whichever fluid was changed
+- `estimatedOdo = newestOfKind.odo + avgKmPerDay × daysSince`
+- `effectiveDaysRemaining = min(daysUntilByKm, daysUntilByTime)`; the time limit alone works from a single record
+- Alert keys are per kind; engine oil keeps the pre-kinds key format so earlier dismissals still apply
 
 ### Part Warranty
 - `warrantyExpiry = installDate + warrantyMonths` (clamped to month end, e.g. Jan 31 + 1 month = Feb 28)

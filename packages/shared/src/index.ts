@@ -11,6 +11,7 @@ export * from "./constants/brands";
 export * from "./constants/colors";
 export * from "./constants/defaults";
 export * from "./constants/expense";
+export * from "./constants/oil";
 
 // Utils
 export * from "./utils/alerts";

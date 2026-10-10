@@ -1,23 +1,29 @@
 import { z } from "zod";
+import { emptyAsUndefined } from "./number";
 
 export const insertPartSchema = z.object({
   vehicleId: z.string().uuid(),
   name: z.string().min(1, "validation.partNameRequired"),
   installDate: z.string().min(1, "validation.dateRequired"),
-  warrantyMonths: z.coerce
-    .number({ invalid_type_error: "validation.warrantyMonthsInvalid" })
-    .int("validation.warrantyMonthsInvalid")
-    .min(0, "validation.warrantyMonthsMin")
-    .default(12),
-  odometer: z.coerce
-    .number({ invalid_type_error: "validation.odometerRequired" })
-    .int("validation.odometerInt")
-    .min(0, "validation.odometerMin")
-    .optional(),
-  cost: z.coerce
-    .number({ invalid_type_error: "validation.costMin" })
-    .int("validation.costMin")
-    .min(0, "validation.costMin"),
+  warrantyMonths: emptyAsUndefined(
+    z.coerce
+      .number({ invalid_type_error: "validation.warrantyMonthsRequired" })
+      .int("validation.warrantyMonthsInvalid")
+      .min(0, "validation.warrantyMonthsMin"),
+  ),
+  odometer: emptyAsUndefined(
+    z.coerce
+      .number({ invalid_type_error: "validation.odometerRequired" })
+      .int("validation.odometerInt")
+      .min(0, "validation.odometerMin")
+      .optional(),
+  ),
+  cost: emptyAsUndefined(
+    z.coerce
+      .number({ invalid_type_error: "validation.costRequired" })
+      .int("validation.costMin")
+      .min(0, "validation.costMin"),
+  ),
   note: z.string().optional(),
 });
 

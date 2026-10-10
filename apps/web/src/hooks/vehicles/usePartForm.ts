@@ -10,6 +10,7 @@ export type PartFormType = "part" | "other";
 
 export function usePartForm(
   vehicleId: string,
+  prefillOdometer: number | undefined,
   onSuccess: () => Promise<unknown> | void,
   onClose: () => void,
 ) {
@@ -22,7 +23,7 @@ export function usePartForm(
       name: "",
       installDate: todayDateStr(),
       warrantyMonths: 12,
-      odometer: undefined as number | undefined,
+      odometer: prefillOdometer,
       cost: undefined as number | undefined,
       note: "",
     },
@@ -52,6 +53,10 @@ export function usePartForm(
         type: "manual",
         message: "validation.expenseNameRequired",
       });
+      return;
+    }
+    if (cost == null) {
+      form.setError("cost", { type: "manual", message: "validation.costRequired" });
       return;
     }
     setLoading(true);

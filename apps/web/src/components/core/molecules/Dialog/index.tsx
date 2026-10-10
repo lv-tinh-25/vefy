@@ -3,6 +3,7 @@
 import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
 import { X } from "lucide-react";
+import { IconButton } from "@/components/core/atoms/IconButton";
 import { useEffect, type ReactNode } from "react";
 import { useT } from "@/lib/i18n";
 
@@ -65,15 +66,7 @@ export function Dialog({ open, onClose, title, children, actions, className, bus
         {/* Header — sticky */}
         <div className="shrink-0 flex items-center justify-between px-5 py-4 border-b border-border sm:px-6">
           <h2 className="text-lg font-semibold text-foreground">{title}</h2>
-          <button
-            type="button"
-            onClick={requestClose}
-            disabled={busy}
-            aria-label={t("common.close")}
-            className="rounded-lg p-1.5 text-faint hover:text-foreground hover:bg-surface transition-colors disabled:opacity-40 disabled:pointer-events-none"
-          >
-            <X className="h-4 w-4" />
-          </button>
+          <IconButton icon={X} label={t("common.close")} onClick={requestClose} disabled={busy} />
         </div>
 
         {/* Content — scrollable */}

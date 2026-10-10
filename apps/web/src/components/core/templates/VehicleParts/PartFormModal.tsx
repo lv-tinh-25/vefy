@@ -8,22 +8,32 @@ import { InputNumber } from "@/components/core/atoms/InputNumber";
 import { Label } from "@/components/core/atoms/Label";
 import { useT } from "@/lib/i18n";
 import { usePartForm } from "@/hooks/vehicles/usePartForm";
+import type { LastOdometer } from "@/lib/last-odometer";
+import { formatDate, formatNumber } from "@/lib/utils";
 
 interface PartFormModalProps {
   open: boolean;
   onClose: () => void;
   onSuccess: () => Promise<unknown> | void;
   vehicleId: string;
+  lastOdometer: LastOdometer | null;
 }
 
-export function PartFormModal({ open, onClose, onSuccess, vehicleId }: PartFormModalProps) {
-  const { t, tRaw } = useT();
+export function PartFormModal({ open, onClose, onSuccess, vehicleId, lastOdometer }: PartFormModalProps) {
+  const { t, tRaw, locale } = useT();
   const { form, formType, setFormType, loading, onSubmit } = usePartForm(
     vehicleId,
+    lastOdometer?.prefill ? lastOdometer.odometer : undefined,
     onSuccess,
     onClose,
   );
-  const { control } = form;
+  const {
+    control,
+    formState: { errors },
+  } = form;
+
+  const fieldError = (message?: string) =>
+    message && <p className="text-sm text-danger mt-1">{tRaw(message)}</p>;
 
   return (
     <Dialog
@@ -104,6 +114,7 @@ export function PartFormModal({ open, onClose, onSuccess, vehicleId }: PartFormM
             suffix="₫"
             className="mt-1.5"
           />
+          {fieldError(errors.cost?.message)}
         </div>
 
         {formType === "part" && (
@@ -134,6 +145,7 @@ export function PartFormModal({ open, onClose, onSuccess, vehicleId }: PartFormM
                 suffix={t("common.months")}
                 className="mt-1.5"
               />
+              {fieldError(errors.warrantyMonths?.message)}
             </div>
 
             <div>
@@ -141,11 +153,19 @@ export function PartFormModal({ open, onClose, onSuccess, vehicleId }: PartFormM
               <InputNumber
                 control={control}
                 name="odometer"
-                placeholder={t("common.optional")}
+                placeholder={
+                  lastOdometer
+                    ? t("common.lastOdometerHint", {
+                        km: formatNumber(lastOdometer.odometer, locale),
+                        date: formatDate(lastOdometer.date, locale),
+                      })
+                    : t("common.optional")
+                }
                 thousandSeparator
                 suffix="km"
                 className="mt-1.5"
               />
+              {fieldError(errors.odometer?.message)}
             </div>
           </>
         )}

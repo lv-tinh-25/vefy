@@ -11,7 +11,6 @@ import { cn } from "@/lib/utils";
 interface InputNumberProps<TFieldValues extends FieldValues> {
   name: FieldPath<TFieldValues>;
   control: Control<TFieldValues>;
-  emptyValue?: number | undefined;
   thousandSeparator?: boolean;
   suffix?: ReactNode;
   placeholder?: string;
@@ -24,7 +23,6 @@ interface InputNumberProps<TFieldValues extends FieldValues> {
 export function InputNumber<TFieldValues extends FieldValues>({
   name,
   control,
-  emptyValue,
   thousandSeparator = false,
   suffix,
   className,
@@ -42,7 +40,8 @@ export function InputNumber<TFieldValues extends FieldValues>({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const digitsOnly = e.target.value.replace(/\D/g, "");
     if (digitsOnly === "") {
-      field.onChange(emptyValue);
+      // Not undefined: React Hook Form would show the field's default value again
+      field.onChange(null);
       return;
     }
     field.onChange(Number(digitsOnly));

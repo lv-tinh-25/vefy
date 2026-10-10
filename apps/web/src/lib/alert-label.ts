@@ -13,11 +13,13 @@ export function getAlertLabel(alert: Alert, t: Translate): string {
       return t("alerts.labelInsurance");
     case "part_warranty":
       return t("alerts.labelPartWarranty", { name: alert.subject ?? "" });
-    case "oil_change":
+    case "oil_change": {
+      const kind = t(`oilKinds.${alert.oilKind ?? "engine"}`);
       if (alert.daysRemaining === null) {
-        return t("alerts.labelOilSinceLast", { days: alert.daysSinceLast ?? 0 });
+        return t("alerts.labelOilSinceLast", { kind, days: alert.daysSinceLast ?? 0 });
       }
-      if (alert.status === "danger") return t("alerts.labelOilOverdue");
-      return t("alerts.labelOilRemaining", { days: alert.daysRemaining });
+      if (alert.status === "danger") return t("alerts.labelOilOverdue", { kind });
+      return t("alerts.labelOilRemaining", { kind, days: alert.daysRemaining });
+    }
   }
 }

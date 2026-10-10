@@ -7,6 +7,7 @@ import { useT } from "@/lib/i18n";
 import type { MessageKey } from "@/lib/i18n";
 import { AppShell } from "@/components/core/molecules/AppShell";
 import { UserMenu } from "@/components/core/molecules/UserMenu";
+import { useVehicle } from "@/hooks/vehicles/useVehicle";
 import { ArrowLeft, LayoutDashboard, FileText, Droplets, Wrench, Coins } from "lucide-react";
 import type { ReactNode } from "react";
 
@@ -23,6 +24,8 @@ export function VehicleShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const id = String(params.id);
   const { t } = useT();
+  const { data: vehicle } = useVehicle(id);
+  const hasOil = vehicle?.variant !== "electric";
 
   return (
     <AppShell
@@ -40,7 +43,7 @@ export function VehicleShell({ children }: { children: ReactNode }) {
           </div>
           <div className="container mx-auto px-4">
             <nav className="flex">
-              {tabs.map((tab) => {
+              {tabs.filter((tab) => hasOil || tab.href !== "oil").map((tab) => {
                 const href = `/vehicle/${id}/${tab.href}`;
                 const isActive = pathname === href;
                 return (

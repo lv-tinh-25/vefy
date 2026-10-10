@@ -5,13 +5,15 @@ import { Card, CardContent } from "@/components/core/molecules/Card";
 import { Badge } from "@/components/core/atoms/Badge";
 import { useT } from "@/lib/i18n";
 import { getBrandLabel } from "@/lib/brand-label";
+import { getVehicleTypeLabel } from "@/lib/vehicle-label";
 import { Car, Bike, AlertTriangle, Droplets, Wrench } from "lucide-react";
-import { getColorHex } from "@vefy/shared";
+import { getColorHex, type MotorcycleVariant } from "@vefy/shared";
 
 interface VehicleCardProps {
   vehicle: {
     id: string;
     type: "car" | "motorcycle";
+    variant: MotorcycleVariant | null;
     name: string;
     brand: string;
     model: string;
@@ -44,7 +46,7 @@ export function VehicleCard({ vehicle }: VehicleCardProps) {
               <div className="flex items-center gap-2">
                 <h3 className="font-semibold text-sm truncate text-foreground">{vehicle.name}</h3>
                 <Badge className="shrink-0">
-                  {vehicle.type === "car" ? t("common.car") : t("common.motorcycle")}
+                  {getVehicleTypeLabel(vehicle, t)}
                 </Badge>
               </div>
               <p className="text-xs text-muted-foreground mt-0.5">
@@ -60,10 +62,12 @@ export function VehicleCard({ vehicle }: VehicleCardProps) {
                 <span>{vehicle.activeAlertCount}</span>
               </div>
             )}
-            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-              <Droplets className="h-3 w-3" />
-              <span>{vehicle.oilChangeCount}</span>
-            </div>
+            {vehicle.variant !== "electric" && (
+              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                <Droplets className="h-3 w-3" />
+                <span>{vehicle.oilChangeCount}</span>
+              </div>
+            )}
             <div className="flex items-center gap-1 text-xs text-muted-foreground">
               <Wrench className="h-3 w-3" />
               <span>{vehicle.partCount}</span>
