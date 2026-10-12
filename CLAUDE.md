@@ -73,6 +73,7 @@ pnpm --filter @vefy/api dev:standalone   # Optional: run the Hono API alone on p
 ## Deploy, CI & SEO
 
 - **Vercel**: Git integration on project `vefy` — pushes to `master` deploy to production, other branches/PRs get preview URLs. Root directory `apps/web` (pnpm workspace is auto-detected); Node version comes from `.nvmrc` (22). Set the env vars listed below (`DATABASE_URL` must be the Supabase transaction pooler, port 6543; generate fresh `BETTER_AUTH_SECRET` and `CRON_SECRET`). Run `pnpm db:migrate` locally before pushing code that needs a new migration.
+- **Turborepo strict env mode**: Vercel builds through `turbo`, which hides env vars not declared in `turbo.json`. Vars read at build time go in the build task's `env` (they change the output, e.g. SEO tags) or `passThroughEnv` (secrets); runtime functions read Vercel env directly.
 - **Cron**: `apps/web/vercel.json` schedules `GET /api/cron/keepalive` daily (guarded by `CRON_SECRET`, which Vercel sends as a Bearer token) so Supabase's free tier doesn't pause.
 - **Google OAuth**: register `https://<domain>/api/auth/callback/google` alongside the localhost URI. Preview deployments have changing URLs, so Google sign-in only works on production (email/password works everywhere).
 - **Search Console**: HTML-tag verification via `GOOGLE_SITE_VERIFICATION`, then submit `/sitemap.xml`.
