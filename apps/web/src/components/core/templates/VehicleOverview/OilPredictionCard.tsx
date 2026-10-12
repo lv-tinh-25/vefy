@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/core/mole
 import { Badge } from "@/components/core/atoms/Badge";
 import { cn } from "@/lib/utils";
 import { useT } from "@/lib/i18n";
+import { formatDaysAgo, OIL_CHANGED_KEYS } from "@/lib/days-ago";
 import type { MessageKey } from "@/lib/i18n";
 import type { OilPrediction } from "@vefy/shared";
 import { formatNumber } from "@/lib/utils";
@@ -43,7 +44,7 @@ export function OilPredictionCard({ prediction }: { prediction: OilPrediction })
       </CardHeader>
       <CardContent className="space-y-3 text-sm">
         <div className="flex justify-between">
-          <span className="text-muted-foreground">{t("prediction.daysSinceLast", { days: prediction.daysSinceLast })}</span>
+          <span className="text-muted-foreground">{formatDaysAgo(prediction.daysSinceLast, t, OIL_CHANGED_KEYS)}</span>
         </div>
         <div className="flex justify-between">
           <span className="text-muted-foreground">{t("prediction.lastOdo")}</span>

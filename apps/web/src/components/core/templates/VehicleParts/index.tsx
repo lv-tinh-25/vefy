@@ -7,8 +7,10 @@ import { RecordItem } from "@/components/core/molecules/RecordItem";
 import { Badge } from "@/components/core/atoms/Badge";
 import { PartFormModal } from "./PartFormModal";
 import { ConfirmDialog } from "@/components/core/molecules/ConfirmDialog";
+import { Fab } from "@/components/core/molecules/Fab";
 import { useParts } from "@/hooks/vehicles/useParts";
 import { getLastOdometer } from "@/lib/last-odometer";
+import { formatDaysAgo, PART_INSTALLED_KEYS } from "@/lib/days-ago";
 import { useT } from "@/lib/i18n";
 import { formatDate, formatNumber } from "@/lib/utils";
 import { PageSpinner } from "@/components/core/atoms/Spinner";
@@ -29,7 +31,7 @@ export function VehiclePartsContent() {
   function getWarrantyStatus(part: Part): { variant: "danger" | "warning" | "success" | "neutral"; label: string } {
     if (!part.warrantyExpiry) {
       const days = Math.max(0, daysBetweenDates(part.installDate, todayDateStr()));
-      return { variant: "neutral", label: t("parts.installedDaysAgo", { days }) };
+      return { variant: "neutral", label: formatDaysAgo(days, t, PART_INSTALLED_KEYS) };
     }
     const days = daysUntil(part.warrantyExpiry);
     if (days < 0) return { variant: "danger", label: t("parts.warrantyExpired", { days: Math.abs(days) }) };
@@ -39,7 +41,7 @@ export function VehiclePartsContent() {
 
   return (
     <div className="space-y-6">
-      <Button onClick={() => setShowForm(true)} className="w-full">
+      <Button onClick={() => setShowForm(true)} className="hidden sm:inline-flex w-full">
         <Plus className="h-4 w-4" />
         {t("parts.addPart")}
       </Button>
@@ -100,6 +102,8 @@ export function VehiclePartsContent() {
           loading={deleting}
         />
       )}
+
+      <Fab label={t("parts.addPart")} onClick={() => setShowForm(true)} />
     </div>
   );
 }

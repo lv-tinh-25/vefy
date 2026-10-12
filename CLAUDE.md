@@ -169,9 +169,12 @@ POST   /api/ocr/read-odometer   # 200 ok/unreadable · 429 OCR_DAILY_LIMIT|OCR_C
 - `/account` — profile, language/theme, change password, logout all devices, delete account
 - `/vehicle/[id]/overview` — status cards, oil prediction, ⋮ menu (delete vehicle)
 - `/vehicle/[id]/documents` — edit vehicle info, warranty/registration/insurance dates
-- `/vehicle/[id]/oil` — per-kind cycle settings and predictions, add several kinds at one odometer reading, history filtered by kind, OCR (hidden for electric motorcycles)
-- `/vehicle/[id]/parts` — add/list parts with warranty tracking
+- `/vehicle/[id]/maintenance` — "Bảo dưỡng" tab with Oil | Parts sub-tabs (`MaintenanceShell`); the bare path and the legacy `/oil` and `/parts` URLs redirect into it (legacy ones via `next.config.ts`)
+  - `/vehicle/[id]/maintenance/oil` — per-kind cycle settings and predictions, add several kinds at one odometer reading, history filtered by kind, OCR. Electric motorcycles have no oil: the sub-tab bar is hidden and this path redirects to parts
+  - `/vehicle/[id]/maintenance/parts` — add/list parts with warranty tracking
 - `/vehicle/[id]/expenses` — per-vehicle expenses, chart, "other" expenses
+
+On phones the vehicle tab bar stacks each icon above a small label; from `sm` up they sit side by side. The add buttons on the oil, parts and expenses tabs become a floating `Fab` (bottom-right, label shown for 3 s or until the first scroll) on phones and stay full-width from `sm` up.
 
 The user menu holds notifications (swipe or "dismiss all"), theme, language, expenses, account settings and logout.
 

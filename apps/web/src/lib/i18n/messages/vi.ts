@@ -37,7 +37,8 @@ export const vi = {
     labelPartWarranty: "BH: {name}",
     labelOilOverdue: "{kind}: đã quá hạn thay!",
     labelOilRemaining: "{kind}: còn ~{days} ngày",
-    labelOilSinceLast: "{kind}: đã {days} ngày từ lần cuối",
+    labelOilYesterday: "{kind}: thay hôm qua",
+    labelOilSinceLast: "{kind}: {days} ngày từ lần cuối",
   },
 
   vehicleVariant: {
@@ -118,6 +119,7 @@ export const vi = {
     garage: "Garage",
     overview: "Tổng quan",
     documents: "Giấy tờ",
+    maintenance: "Bảo dưỡng",
     oil: "Nhớt",
     parts: "Phụ tùng",
     expenses: "Chi phí",
@@ -128,7 +130,7 @@ export const vi = {
     registration: "Đăng kiểm",
     insurance: "Bảo hiểm",
     oilStatus: "Tình trạng nhớt",
-    noOilData: "Chưa có dữ liệu nhớt. Thêm lần thay nhớt tại tab Nhớt.",
+    noOilData: "Chưa có dữ liệu nhớt. Thêm lần thay nhớt tại tab Bảo dưỡng → Nhớt.",
     noKindData: "Chưa có lần thay",
   },
 
@@ -195,7 +197,9 @@ export const vi = {
     overdueAlert: "ĐÃ QUÁ HẠN THAY!",
     remainingDays: "Còn ~{days} ngày",
     remainingDaysMore: "Còn ~{days} ngày nữa",
-    daysSinceLast: "Đã {days} ngày từ lần thay cuối",
+    changedToday: "Thay hôm nay",
+    changedYesterday: "Thay hôm qua",
+    daysSinceLast: "{days} ngày từ lần thay cuối",
     lastOdo: "Odo lần cuối",
     average: "Trung bình",
     kmPerDay: "~{km} km/ngày",
@@ -216,7 +220,9 @@ export const vi = {
     warrantyRemaining: "Còn {days} ngày BH",
     warrantyPeriod: "BH {months} tháng",
     warrantyEnds: "Hết BH {date}",
-    installedDaysAgo: "Đã thay {days} ngày",
+    installedToday: "Thay hôm nay",
+    installedYesterday: "Thay hôm qua",
+    installedDaysAgo: "Thay {days} ngày trước",
   },
 
   partForm: {

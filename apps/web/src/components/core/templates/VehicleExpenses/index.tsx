@@ -11,6 +11,7 @@ import {
   CardTitle,
 } from "@/components/core/molecules/Card";
 import { ConfirmDialog } from "@/components/core/molecules/ConfirmDialog";
+import { Fab } from "@/components/core/molecules/Fab";
 import { SummaryCards } from "./SummaryCards";
 import { PeriodToggle } from "./PeriodToggle";
 import { ExpensesChart } from "./ExpensesChart";
@@ -78,7 +79,7 @@ export function VehicleExpensesContent() {
         </CardContent>
       </Card>
 
-      <Button onClick={() => setShowForm(true)} className="w-full">
+      <Button onClick={() => setShowForm(true)} className="hidden sm:inline-flex w-full">
         <Plus className="h-4 w-4" />
         {t("expenses.addOther")}
       </Button>
@@ -109,6 +110,8 @@ export function VehicleExpensesContent() {
           loading={deleting}
         />
       )}
+
+      <Fab label={t("expenses.addOther")} onClick={() => setShowForm(true)} />
     </div>
   );
 }

@@ -10,6 +10,7 @@ import { OilPredictionCard } from "@/components/core/templates/VehicleOverview/O
 import { OilChangeFormModal } from "./OilChangeFormModal";
 import { OilSettingsCard } from "./OilSettingsCard";
 import { ConfirmDialog } from "@/components/core/molecules/ConfirmDialog";
+import { Fab } from "@/components/core/molecules/Fab";
 import { useOilChanges } from "@/hooks/vehicles/useOilChanges";
 import { getLastOdometer } from "@/lib/last-odometer";
 import { useT } from "@/lib/i18n";
@@ -103,7 +104,7 @@ export function VehicleOilContent() {
         </div>
       )}
 
-      <Button onClick={() => setShowForm(true)} className="w-full" disabled={enabledKinds.length === 0}>
+      <Button onClick={() => setShowForm(true)} className="hidden sm:inline-flex w-full" disabled={enabledKinds.length === 0}>
         <Plus className="h-4 w-4" />
         {t("oil.addOilChange")}
       </Button>
@@ -158,6 +159,8 @@ export function VehicleOilContent() {
           loading={deleting}
         />
       )}
+
+      <Fab label={t("oil.addOilChange")} onClick={() => setShowForm(true)} disabled={enabledKinds.length === 0} />
     </div>
   );
 }

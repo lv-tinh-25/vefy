@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Card, CardContent } from "@/components/core/molecules/Card";
 import { Badge } from "@/components/core/atoms/Badge";
 import { useT } from "@/lib/i18n";
+import { formatDaysAgo, OIL_CHANGED_KEYS } from "@/lib/days-ago";
 import type { OilPrediction, OilSetting } from "@vefy/shared";
 import { getPredictionBadge } from "./OilPredictionCard";
 import { ChevronRight } from "lucide-react";
@@ -14,7 +15,7 @@ interface OilStatusListProps {
   predictions: OilPrediction[];
 }
 
-/** One row per enabled kind, the most urgent first; details live on the Oil tab */
+/** One row per enabled kind, the most urgent first; details live under Maintenance → Oil */
 export function OilStatusList({ vehicleId, settings, predictions }: OilStatusListProps) {
   const { t } = useT();
 
@@ -30,7 +31,7 @@ export function OilStatusList({ vehicleId, settings, predictions }: OilStatusLis
   if (rows.length === 0) return null;
 
   return (
-    <Link href={`/vehicle/${vehicleId}/oil`}>
+    <Link href={`/vehicle/${vehicleId}/maintenance/oil`}>
       <Card className="hover:border-primary/20 transition-colors">
         <CardContent className="p-0 divide-y divide-border">
           {rows.map(({ kind, prediction }) => {
@@ -44,7 +45,7 @@ export function OilStatusList({ vehicleId, settings, predictions }: OilStatusLis
                   ) : (
                     <span className="text-xs text-faint truncate">
                       {prediction
-                        ? t("prediction.daysSinceLast", { days: prediction.daysSinceLast })
+                        ? formatDaysAgo(prediction.daysSinceLast, t, OIL_CHANGED_KEYS)
                         : t("overview.noKindData")}
                     </span>
                   )}

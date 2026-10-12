@@ -16,7 +16,8 @@ export function getAlertLabel(alert: Alert, t: Translate): string {
     case "oil_change": {
       const kind = t(`oilKinds.${alert.oilKind ?? "engine"}`);
       if (alert.daysRemaining === null) {
-        return t("alerts.labelOilSinceLast", { kind, days: alert.daysSinceLast ?? 0 });
+        const days = alert.daysSinceLast ?? 0;
+        return t(days === 1 ? "alerts.labelOilYesterday" : "alerts.labelOilSinceLast", { kind, days });
       }
       if (alert.status === "danger") return t("alerts.labelOilOverdue", { kind });
       return t("alerts.labelOilRemaining", { kind, days: alert.daysRemaining });

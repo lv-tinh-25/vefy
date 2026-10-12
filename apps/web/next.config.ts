@@ -8,6 +8,14 @@ try {
 
 const nextConfig: NextConfig = {
   transpilePackages: ["@vefy/shared", "@vefy/api", "@vefy/db"],
+  // Oil and parts moved under the Maintenance tab; keep old links and bookmarks working
+  async redirects() {
+    return ["oil", "parts"].map((tab) => ({
+      source: `/vehicle/:id/${tab}`,
+      destination: `/vehicle/:id/maintenance/${tab}`,
+      permanent: true,
+    }));
+  },
 };
 
 export default nextConfig;

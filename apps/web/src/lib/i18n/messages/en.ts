@@ -39,6 +39,7 @@ export const en: Messages = {
     labelPartWarranty: "Warranty: {name}",
     labelOilOverdue: "{kind}: change overdue!",
     labelOilRemaining: "{kind}: ~{days} days left",
+    labelOilYesterday: "{kind}: changed yesterday",
     labelOilSinceLast: "{kind}: {days} days since last change",
   },
 
@@ -120,6 +121,7 @@ export const en: Messages = {
     garage: "Garage",
     overview: "Overview",
     documents: "Documents",
+    maintenance: "Maintenance",
     oil: "Oil",
     parts: "Parts",
     expenses: "Expenses",
@@ -130,7 +132,7 @@ export const en: Messages = {
     registration: "Registration",
     insurance: "Insurance",
     oilStatus: "Oil status",
-    noOilData: "No oil data yet. Add an oil change in the Oil tab.",
+    noOilData: "No oil data yet. Add an oil change under Maintenance → Oil.",
     noKindData: "No changes yet",
   },
 
@@ -197,6 +199,8 @@ export const en: Messages = {
     overdueAlert: "CHANGE OVERDUE!",
     remainingDays: "~{days} days left",
     remainingDaysMore: "~{days} days remaining",
+    changedToday: "Changed today",
+    changedYesterday: "Changed yesterday",
     daysSinceLast: "{days} days since last change",
     lastOdo: "Last odometer",
     average: "Average",
@@ -218,6 +222,8 @@ export const en: Messages = {
     warrantyRemaining: "{days} days warranty",
     warrantyPeriod: "{months}-month warranty",
     warrantyEnds: "Warranty ends {date}",
+    installedToday: "Installed today",
+    installedYesterday: "Installed yesterday",
     installedDaysAgo: "Installed {days} days ago",
   },
 
