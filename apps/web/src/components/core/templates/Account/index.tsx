@@ -5,6 +5,7 @@ import { useT } from "@/lib/i18n";
 import { PageSpinner } from "@/components/core/atoms/Spinner";
 import { ProfileSection } from "./ProfileSection";
 import { PreferencesSection } from "./PreferencesSection";
+import { RemindersSection } from "./RemindersSection";
 import { SecuritySection } from "./SecuritySection";
 import { DangerSection } from "./DangerSection";
 
@@ -21,6 +22,7 @@ export function AccountContent() {
       </h1>
 
       <ProfileSection />
+      <RemindersSection />
       <PreferencesSection />
       <SecuritySection />
       <DangerSection />

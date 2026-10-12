@@ -8,6 +8,10 @@ try {
 
 const nextConfig: NextConfig = {
   transpilePackages: ["@vefy/shared", "@vefy/api", "@vefy/db"],
+  // Browsers must always fetch the latest service worker, or push handling fixes never ship
+  async headers() {
+    return [{ source: "/sw.js", headers: [{ key: "Cache-Control", value: "no-cache" }] }];
+  },
   // Oil and parts moved under the Maintenance tab; keep old links and bookmarks working
   async redirects() {
     return ["oil", "parts"].map((tab) => ({

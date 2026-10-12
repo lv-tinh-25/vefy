@@ -14,7 +14,8 @@ Personal vehicle management app for cars and motorcycles, targeting the Vietname
 - **Auth**: better-auth 1.6 (email/password + Google OAuth, Drizzle adapter, DB-backed rate limiting)
 - **AI/OCR**: Google Gemini (`@google/genai`, `gemini-2.5-flash` with fallback to `gemini-2.5-flash-lite` on quota errors)
 - **Storage**: Supabase Storage, bucket `avatars` (user avatars at the root, vehicle photos under `vehicles/`)
-- **Mail**: nodemailer over SMTP (Gmail App Password) — email verification + password reset
+- **Mail**: nodemailer over SMTP (Gmail App Password) — email verification, password reset, reminder digests
+- **Push**: Web Push (`web-push`, VAPID) with a plain service worker at `public/sw.js`
 
 ## Monorepo Structure
 
@@ -66,6 +67,7 @@ pnpm --filter @vefy/api dev:standalone   # Optional: run the Hono API alone on p
 - **App origin** (`apps/api/src/lib/origin.ts`): Vercel preview URL → `FRONTEND_URL` → Vercel production domain → localhost. Used by auth, CORS and SEO, so `FRONTEND_URL` is optional on Vercel.
 - **Vehicle tabs are static**: `app/vehicle/[id]/layout.tsx` returns `[]` from `generateStaticParams`, so each vehicle's shell is rendered once and cached; `<Link>` then prefetches whole tabs and switching is instant. Pages there must stay client-only (data via SWR) — no `cookies()`/`headers()`/server data fetching.
 - **SWR feedback**: `SWRActivityProvider` (`lib/swr-activity.tsx`) drives the thin top `RefreshIndicator` while a hook refetches over existing data. Mutating dialogs `await` the revalidation before closing so they never close onto stale data.
+- **Reminders**: `services/reminder.service.ts` runs the daily job; `lib/push.ts` and `lib/email.ts` deliver. The browser side is `lib/web-push.ts` + `hooks/account/useReminderSettings.ts`; `public/sw.js` must stay excluded from the middleware matcher and served `no-cache`.
 - **Toasts report API actions**: every mutating call (POST/PATCH/PUT/DELETE, better-auth actions) reports success and failure through `notify` (`lib/notify.ts`), rendered by `AppToaster` (bottom-right on desktop, top-centre on phones). Form validation stays inline. Actions that end in a full reload use `notify.afterReload`.
 - **Third-party clients are created lazily** (Supabase, Gemini) so importing the API never throws during `next build` when env vars are missing.
 - **No `.js` extensions in imports**: tsx and drizzle-kit require extensionless imports.
@@ -74,7 +76,7 @@ pnpm --filter @vefy/api dev:standalone   # Optional: run the Hono API alone on p
 
 - **Vercel**: Git integration on project `vefy` — pushes to `master` deploy to production, other branches/PRs get preview URLs. Root directory `apps/web` (pnpm workspace is auto-detected); Node version comes from `.nvmrc` (22). Set the env vars listed below (`DATABASE_URL` must be the Supabase transaction pooler, port 6543; generate fresh `BETTER_AUTH_SECRET` and `CRON_SECRET`). Run `pnpm db:migrate` locally before pushing code that needs a new migration.
 - **Turborepo strict env mode**: Vercel builds through `turbo`, which hides env vars not declared in `turbo.json`. Vars read at build time go in the build task's `env` (they change the output, e.g. SEO tags) or `passThroughEnv` (secrets); runtime functions read Vercel env directly.
-- **Cron**: `apps/web/vercel.json` schedules `GET /api/cron/keepalive` daily (guarded by `CRON_SECRET`, which Vercel sends as a Bearer token) so Supabase's free tier doesn't pause.
+- **Cron**: `apps/web/vercel.json` schedules `GET /api/cron/keepalive` daily (so Supabase's free tier doesn't pause) and `GET /api/cron/reminders` at 01:00 UTC (08:00 Vietnam). Both are guarded by `CRON_SECRET`, which Vercel sends as a Bearer token.
 - **Google OAuth**: register `https://<domain>/api/auth/callback/google` alongside the localhost URI. Preview deployments have changing URLs, so Google sign-in only works on production (email/password works everywhere).
 - **Search Console**: HTML-tag verification via `GOOGLE_SITE_VERIFICATION`, then submit `/sitemap.xml`.
 - **CI**: `.github/workflows/ci.yml` runs install (frozen lockfile) → typecheck → lint → test → web build on pushes to `master` and PRs.
@@ -96,6 +98,9 @@ pnpm --filter @vefy/api dev:standalone   # Optional: run the Hono API alone on p
 - `parts` — 10 columns (id, vehicleId FK cascade, name, installDate, warrantyMonths, warrantyExpiry, odometer, cost, note, createdAt); warrantyMonths/warrantyExpiry are null for parts without a warranty
 - `expenses` — 10 columns (id, vehicleId FK cascade, oilChangeId/partId FK cascade, date, amount, category `part|other`, name, note, createdAt). Rows linked to an oil change/part are auto-created and read-only.
 - `dismissed_alerts` — 4 columns (id, userId, alertKey, dismissedAt); unique (userId, alertKey)
+- `push_subscriptions` — 7 columns (id, userId, endpoint unique, p256dh, auth, userAgent, createdAt); one row per browser/device
+- `notification_settings` — 3 columns (userId PK, emailReminders, updatedAt); a missing row means email reminders are on
+- `reminder_log` — 4 columns (userId, alertKey, stage, sentAt); PK (userId, alertKey, stage)
 - `ocr_usage` — 4 columns (userId, date, count, lastAt); PK (userId, date)
 
 **better-auth tables (auto-managed):**
@@ -148,6 +153,16 @@ GET    /api/expenses/summary
 GET    /api/notifications
 POST   /api/notifications/dismiss
 POST   /api/notifications/dismiss-all
+GET    /api/notifications/settings                  # { emailReminders, vapidPublicKey } (null key = push not configured)
+PATCH  /api/notifications/settings                  # { emailReminders }
+POST   /api/notifications/push/subscribe            # PushSubscription JSON; HTTPS endpoints only
+POST   /api/notifications/push/unsubscribe          # { endpoint }
+POST   /api/notifications/push/test                 # { endpoint } — 502 PUSH_FAILED if it didn't go through
+
+# Public
+GET    /api/reminders/unsubscribe?token=            # confirm page (GET never changes anything: mail scanners prefetch links)
+POST   /api/reminders/unsubscribe?token=            # turns email reminders off; also the RFC 8058 one-click target
+GET    /api/cron/reminders                          # Vercel Cron, Bearer CRON_SECRET
 
 # OCR (auth required, per-user limits)
 POST   /api/ocr/read-odometer   # 200 ok/unreadable · 429 OCR_DAILY_LIMIT|OCR_COOLDOWN · 503 OCR_UNAVAILABLE
@@ -167,7 +182,7 @@ POST   /api/ocr/read-odometer   # 200 ok/unreadable · 429 OCR_DAILY_LIMIT|OCR_C
 **Authenticated:**
 - `/garage` — vehicle list, add vehicle
 - `/expenses` — expenses across all vehicles
-- `/account` — profile, language/theme, change password, logout all devices, delete account
+- `/account` — profile, reminders (push on this device + test, email on/off, iPhone "Add to Home Screen" guide), language/theme, change password, logout all devices, delete account
 - `/vehicle/[id]/overview` — status cards, oil prediction, ⋮ menu (delete vehicle)
 - `/vehicle/[id]/documents` — edit vehicle info, warranty/registration/insurance dates
 - `/vehicle/[id]/maintenance` — "Bảo dưỡng" tab with Oil | Parts sub-tabs (`MaintenanceShell`); the bare path and the legacy `/oil` and `/parts` URLs redirect into it (legacy ones via `next.config.ts`)
@@ -226,6 +241,15 @@ Electric motorcycles have no oil kinds.
 - Password reset revokes all sessions
 - Verification/reset emails limited to 3 per hour per IP (better-auth rate limit, stored in `rate_limit`)
 
+### Reminders (push + email)
+- A daily job at 08:00 (VN) reminds each active alert at most once per stage: `start` (enters the warning threshold) → `week` (≤ 7 days) → `day` (tomorrow/today) → `overdue` (status `danger`; oil predictions bottom out at 0 days). Only the current stage is sent, so a missed run never replays old stages (`selectDueReminders` in `@vefy/shared`)
+- Dismissed alerts are never reminded. Alert keys include the expiry/last-change date, so renewing a document or logging an oil change starts fresh
+- Per user and run: one push to every subscribed device (one item → that vehicle's page, several → a summary) and one digest email if `emailVerified` and email reminders are on. Expired subscriptions (404/410) are deleted
+- Stages are claimed in `reminder_log` before sending (Vercel may start a cron twice; only one run gets each row) and released if no channel delivered, so turning a channel on later still delivers the current stage
+- Logging out removes that device's push subscription, so a shared device stops getting the previous account's reminders
+- Reminder text is Vietnamese only (`lib/reminder-text.ts`): the job runs without a browser locale
+- iPhone/iPad needs iOS 16.4+ and Vefy added to the Home Screen; the permission prompt must come from a tap
+
 ### OCR Limits
 - 10 scans per user per day (VN calendar day), at least 10 seconds between scans
 - A scan counts whenever Gemini is called, even if the odometer can't be read
@@ -269,6 +293,8 @@ OCR_DAILY_LIMIT          — optional, default 10
 OCR_COOLDOWN_SECONDS     — optional, default 10
 
 # Deploy / SEO
-CRON_SECRET              — Vercel Cron bearer token for /api/cron/keepalive
+CRON_SECRET              — Vercel Cron bearer token for /api/cron/*
+VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY — Web push keys (npx web-push generate-vapid-keys); push UI hides itself when unset
+VAPID_SUBJECT            — real mailto: or https: contact for push services (Apple answers 403 BadJwtToken for made-up domains); defaults to the app's https origin
 GOOGLE_SITE_VERIFICATION — optional, Search Console HTML-tag token
 ```

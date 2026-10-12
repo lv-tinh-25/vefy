@@ -35,6 +35,9 @@ export const metadata: Metadata = {
     description: DESCRIPTION,
   },
   twitter: { card: "summary_large_image" },
+  // iOS uses this for "Add to Home Screen", which is also what enables web push there
+  icons: { apple: "/icons/apple-touch-icon.png" },
+  appleWebApp: { capable: true, title: "Vefy", statusBarStyle: "default" },
   // Google Search Console HTML-tag verification; set the token in Vercel env
   verification: process.env.GOOGLE_SITE_VERIFICATION
     ? { google: process.env.GOOGLE_SITE_VERIFICATION }

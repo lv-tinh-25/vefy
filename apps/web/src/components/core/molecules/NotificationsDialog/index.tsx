@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { BellOff } from "lucide-react";
+import Link from "next/link";
+import { BellOff, BellRing } from "lucide-react";
 import { Dialog } from "@/components/core/molecules/Dialog";
 import { ConfirmDialog } from "@/components/core/molecules/ConfirmDialog";
 import { useT } from "@/lib/i18n";
 import { useNotifications } from "@/hooks/notifications/useNotifications";
+import { useReminderSettings } from "@/hooks/account/useReminderSettings";
 import { NotificationItem } from "./NotificationItem";
 
 interface NotificationsDialogProps {
@@ -15,9 +17,17 @@ interface NotificationsDialogProps {
 
 export function NotificationsDialog({ open, onClose }: NotificationsDialogProps) {
   const { t } = useT();
-  const { activeAlerts, dismiss, dismissAll } = useNotifications();
+  const { activeAlerts, vehicleNames, dismiss, dismissAll } = useNotifications();
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [dismissingAll, setDismissingAll] = useState(false);
+  const { support, pushEnabled, pushAvailable } = useReminderSettings();
+  const showPushHint = pushAvailable && !pushEnabled && (support === "supported" || support === "ios-install");
+
+  // One group per vehicle, in the order vehicles first appear (alerts arrive grouped already)
+  const groups = [...new Set(activeAlerts.map((a) => a.vehicleId))].map((vehicleId) => ({
+    vehicleId,
+    alerts: activeAlerts.filter((a) => a.vehicleId === vehicleId),
+  }));
 
   const handleDismissAll = async () => {
     setDismissingAll(true);
@@ -59,16 +69,31 @@ export function NotificationsDialog({ open, onClose }: NotificationsDialogProps)
                 {t("notifications.dismissAll")}
               </button>
             </div>
-            <div className="space-y-2">
-              {activeAlerts.map((alert) => (
-                <NotificationItem
-                  key={alert.key}
-                  alert={alert}
-                  onDismiss={dismiss}
-                  onNavigate={onClose}
-                />
-              ))}
-            </div>
+            {groups.map((group) => (
+              <section key={group.vehicleId} className="space-y-2">
+                <h3 className="flex items-center gap-2 px-1 pt-1 text-sm font-semibold text-foreground">
+                  <span className="truncate">{vehicleNames[group.vehicleId] ?? ""}</span>
+                  <span className="text-xs font-normal text-muted-foreground">({group.alerts.length})</span>
+                </h3>
+                {group.alerts.map((alert) => (
+                  <NotificationItem key={alert.key} alert={alert} onDismiss={dismiss} onNavigate={onClose} />
+                ))}
+              </section>
+            ))}
+          </div>
+        )}
+
+        {showPushHint && (
+          <div className="mt-4 flex items-center gap-3 rounded-lg border border-border bg-primary-muted/40 px-3 py-2.5">
+            <BellRing className="h-4 w-4 shrink-0 text-primary" />
+            <p className="flex-1 text-xs text-foreground">{t("notifications.enableHint")}</p>
+            <Link
+              href="/account#reminders"
+              onClick={onClose}
+              className="shrink-0 text-xs font-semibold text-primary hover:underline"
+            >
+              {t("notifications.enableHintAction")}
+            </Link>
           </div>
         )}
       </Dialog>

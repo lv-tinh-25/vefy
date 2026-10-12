@@ -10,6 +10,7 @@ import { uploadRoutes } from "./routes/upload";
 import { notificationRoutes } from "./routes/notifications";
 import { expensesGlobalRoutes } from "./routes/expenses-global";
 import { cronRoutes } from "./routes/cron";
+import { reminderRoutes } from "./routes/reminders";
 
 const FRONTEND_URL = getAppOrigin();
 
@@ -23,6 +24,7 @@ const app = new Hono()
   )
   .get("/api/health", (c) => c.json({ status: "ok" }))
   .route("/api/cron", cronRoutes)
+  .route("/api/reminders", reminderRoutes)
   // Better Auth handles all /api/auth/* routes (all HTTP methods)
   .all("/api/auth/*", (c) => {
     return auth.handler(c.req.raw);

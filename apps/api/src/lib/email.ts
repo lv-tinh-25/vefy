@@ -67,3 +67,67 @@ export async function sendResetPasswordEmail(to: string, url: string) {
     footer: "Nếu bạn không yêu cầu đặt lại mật khẩu, hãy bỏ qua email này. Mật khẩu hiện tại vẫn giữ nguyên.",
   });
 }
+
+const escapeHtml = (s: string) =>
+  s.replace(/[&<>"']/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[ch]!);
+
+export interface ReminderEmailGroup {
+  vehicleName: string;
+  lines: string[];
+}
+
+interface ReminderEmail {
+  to: string;
+  groups: ReminderEmailGroup[];
+  appUrl: string;
+  unsubscribeUrl: string;
+}
+
+export async function sendReminderEmail({ to, groups, appUrl, unsubscribeUrl }: ReminderEmail) {
+  const count = groups.reduce((n, g) => n + g.lines.length, 0);
+  const subject =
+    count === 1 ? `${groups[0].lines[0]} — ${groups[0].vehicleName}` : `${count} việc cần chú ý cho xe của bạn — Vefy`;
+
+  const text = [
+    "Nhắc nhở từ Vefy",
+    "",
+    ...groups.flatMap((g) => [g.vehicleName, ...g.lines.map((l) => `  • ${l}`), ""]),
+    `Mở Vefy: ${appUrl}`,
+    "",
+    `Không muốn nhận email nhắc nhở nữa? ${unsubscribeUrl}`,
+  ].join("\n");
+
+  // Explicit colours: without them dark-mode mail clients render dark text on a dark background
+  const html = `
+    <div style="font-family:system-ui,sans-serif;max-width:480px;margin:0 auto;padding:32px;background:#ffffff;color:#111111;border-radius:12px">
+      <h2 style="color:#00d4aa;margin-bottom:16px">Nhắc nhở từ Vefy</h2>
+      ${groups
+        .map(
+          (g) => `
+        <p style="font-weight:600;margin:20px 0 6px">${escapeHtml(g.vehicleName)}</p>
+        <ul style="margin:0;padding-left:20px">
+          ${g.lines.map((l) => `<li style="margin:4px 0">${escapeHtml(l)}</li>`).join("")}
+        </ul>`,
+        )
+        .join("")}
+      <a href="${appUrl}" style="display:inline-block;background:#00d4aa;color:#080b12;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;margin:24px 0 16px">
+        Mở Vefy
+      </a>
+      <p style="color:#888;font-size:13px;margin-top:24px">
+        Bạn nhận email này vì đã bật nhắc nhở trên Vefy.
+        <a href="${unsubscribeUrl}" style="color:#888">Tắt email nhắc nhở</a>
+      </p>
+    </div>
+  `;
+
+  await transporter.sendMail({
+    from: FROM,
+    to,
+    subject,
+    text,
+    html,
+    // One-click unsubscribe (RFC 8058), expected by Gmail and Yahoo for recurring mail
+    list: { unsubscribe: { url: unsubscribeUrl, comment: "Tắt email nhắc nhở" } },
+    headers: { "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" },
+  });
+}

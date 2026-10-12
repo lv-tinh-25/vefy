@@ -141,7 +141,34 @@ export async function listAllAlerts(userId: string) {
 
   const now = new Date();
   const states = await Promise.all(vehicleRows.map((row) => loadVehicleState(row, now)));
-  return states.flatMap((s) => getActiveAlerts(s.alerts));
+  return {
+    alerts: states.flatMap((s) => getActiveAlerts(s.alerts)),
+    vehicleNames: Object.fromEntries(vehicleRows.map((row) => [row.id, row.name])) as Record<string, string>,
+  };
+}
+
+export interface VehicleAlerts {
+  vehicle: Vehicle;
+  alerts: Alert[];
+}
+
+/** Active alerts of every vehicle, grouped by owner; used by the daily reminder job */
+export async function listActiveAlertsByUser(now: Date): Promise<Map<string, VehicleAlerts[]>> {
+  const rows = await db.select().from(vehicles);
+  const byUser = new Map<string, VehicleAlerts[]>();
+  // Small batches: each vehicle runs 3 queries and the pool holds 5 connections
+  const BATCH = 4;
+  for (let i = 0; i < rows.length; i += BATCH) {
+    const batch = rows.slice(i, i + BATCH);
+    const states = await Promise.all(batch.map((row) => loadVehicleState(row, now)));
+    states.forEach(({ vehicle, alerts }, j) => {
+      const active = getActiveAlerts(alerts);
+      if (active.length === 0) return;
+      const userId = batch[j].userId;
+      byUser.set(userId, [...(byUser.get(userId) ?? []), { vehicle, alerts: active }]);
+    });
+  }
+  return byUser;
 }
 
 export async function create(userId: string, data: InsertVehicle) {

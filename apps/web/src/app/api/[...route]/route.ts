@@ -3,8 +3,8 @@ import { app } from "@vefy/api/client";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-// OCR waits on Gemini
-export const maxDuration = 30;
+// OCR waits on Gemini; the daily reminder job walks every vehicle
+export const maxDuration = 60;
 
 const handler = handle(app);
 

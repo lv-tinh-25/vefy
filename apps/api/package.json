@@ -26,10 +26,12 @@
     "drizzle-orm": "^0.45.2",
     "hono": "^4.7.0",
     "nodemailer": "^8.0.5",
+    "web-push": "3.6.7",
     "zod": "^3.24.0"
   },
   "devDependencies": {
     "@types/nodemailer": "^8.0.0",
+    "@types/web-push": "3.6.4",
     "@vefy/tsconfig": "workspace:*",
     "tsup": "^8.4.0",
     "tsx": "^4.19.0",

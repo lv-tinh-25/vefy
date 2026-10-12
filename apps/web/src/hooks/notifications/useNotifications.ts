@@ -7,6 +7,7 @@ import { api } from "@/lib/api";
 
 interface NotificationsResponse {
   alerts: Alert[];
+  vehicleNames: Record<string, string>;
   dismissedKeys: string[];
 }
 
@@ -31,12 +32,12 @@ export function useNotifications() {
       async () => {
         await api.api.notifications.dismiss.$post({ json: { alertKey } });
         return data
-          ? { alerts: data.alerts, dismissedKeys: [...data.dismissedKeys, alertKey] }
+          ? { ...data, dismissedKeys: [...data.dismissedKeys, alertKey] }
           : undefined;
       },
       {
         optimisticData: data
-          ? { alerts: data.alerts, dismissedKeys: [...data.dismissedKeys, alertKey] }
+          ? { ...data, dismissedKeys: [...data.dismissedKeys, alertKey] }
           : undefined,
         rollbackOnError: true,
         revalidate: false,
@@ -51,15 +52,12 @@ export function useNotifications() {
       async () => {
         await api.api.notifications["dismiss-all"].$post({ json: { alertKeys: keys } });
         return data
-          ? {
-              alerts: data.alerts,
-              dismissedKeys: [...data.dismissedKeys, ...keys],
-            }
+          ? { ...data, dismissedKeys: [...data.dismissedKeys, ...keys] }
           : undefined;
       },
       {
         optimisticData: data
-          ? { alerts: data.alerts, dismissedKeys: [...data.dismissedKeys, ...keys] }
+          ? { ...data, dismissedKeys: [...data.dismissedKeys, ...keys] }
           : undefined,
         rollbackOnError: true,
         revalidate: false,
@@ -69,6 +67,7 @@ export function useNotifications() {
 
   return {
     activeAlerts,
+    vehicleNames: data?.vehicleNames ?? {},
     unreadCount: activeAlerts.length,
     isLoading,
     dismiss,

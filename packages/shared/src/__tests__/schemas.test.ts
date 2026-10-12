@@ -3,6 +3,7 @@ import { insertPartsSchema, partItemSchema } from "../schemas/part";
 import { insertOilChangesSchema } from "../schemas/oil-change";
 import { insertVehicleSchema } from "../schemas/vehicle";
 import { createOtherExpensesSchema } from "../schemas/expense";
+import { pushSubscriptionSchema } from "../schemas/notification";
 
 const part = { name: "Lọc gió", cost: 100000, noWarranty: false };
 
@@ -76,5 +77,14 @@ describe("insertVehicleSchema", () => {
     expect(firstError(insertVehicleSchema.safeParse({ ...vehicle, type: "motorcycle" }))).toBe("validation.variantRequired");
     expect(insertVehicleSchema.safeParse({ ...vehicle, type: "motorcycle", variant: "scooter" }).success).toBe(true);
     expect(insertVehicleSchema.safeParse({ ...vehicle, type: "car" }).success).toBe(true);
+  });
+});
+
+describe("pushSubscriptionSchema", () => {
+  const keys = { p256dh: "BKey", auth: "secret" };
+  it("accepts HTTPS push endpoints only", () => {
+    expect(pushSubscriptionSchema.safeParse({ endpoint: "https://fcm.googleapis.com/fcm/send/abc", keys }).success).toBe(true);
+    expect(pushSubscriptionSchema.safeParse({ endpoint: "http://127.0.0.1:9999/push", keys }).success).toBe(false);
+    expect(pushSubscriptionSchema.safeParse({ endpoint: "not-a-url", keys }).success).toBe(false);
   });
 });

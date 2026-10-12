@@ -7,6 +7,8 @@ import { useAuth } from "@/hooks/auth/useAuth";
 import { useNotifications } from "@/hooks/notifications/useNotifications";
 import { NotificationsDialog } from "@/components/core/molecules/NotificationsDialog";
 import { signOut } from "@/lib/auth-client";
+import { api } from "@/lib/api";
+import { removeDeviceSubscription } from "@/lib/web-push";
 import { useT } from "@/lib/i18n";
 import type { Locale } from "@/lib/i18n";
 import { useTheme } from "@/lib/theme";
@@ -48,6 +50,10 @@ export function UserMenu() {
 
   const handleLogout = async () => {
     setLoggingOut(true);
+    // A shared device must stop receiving this account's reminders; never block logout on it
+    await removeDeviceSubscription((endpoint) =>
+      api.api.notifications.push.unsubscribe.$post({ json: { endpoint } }),
+    ).catch(() => {});
     try {
       const result = await signOut();
       if (!result.error) {
@@ -67,6 +73,16 @@ export function UserMenu() {
     setLocale(locale === "vi" ? "en" : "vi");
     setOpen(false);
   };
+
+  // A multi-vehicle reminder push links to /garage?notifications=1; read it from the URL directly
+  // (useSearchParams would need a Suspense boundary on these static pages) and tidy the URL afterwards
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (url.searchParams.get("notifications") !== "1") return;
+    setNotificationsOpen(true);
+    url.searchParams.delete("notifications");
+    window.history.replaceState(window.history.state, "", url.pathname + url.search + url.hash);
+  }, []);
 
   const openNotifications = () => {
     setOpen(false);

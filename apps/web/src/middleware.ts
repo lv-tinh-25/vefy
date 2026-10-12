@@ -30,6 +30,6 @@ export function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     // Everything except static assets, SEO files and the API
-    "/((?!_next/static|_next/image|favicon.ico|icon.svg|opengraph-image|robots.txt|sitemap.xml|manifest.webmanifest|api).*)",
+    "/((?!_next/static|_next/image|favicon.ico|icon.svg|icons/|sw.js|opengraph-image|robots.txt|sitemap.xml|manifest.webmanifest|api).*)",
   ],
 };
