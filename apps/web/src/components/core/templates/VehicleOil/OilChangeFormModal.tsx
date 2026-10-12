@@ -3,18 +3,17 @@
 import { Controller } from "react-hook-form";
 import { Dialog } from "@/components/core/molecules/Dialog";
 import { Button } from "@/components/core/atoms/Button";
-import { IconButton } from "@/components/core/atoms/IconButton";
 import { Input } from "@/components/core/atoms/Input";
 import { InputNumber } from "@/components/core/atoms/InputNumber";
 import { Label } from "@/components/core/atoms/Label";
 import { Select } from "@/components/core/atoms/Select";
 import { OcrButton } from "@/components/core/molecules/OcrButton";
+import { AddRowButton, EntryRow } from "@/components/core/molecules/EntryRow";
 import { useT } from "@/lib/i18n";
 import { useOilChangeForm } from "@/hooks/vehicles/useOilChangeForm";
 import type { OilKind } from "@vefy/shared";
 import type { LastOdometer } from "@/lib/last-odometer";
 import { formatDate, formatNumber } from "@/lib/utils";
-import { Plus, X } from "lucide-react";
 
 interface OilChangeFormModalProps {
   open: boolean;
@@ -99,21 +98,21 @@ export function OilChangeFormModal({
           {items.map((item, index) => {
             const itemErrors = errors.items?.[index];
             return (
-              <div key={item.id} className="rounded-lg border border-border p-3 space-y-3">
-                <div className="flex items-end gap-2">
-                  <div className="flex-1 min-w-0">
-                    <Label>{t("oilForm.kind")} *</Label>
-                    <Controller control={control} name={`items.${index}.kind`} render={({ field }) => (
-                      <Select {...field} className="mt-1.5">
-                        {kindOptions(index).map((kind) => (
-                          <option key={kind} value={kind}>{t(`oilKinds.${kind}`)}</option>
-                        ))}
-                      </Select>
-                    )} />
-                  </div>
-                  {items.length > 1 && (
-                    <IconButton icon={X} label={t("oilForm.removeKind")} onClick={() => removeItem(index)} className="mb-0.5" />
-                  )}
+              <EntryRow
+                key={item.id}
+                title={t("oilForm.itemTitle", { n: index + 1 })}
+                onRemove={items.length > 1 ? () => removeItem(index) : undefined}
+                removeLabel={t("common.removeRow")}
+              >
+                <div>
+                  <Label>{t("oilForm.kind")} *</Label>
+                  <Controller control={control} name={`items.${index}.kind`} render={({ field }) => (
+                    <Select {...field} className="mt-1.5">
+                      {kindOptions(index).map((kind) => (
+                        <option key={kind} value={kind}>{t(`oilKinds.${kind}`)}</option>
+                      ))}
+                    </Select>
+                  )} />
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -123,7 +122,7 @@ export function OilChangeFormModal({
                       control={control}
                       name={`items.${index}.cost`}
                       thousandSeparator
-                      suffix="₫"
+                      suffix="đ"
                       className="mt-1.5"
                     />
                     {itemErrors?.cost && (
@@ -137,21 +136,18 @@ export function OilChangeFormModal({
                     )} />
                   </div>
                 </div>
-              </div>
+
+                <div>
+                  <Label>{t("oilForm.note")} ({t("common.optional")})</Label>
+                  <Controller control={control} name={`items.${index}.note`} render={({ field }) => (
+                    <Input {...field} value={field.value ?? ""} placeholder={t("common.noteHint")} className="mt-1.5" />
+                  )} />
+                </div>
+              </EntryRow>
             );
           })}
 
-          {canAddItem && (
-            <Button type="button" variant="outline" size="sm" onClick={addItem} className="w-full">
-              <Plus className="h-4 w-4" />
-              {t("oilForm.addKind")}
-            </Button>
-          )}
-        </div>
-
-        <div>
-          <Label>{t("oilForm.note")} ({t("common.optional")})</Label>
-          <Controller control={control} name="note" render={({ field }) => <Input {...field} value={field.value ?? ""} placeholder={t("common.noteHint")} className="mt-1.5" />} />
+          {canAddItem && <AddRowButton label={t("oilForm.addKind")} onClick={addItem} />}
         </div>
 
         {error && <p className="text-sm text-danger bg-danger-muted p-3 rounded-lg">{error}</p>}

@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
-import { createOtherExpenseSchema } from "@vefy/shared";
+import { createOtherExpensesSchema } from "@vefy/shared";
 import * as expenseService from "../services/expense.service";
 
 const periodQuerySchema = z.object({
@@ -22,18 +22,11 @@ export const expenseRoutes = new Hono()
     const summary = await expenseService.summaryByVehicle(vehicleId, period);
     return c.json(summary);
   })
-  .post("/", zValidator("json", createOtherExpenseSchema), async (c) => {
+  .post("/", zValidator("json", createOtherExpensesSchema), async (c) => {
     const vehicleId = c.req.param("vehicleId");
     if (!vehicleId) return c.json({ error: "Vehicle ID required" }, 400);
-    const data = c.req.valid("json");
-    const expense = await expenseService.createOther({
-      vehicleId,
-      date: data.date,
-      amount: data.amount,
-      name: data.name,
-      note: data.note,
-    });
-    return c.json(expense, 201);
+    const created = await expenseService.createOthers(vehicleId, c.req.valid("json"));
+    return c.json(created, 201);
   })
   .delete("/:id", async (c) => {
     const id = c.req.param("id");

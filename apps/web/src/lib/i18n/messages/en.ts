@@ -22,6 +22,7 @@ export const en: Messages = {
     days: "days",
     months: "months",
     lastOdometerHint: "Last: {km} km ({date})",
+    removeRow: "Remove this row",
   },
 
   alerts: {
@@ -180,7 +181,7 @@ export const en: Messages = {
     date: "Date",
     kind: "Fluid",
     addKind: "Add fluid",
-    removeKind: "Remove this row",
+    itemTitle: "Fluid {n}",
     odometer: "Odometer (km)",
     odometerHint: "e.g. 45230",
     cost: "Cost (VND)",
@@ -217,6 +218,7 @@ export const en: Messages = {
     warrantyRemaining: "{days} days warranty",
     warrantyPeriod: "{months}-month warranty",
     warrantyEnds: "Warranty ends {date}",
+    installedDaysAgo: "Installed {days} days ago",
   },
 
   partForm: {
@@ -232,6 +234,9 @@ export const en: Messages = {
     odoAtInstall: "Odo at install (km)",
     cost: "Cost (VND)",
     note: "Note",
+    noWarranty: "No warranty",
+    itemTitle: "Part {n}",
+    addItem: "Add part",
     savePart: "Save part",
     saveOther: "Save expense",
   },
@@ -249,6 +254,8 @@ export const en: Messages = {
     note: "Note",
     vehicle: "Vehicle",
     selectVehicle: "Select vehicle",
+    itemTitle: "Expense {n}",
+    addItem: "Add expense",
   },
 
   colors: {

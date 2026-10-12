@@ -20,6 +20,7 @@ export const vi = {
     days: "ngày",
     months: "tháng",
     lastOdometerHint: "Lần gần nhất: {km} km ({date})",
+    removeRow: "Bỏ dòng này",
   },
 
   alerts: {
@@ -178,7 +179,7 @@ export const vi = {
     date: "Ngày thay",
     kind: "Loại",
     addKind: "Thêm loại",
-    removeKind: "Bỏ dòng này",
+    itemTitle: "Loại dầu {n}",
     odometer: "Số Odo (km)",
     odometerHint: "VD: 45230",
     cost: "Chi phí (VNĐ)",
@@ -215,6 +216,7 @@ export const vi = {
     warrantyRemaining: "Còn {days} ngày BH",
     warrantyPeriod: "BH {months} tháng",
     warrantyEnds: "Hết BH {date}",
+    installedDaysAgo: "Đã thay {days} ngày",
   },
 
   partForm: {
@@ -230,6 +232,9 @@ export const vi = {
     odoAtInstall: "Odo khi thay (km)",
     cost: "Chi phí (VNĐ)",
     note: "Ghi chú",
+    noWarranty: "Không bảo hành",
+    itemTitle: "Phụ tùng {n}",
+    addItem: "Thêm phụ tùng",
     savePart: "Lưu phụ tùng",
     saveOther: "Lưu chi phí",
   },
@@ -247,6 +252,8 @@ export const vi = {
     note: "Ghi chú",
     vehicle: "Xe",
     selectVehicle: "Chọn xe",
+    itemTitle: "Khoản chi {n}",
+    addItem: "Thêm khoản chi",
   },
 
   colors: {

@@ -8,8 +8,9 @@ export const parts = pgTable("parts", {
     .references(() => vehicles.id, { onDelete: "cascade" }),
   name: varchar("name", { length: 200 }).notNull(),
   installDate: date("install_date", { mode: "string" }).notNull(),
-  warrantyMonths: integer("warranty_months").notNull().default(12),
-  warrantyExpiry: date("warranty_expiry", { mode: "string" }).notNull(),
+  // Both null for parts sold without a warranty
+  warrantyMonths: integer("warranty_months"),
+  warrantyExpiry: date("warranty_expiry", { mode: "string" }),
   odometer: integer("odometer"),
   cost: integer("cost").notNull().default(0),
   note: text("note"),

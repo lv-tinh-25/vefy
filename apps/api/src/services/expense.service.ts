@@ -3,6 +3,7 @@ import { expenses, oilChanges, vehicles } from "@vefy/db";
 import { and, eq, desc } from "drizzle-orm";
 import {
   groupExpensesByPeriod,
+  type CreateOtherExpenses,
   type Expense,
   type OilKind,
   type ExpenseSummary,
@@ -46,25 +47,22 @@ export async function listByUser(userId: string): Promise<Expense[]> {
   return rows.map((r) => toExpense(r.expense, r.oilKind));
 }
 
-export async function createOther(data: {
-  vehicleId: string;
-  date: string;
-  amount: number;
-  name: string;
-  note?: string;
-}): Promise<Expense> {
-  const [row] = await db
+/** Records several "other" expenses on the same date. */
+export async function createOthers(vehicleId: string, data: CreateOtherExpenses): Promise<Expense[]> {
+  const rows = await db
     .insert(expenses)
-    .values({
-      vehicleId: data.vehicleId,
-      date: data.date,
-      amount: data.amount,
-      category: "other",
-      name: data.name,
-      note: data.note || null,
-    })
+    .values(
+      data.items.map((item) => ({
+        vehicleId,
+        date: data.date,
+        amount: item.amount,
+        category: "other" as const,
+        name: item.name,
+        note: item.note || null,
+      })),
+    )
     .returning();
-  return toExpense(row, null);
+  return rows.map((row) => toExpense(row, null));
 }
 
 export async function remove(id: string, vehicleId: string) {

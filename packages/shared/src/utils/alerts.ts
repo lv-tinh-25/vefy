@@ -87,7 +87,9 @@ export function computeDocumentAlerts(vehicle: Vehicle, now: Date): Alert[] {
 }
 
 export function computePartAlerts(parts: Part[], now: Date, vehicleId: string): Alert[] {
-  return parts.map((part) => {
+  return parts.flatMap((part) => {
+    // Parts without a warranty have nothing to expire
+    if (!part.warrantyExpiry) return [];
     const base = dateAlert(
       "part_warranty",
       part.warrantyExpiry,
@@ -95,12 +97,12 @@ export function computePartAlerts(parts: Part[], now: Date, vehicleId: string): 
       vehicleId,
       ALERT_THRESHOLDS.partWarranty,
     );
-    return {
+    return [{
       ...base,
       key: buildAlertKey("part_warranty", part.id, part.warrantyExpiry),
       relatedId: part.id,
       subject: part.name,
-    };
+    }];
   });
 }
 

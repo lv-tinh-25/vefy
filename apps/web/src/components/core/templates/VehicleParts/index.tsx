@@ -13,7 +13,7 @@ import { useT } from "@/lib/i18n";
 import { formatDate, formatNumber } from "@/lib/utils";
 import { PageSpinner } from "@/components/core/atoms/Spinner";
 import { Plus, Trash2, Wrench } from "lucide-react";
-import { daysUntil } from "@vefy/shared";
+import { daysBetweenDates, daysUntil, todayDateStr, type Part } from "@vefy/shared";
 
 export function VehiclePartsContent() {
   const params = useParams();
@@ -26,8 +26,12 @@ export function VehiclePartsContent() {
 
   if (!vehicle) return <PageSpinner />;
 
-  function getWarrantyStatus(expiryDate: string): { variant: "danger" | "warning" | "success"; label: string } {
-    const days = daysUntil(expiryDate);
+  function getWarrantyStatus(part: Part): { variant: "danger" | "warning" | "success" | "neutral"; label: string } {
+    if (!part.warrantyExpiry) {
+      const days = Math.max(0, daysBetweenDates(part.installDate, todayDateStr()));
+      return { variant: "neutral", label: t("parts.installedDaysAgo", { days }) };
+    }
+    const days = daysUntil(part.warrantyExpiry);
     if (days < 0) return { variant: "danger", label: t("parts.warrantyExpired", { days: Math.abs(days) }) };
     if (days <= 30) return { variant: "warning", label: t("parts.warrantyRemaining", { days }) };
     return { variant: "success", label: t("parts.warrantyRemaining", { days }) };
@@ -50,7 +54,7 @@ export function VehiclePartsContent() {
       ) : (
         <div className="space-y-3">
           {vehicle.parts.map((part) => {
-            const warranty = getWarrantyStatus(part.warrantyExpiry);
+            const warranty = getWarrantyStatus(part);
             return (
               <RecordItem
                 key={part.id}
@@ -60,9 +64,12 @@ export function VehiclePartsContent() {
                 meta={[
                   formatDate(part.installDate, locale),
                   part.odometer !== null && `${formatNumber(part.odometer, locale)} km`,
-                  t("parts.warrantyPeriod", { months: part.warrantyMonths }),
+                  part.warrantyMonths !== null && t("parts.warrantyPeriod", { months: part.warrantyMonths }),
                 ]}
-                details={[t("parts.warrantyEnds", { date: formatDate(part.warrantyExpiry, locale) }), part.note]}
+                details={[
+                  part.warrantyExpiry && t("parts.warrantyEnds", { date: formatDate(part.warrantyExpiry, locale) }),
+                  part.note,
+                ]}
                 amount={part.cost}
                 action={
                   <IconButton icon={Trash2} tone="danger" label={t("common.delete")} onClick={() => setDeleteId(part.id)} />

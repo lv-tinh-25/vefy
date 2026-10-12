@@ -92,7 +92,7 @@ pnpm --filter @vefy/api dev:standalone   # Optional: run the Hono API alone on p
 - `vehicles` — 19 columns (id, userId, type, variant, name, brand, model, year, licensePlate, color, imageUrl, warranty/registration/insurance expiry, timestamps; the legacy `oil_cycle_*` columns are unused and pending a drop)
 - `oil_changes` — 9 columns (id, vehicleId FK cascade, kind, date, odometer, cost, oilType, note, createdAt)
 - `vehicle_oil_settings` — 6 columns (vehicleId FK cascade, kind, enabled, cycleKm, useDays, cycleDays); PK (vehicleId, kind). Only overrides are stored; missing kinds use `OIL_KIND_DEFAULTS`
-- `parts` — 10 columns (id, vehicleId FK cascade, name, installDate, warrantyMonths, warrantyExpiry, odometer, cost, note, createdAt)
+- `parts` — 10 columns (id, vehicleId FK cascade, name, installDate, warrantyMonths, warrantyExpiry, odometer, cost, note, createdAt); warrantyMonths/warrantyExpiry are null for parts without a warranty
 - `expenses` — 10 columns (id, vehicleId FK cascade, oilChangeId/partId FK cascade, date, amount, category `part|other`, name, note, createdAt). Rows linked to an oil change/part are auto-created and read-only.
 - `dismissed_alerts` — 4 columns (id, userId, alertKey, dismissedAt); unique (userId, alertKey)
 - `ocr_usage` — 4 columns (userId, date, count, lastAt); PK (userId, date)
@@ -128,17 +128,17 @@ POST   /api/vehicles/:vehicleId/image                # base64 data URL → Supab
 DELETE /api/vehicles/:vehicleId/image
 
 GET    /api/vehicles/:vehicleId/oil-changes
-POST   /api/vehicles/:vehicleId/oil-changes           # { date, odometer, note, items: [{ kind, cost, oilType }] } — one record per item
+POST   /api/vehicles/:vehicleId/oil-changes           # { date, odometer, items: [{ kind, cost, oilType, note }] } — one record per item
 DELETE /api/vehicles/:vehicleId/oil-changes/:id
 PUT    /api/vehicles/:vehicleId/oil-settings          # per-kind cycles
 
 GET    /api/vehicles/:vehicleId/parts
-POST   /api/vehicles/:vehicleId/parts
+POST   /api/vehicles/:vehicleId/parts                 # { installDate, odometer, items: [{ name, cost, noWarranty, warrantyMonths, note }] }
 DELETE /api/vehicles/:vehicleId/parts/:id
 
 GET    /api/vehicles/:vehicleId/expenses
 GET    /api/vehicles/:vehicleId/expenses/summary
-POST   /api/vehicles/:vehicleId/expenses              # "other" expenses only
+POST   /api/vehicles/:vehicleId/expenses              # "other" expenses only: { date, items: [{ name, amount, note }] }
 DELETE /api/vehicles/:vehicleId/expenses/:id
 
 # Cross-vehicle (auth required)
@@ -214,6 +214,8 @@ Electric motorcycles have no oil kinds.
 
 ### Part Warranty
 - `warrantyExpiry = installDate + warrantyMonths` (clamped to month end, e.g. Jan 31 + 1 month = Feb 28)
+- Warranty is optional ("Không bảo hành"): such parts have no expiry, raise no alert and show days since installation
+- Parts list newest installation first
 
 ### Auth Emails
 - Verification and password-reset links expire after 30 minutes; reset links are single-use

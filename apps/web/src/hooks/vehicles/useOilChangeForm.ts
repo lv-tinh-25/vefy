@@ -15,7 +15,7 @@ import { formatNumber } from "@/lib/utils";
 import { notify } from "@/lib/notify";
 
 // Cost starts empty; the schema rejects it on submit if it's never filled in
-const newItem = (kind: OilKind) => ({ kind, cost: undefined as unknown as number, oilType: "" });
+const newItem = (kind: OilKind) => ({ kind, cost: undefined as unknown as number, oilType: "", note: "" });
 
 export function useOilChangeForm(
   vehicleId: string,
@@ -33,7 +33,6 @@ export function useOilChangeForm(
     defaultValues: {
       date: todayDateStr(),
       odometer: prefillOdometer,
-      note: "",
       items: [newItem(enabledKinds[0])],
     },
   });

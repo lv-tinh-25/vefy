@@ -20,18 +20,24 @@ export const insertExpenseSchema = z.object({
 });
 export type InsertExpense = z.infer<typeof insertExpenseSchema>;
 
-export const createOtherExpenseSchema = z.object({
-  date: z.string().min(1, "validation.dateRequired"),
+export const otherExpenseItemSchema = z.object({
+  name: z.string().min(1, "validation.expenseNameRequired"),
   amount: emptyAsUndefined(
     z.coerce
       .number({ invalid_type_error: "validation.costRequired" })
       .int("validation.costMin")
       .min(0, "validation.costMin"),
   ),
-  name: z.string().min(1, "validation.expenseNameRequired"),
   note: z.string().optional(),
 });
-export type CreateOtherExpense = z.infer<typeof createOtherExpenseSchema>;
+
+/** Several "other" expenses on the same day */
+export const createOtherExpensesSchema = z.object({
+  date: z.string().min(1, "validation.dateRequired"),
+  items: z.array(otherExpenseItemSchema).min(1),
+});
+export type CreateOtherExpenses = z.infer<typeof createOtherExpensesSchema>;
+export type OtherExpenseItem = z.infer<typeof otherExpenseItemSchema>;
 
 export interface Expense {
   id: string;

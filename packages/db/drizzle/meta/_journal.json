@@ -71,6 +71,13 @@
       "when": 1791620625676,
       "tag": "0009_vehicle_image",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1791768673225,
+      "tag": "0010_part_optional_warranty",
+      "breakpoints": true
     }
   ]
 }

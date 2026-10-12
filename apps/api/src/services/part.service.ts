@@ -1,7 +1,7 @@
 import { db } from "@vefy/db";
 import { parts, expenses } from "@vefy/db";
-import { and, eq, asc } from "drizzle-orm";
-import { addMonthsToDate, type InsertPart, type Part } from "@vefy/shared";
+import { and, eq, desc } from "drizzle-orm";
+import { addMonthsToDate, type InsertParts, type Part } from "@vefy/shared";
 
 function toPart(row: typeof parts.$inferSelect): Part {
   return {
@@ -23,40 +23,46 @@ export async function listByVehicle(vehicleId: string) {
     .select()
     .from(parts)
     .where(eq(parts.vehicleId, vehicleId))
-    .orderBy(asc(parts.warrantyExpiry));
+    .orderBy(desc(parts.installDate), desc(parts.createdAt));
 
   return rows.map(toPart);
 }
 
-export async function create(data: InsertPart) {
-  const warrantyExpiry = addMonthsToDate(data.installDate, data.warrantyMonths ?? 12);
-
+/** Records several parts installed on the same day: one part (and expense) per item. */
+export async function create(vehicleId: string, data: InsertParts) {
   return db.transaction(async (tx) => {
-    const [row] = await tx
+    const rows = await tx
       .insert(parts)
-      .values({
-        vehicleId: data.vehicleId,
-        name: data.name,
-        installDate: data.installDate,
-        warrantyMonths: data.warrantyMonths ?? 12,
-        warrantyExpiry,
-        odometer: data.odometer ?? null,
-        cost: data.cost,
-        note: data.note || null,
-      })
+      .values(
+        data.items.map((item) => {
+          const warrantyMonths = item.noWarranty ? null : (item.warrantyMonths ?? null);
+          return {
+            vehicleId,
+            name: item.name,
+            installDate: data.installDate,
+            warrantyMonths,
+            warrantyExpiry: warrantyMonths ? addMonthsToDate(data.installDate, warrantyMonths) : null,
+            odometer: data.odometer ?? null,
+            cost: item.cost,
+            note: item.note || null,
+          };
+        }),
+      )
       .returning();
 
-    await tx.insert(expenses).values({
-      vehicleId: row.vehicleId,
-      partId: row.id,
-      date: row.installDate,
-      amount: row.cost,
-      category: "part",
-      name: row.name,
-      note: null,
-    });
+    await tx.insert(expenses).values(
+      rows.map((row) => ({
+        vehicleId,
+        partId: row.id,
+        date: row.installDate,
+        amount: row.cost,
+        category: "part" as const,
+        name: row.name,
+        note: null,
+      })),
+    );
 
-    return toPart(row);
+    return rows.map(toPart);
   });
 }
 

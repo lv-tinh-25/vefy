@@ -109,7 +109,7 @@ export async function create(vehicleId: string, data: InsertOilChanges) {
           odometer: data.odometer,
           cost: item.cost,
           oilType: item.oilType || null,
-          note: data.note || null,
+          note: item.note || null,
         })),
       )
       .returning();

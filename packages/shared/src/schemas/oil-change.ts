@@ -13,6 +13,7 @@ export const oilChangeItemSchema = z.object({
       .min(0, "validation.costMin"),
   ),
   oilType: z.string().optional(),
+  note: z.string().optional(),
 });
 
 export const insertOilChangesSchema = z.object({
@@ -23,7 +24,6 @@ export const insertOilChangesSchema = z.object({
       .int("validation.odometerInt")
       .positive("validation.odometerPositive"),
   ),
-  note: z.string().optional(),
   items: z
     .array(oilChangeItemSchema)
     .min(1)
